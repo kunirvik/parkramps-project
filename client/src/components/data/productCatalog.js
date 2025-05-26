@@ -1,0 +1,83 @@
+
+
+  const productCatalog = [ {id: 1,
+    name: "box1",
+    image: "/images/sets/box1.png",
+    altImages: ["/images/sets/box1.png", "/images/sets/box4.png"],
+    designer: "Studio 65",
+    year: 2023,
+    description: "Комплексные решения для скейтпарков.",
+    details: [
+      { title: "Материалы", link: "#materials" },
+      { title: "Технические характеристики", link: "#tech-specs" },
+      { title: "Доставка", link: "#delivery" },
+      { title: "Установка", link: "#installation" }
+    ],
+    relatedProducts: [2, 3, 4, 5] // IDs of related products
+  },
+  {
+    id: 2,
+    name: "box2",
+   image: "/images/sets/box8.png",
+    altImages: ["/images/sets/box8.png", "/images/sets/box8.png"],
+    designer: "РампСтрой",
+    year: 2024,
+    description: "Профессиональные рампы различных размеров.",
+    details: [
+      { title: "Материалы", link: "#materials" },
+      { title: "Размеры", link: "#dimensions" },
+      { title: "Установка", link: "#installation" },
+      { title: "Гарантия", link: "#warranty" }
+    ],
+    relatedProducts: [1, 3, 4, 5] // IDs of related products
+  },
+  {
+    id: 3,
+    name: "box3 kicker",
+    image: "/images/sets/kicker.png",
+    altImages: ["/images/sets/kicker1.png", "/images/sets/kicker2.png"],
+    designer: "СкейтДизайн",
+    year: 2024,
+    description: "Отдельные элементы и готовые комплекты для скейтпарков.",
+    details: [
+      { title: "Каталог фигур", link: "#catalog" },
+      { title: "Варианты комплектации", link: "#sets" },
+      { title: "Технические характеристики", link: "#tech-specs" },
+      { title: "Доставка", link: "#delivery" }
+    ],
+    relatedProducts: [1, 2, 4, 5] // IDs of related products
+  },  
+  {
+    id: 4,
+    name: "box4",
+     image: "/images/sets/box6.png",
+    altImages: ["/images/sets/box6.png", "/images/sets/box6.png"],
+    designer: "DIY Workshop",
+    year: 2023,
+    description: "Комплекты для самостоятельного строительства элементов.",
+    details: [
+      { title: "Инструкции", link: "#instructions" },
+      { title: "Материалы", link: "#materials" },
+      { title: "Инструменты", link: "#tools" },
+      { title: "Советы", link: "#tips" }
+    ],
+    relatedProducts: [1, 2, 3, 5] // IDs of related products
+  }, 
+  {
+    id: 5,
+    name: "box5",
+     image: "/images/sets/box6.png",
+    altImages: ["/images/sets/box6.png", "/images/sets/box6.png"],
+    designer: "DIY Workshop",
+    year: 2023,
+    description: "Комплекты для самостоятельного строительства элементов.",
+    details: [
+      { title: "Инструкции", link: "#instructions" },
+      { title: "Материалы", link: "#materials" },
+      { title: "Инструменты", link: "#tools" },
+      { title: "Советы", link: "#tips" }
+    ],
+    relatedProducts: [1, 2, 3, 4] // IDs of related products
+  }]  ;
+  export default 
+  productCatalog;

@@ -1,0 +1,28 @@
+{
+  "name": "parkramps-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kunirvik/parkramps-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kunirvik/parkramps-project/issues"
+  },
+  "homepage": "https://github.com/kunirvik/parkramps-project#readme",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "dependencies": {
+    "react-responsive-masonry": "^2.7.1"
+  }
+}

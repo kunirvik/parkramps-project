@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+body{
+    background-color: black;
+}
+/* src/index.css или любой другой файл стилей */
+@layer base {
+    @font-face {
+        font-family: 'FuturaPT';
+        src: 
+            url('https://res.cloudinary.com/dbx6muxub/raw/upload/v1741964168/FuturaPT-Bold_l8usgk.woff2') format('woff2'),
+            url('https://res.cloudinary.com/dbx6muxub/raw/upload/v1741964168/FuturaPT-Bold_ygwo0q.woff') format('woff');
+        font-weight: bold;
+        font-style: normal;
+    }
+    @font-face {
+        font-family: 'FuturaPT';
+        src: 
+           url('https://res.cloudinary.com/dbx6muxub/raw/upload/v1742040729/FuturaPT-Medium_zjdvl6.woff2') format('woff2'),
+            url('https://res.cloudinary.com/dbx6muxub/raw/upload/v1742040729/FuturaPT-Medium_wcqnj3.woff') format('woff');
+        
+        font-weight: 500;
+        font-style: normal;
+    }
+
+
+    @font-face {
+        font-family: 'FuturaPT';
+        src: 
+           url('https://res.cloudinary.com/dbx6muxub/raw/upload/v1742041271/FuturaPT-Light_favijz.woff2') format('woff2'),
+            url('https://res.cloudinary.com/dbx6muxub/raw/upload/v1742041271/FuturaPT-Light_mnwgxb.woff') format('woff');
+           
+        font-weight: light;
+        font-style: normal;
+    }
+
+    @font-face {
+        font-family: 'FuturaPT';
+        src: 
+           url('https://res.cloudinary.com/dbx6muxub/raw/upload/v1742042711/FuturaPT-LightObl_zoeqhl.woff2') format('woff2'),
+            url('https://res.cloudinary.com/dbx6muxub/raw/upload/v1742042711/FuturaPT-LightObl_zk6kkq.woff') format('woff');
+           
+        font-weight: light;
+        font-style: oblique;
+    }
+
+}
+
+ 
+.font-futura {
+    font-family: 'FuturaPT', sans-serif !important;
+    
+}
+
+/* 
+.custom-swiper {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+  */
+
+
+.custom-swiper .swiper-pagination-bullet {
+  background-color: #d1d5db; /* например, серый */
+  opacity: 1;
+}
+
+.custom-swiper .swiper-pagination-bullet-active {
+  background-color: #d81dcc; /* синий */
+}
