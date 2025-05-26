@@ -6,12 +6,16 @@ require('dotenv').config();
 
 const app = express();
 
-
-// Разрешаем CORS-запросы с вашего фронтенда
 app.use(cors(
-  {origin: 'https://parkramps-project.vercel.app/',
+  {origin: 'https://parkramps-project.vercel.app',
   credentials: true}
 ));
+
+
+
+// app.get('/', (req, res) => {
+//   res.send('Backend is working ✅');
+// });
 
 // Конфигурация Cloudinary с использованием переменных окружения
 cloudinary.config({
@@ -20,7 +24,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 // GET /api/gallery
-app.get('/api/gallery', async (req, res) => {
+app.get('/', async (req, res) => {
   try {
     const tags = req.query.tags ? req.query.tags.split(',') : []; // Получаем массив тегов из запроса
     const folderName = 'Parkramps';

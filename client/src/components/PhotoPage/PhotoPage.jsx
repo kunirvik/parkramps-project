@@ -19,7 +19,7 @@ const PhotoPage = () => {
 
 
 const API = import.meta.env.VITE_API_URL;
-
+console.log("API URL:", API);
   const exitTransition = useTransition(!isExiting, {
     from: { transform: "translateY(0%)", opacity: 1 },
     leave: { transform: "translateY(-100vh)", opacity: 0 },
@@ -53,7 +53,7 @@ const API = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const tagsQuery = selectedTags.length > 0 ? `?tags=${selectedTags.join(",")}` : "";
-    fetch(`${API}/api/gallery${tagsQuery}`)
+    fetch(`${API}/${tagsQuery}`)
       .then((res) => res.json())
       .then((data) => {
         setImages(data);
