@@ -26,16 +26,16 @@ export default function MenuPark() {
   };
 
   return (
-    <div className="relative w-full h-screen flex items-center justify-center overflow-visible ">
+    <div className="relative w-full  bg-white-200  h-screen flex items-center justify-center overflow-visible ">
       {/* Фоновое видео */}
-      <video
+      {/* <video
         autoPlay
         loop
         muted
         className="absolute top-0 left-0 w-full h-full object-cover grayscale"
       >
         <source src="/tlprshrt.mp4" type="video/mp4" />
-      </video>
+      </video> */}
       
       {/* Анимированный текст */}
       <div className="relative z-10 flex flex-col items-center overflow-visible">
