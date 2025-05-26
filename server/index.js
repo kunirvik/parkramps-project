@@ -8,7 +8,10 @@ const app = express();
 
 
 // Разрешаем CORS-запросы с вашего фронтенда
-app.use(cors());
+app.use(cors(
+  origin: 'https://parkramps-project.vercel.app/',
+  credentials: true
+));
 
 // Конфигурация Cloudinary с использованием переменных окружения
 cloudinary.config({
