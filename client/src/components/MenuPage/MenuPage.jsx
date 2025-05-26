@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { PiEyesFill } from "react-icons/pi";
+// import { PiEyesFill } from "react-icons/pi";
 import TooltipEyes from "../TooltipEyes/TooltipEyes"; // путь подстрой под себя
 
 const words = ["Welcome", "Explore", "Discover", "Parkramps"];
