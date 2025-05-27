@@ -13,9 +13,6 @@ app.use(cors(
 
 
 
-// app.get('/', (req, res) => {
-//   res.send('Backend is working ✅');
-// });
 
 // Конфигурация Cloudinary с использованием переменных окружения
 cloudinary.config({
@@ -24,7 +21,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 // GET /api/gallery
-app.get('/', async (req, res) => {
+app.get('/api/gallery', async (req, res) => {
   try {
     const tags = req.query.tags ? req.query.tags.split(',') : []; // Получаем массив тегов из запроса
     const folderName = 'Parkramps';

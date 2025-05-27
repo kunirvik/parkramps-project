@@ -53,7 +53,9 @@ console.log("API URL:", API);
 
   useEffect(() => {
     const tagsQuery = selectedTags.length > 0 ? `?tags=${selectedTags.join(",")}` : "";
-    fetch(`${API}/${tagsQuery}`)
+    fetch(`${API}/api/gallery${tagsQuery}`, {
+  credentials: 'include', // если используете куки и credentials:true
+})
       .then((res) => res.json())
       .then((data) => {
         setImages(data);
