@@ -385,16 +385,25 @@ useEffect(() => {
         {/* Основной контент */}
         <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
           {/* Переходное изображение - только при анимированном переходе */}
-          {!animationComplete && imageData && (
-            <img
-              ref={transitionImageRef}
-              src={product.image}
-              alt={product.name}
-              className="object-contain"
-              style={{ position: 'fixed', visibility: 'visible' }}
-            />
-          )}
-          
+     {!animationComplete && imageData && (
+  <img
+    ref={transitionImageRef}
+    src={product.image}
+    alt={product.name}
+    className="transition-image object-contain"
+    style={{ 
+      position: 'fixed', 
+      visibility: 'visible',
+      pointerEvents: 'none', // Предотвращаем взаимодействие во время анимации
+      userSelect: 'none'     // Предотвращаем выделение
+    }}
+    draggable="false"
+    // Предотвращаем загрузку до начала анимации
+    loading="eager"
+    // Обеспечиваем кроссбраузерность
+    crossOrigin="anonymous"
+  />
+)}
           {/* Swiper галерея */}
           <div 
             ref={swiperContainerRef} 
@@ -404,60 +413,78 @@ useEffect(() => {
               opacity: !imageData || animationComplete ? 1 : 0
             }}
           >
-            {/* Основной слайдер */}
-            <Swiper
-              className="custom-swiper mb-4"
-               style={{ height: '500px' }} 
-              modules={[Pagination, Mousewheel, Thumbs]}
-              pagination={{ clickable: true }}
-              mousewheel={true}
-              direction="horizontal"
-              centeredSlides={true}
-              thumbs={{ swiper: thumbsSwiper }}
-              slidesPerView={1}
-              breakpoints={{
-                640: { slidesPerView: 1.2 },
-                1024: { slidesPerView: 1.5 }
-              }}
-              slideToClickedSlide={true}
-              spaceBetween={20}
-              initialSlide={activeProductIndex}
-              speed={ANIMATION_DURATION * 1000}
-              threshold={20}
-              resistance={true}
-              resistanceRatio={0.85}
-              onInit={handleSwiperInit}
-              onSlideChange={handleSlideChange}
-              onSwiper={(swiper) => {
-                swiperRef.current = swiper;
-                if (swiper.mousewheel && !swiper.mousewheel.enabled) {
-                  swiper.mousewheel.enable();
-                }
-                if (swiper.initialized) {
-                  setSwiperLoaded(true);
-                }
-              }}
-              preventClicks={false}
-              preventClicksPropagation={false}
-              touchStartPreventDefault={false}
-            >
-              {productCatalogRamps.map((product, index) => (
-                <SwiperSlide key={product.id} style={{ height: '100%' }}>
-                <div className="w-full h-full flex items-center justify-center">
-                  <img
-                    src={
-                      selectedImageIndices[index] === 0 
-                        ? product.image 
-                        : product.altImages[selectedImageIndices[index] - 1]
-                    }
-                    alt={product.name}
-                    className="max-h-full w-auto object-contain"
-                    draggable="false"
-                  /></div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-
+          <Swiper
+  className="custom-swiper mb-4"
+  style={{ 
+    height: '500px',
+    // Предотвращаем скачки размеров
+    minHeight: '500px',
+    maxHeight: '500px'
+  }}
+  modules={[Pagination, Mousewheel, Thumbs]}
+  pagination={{ clickable: true }}
+  mousewheel={true}
+  direction="horizontal"
+  centeredSlides={true}
+  thumbs={{ swiper: thumbsSwiper }}
+  slidesPerView={1}
+  breakpoints={{
+    640: { slidesPerView: 1.2 },
+    1024: { slidesPerView: 1.5 }
+  }}
+  slideToClickedSlide={true}
+  spaceBetween={20}
+  initialSlide={activeProductIndex}
+  speed={ANIMATION_DURATION * 1000}
+  threshold={20}
+  resistance={true}
+  resistanceRatio={0.85}
+  onInit={handleSwiperInit}
+  onSlideChange={handleSlideChange}
+  onSwiper={(swiper) => {
+    swiperRef.current = swiper;
+    if (swiper.mousewheel && !swiper.mousewheel.enabled) {
+      swiper.mousewheel.enable();
+    }
+    if (swiper.initialized) {
+      setSwiperLoaded(true);
+    }
+  }}
+  preventClicks={false}
+  preventClicksPropagation={false}
+  touchStartPreventDefault={false}
+  // Дополнительные настройки для стабильности
+  watchOverflow={true}
+  watchSlidesProgress={true}
+  watchSlidesVisibility={true}
+  preloadImages={true}
+  updateOnImagesReady={true}
+>
+  {productCatalogRamps.map((product, index) => (
+    <SwiperSlide key={product.id} style={{ height: '100%' }}>
+      <div className="w-full h-full flex items-center justify-center">
+        <img
+          src={
+            selectedImageIndices[index] === 0 
+              ? product.image 
+              : product.altImages[selectedImageIndices[index] - 1]
+          }
+          alt={product.name}
+          className="max-h-full w-auto object-contain"
+          draggable="false"
+          loading="eager" // Быстрая загрузка для первых слайдов
+          // Стабильные размеры
+          style={{
+            maxWidth: '100%',
+            height: 'auto',
+            objectFit: 'contain',
+            objectPosition: 'center center'
+          }}
+        />
+      </div>
+    </SwiperSlide>
+  ))}
+</Swiper>
             {/* Свайпер миниатюр товаров */}
             <Swiper
               className="w-full mt-6"
