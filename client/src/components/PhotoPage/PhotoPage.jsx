@@ -101,7 +101,7 @@ fetch(`${API}/api/gallery${tagsQuery}`)
         )}
       </div>
 
-      <div className="z-9 text-[#919191] font-futura font-light text-[17px]  w-full flex items-center justify-center bg-black">
+      <div className="z-9 text-[#919190] font-futura font-light text-[17px]  w-full flex items-center justify-center bg-black">
         <span>2015-2025</span>
       </div>
     </>
