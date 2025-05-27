@@ -38,7 +38,7 @@ import HeaderButton from "../HeaderButton/HeaderButton"; // Подключаем
 import Attention from "../Attention/Attention";
 export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimationProps }) {
   const buttons = [
-    { icon: <Instagram size={15} className="text-[#919191]" />, link: "https://instagram.com" },
+    { icon: <Instagram size={15} className="text-[#919191]" />, link: "https://instagram.com/parkramps/" },
     { icon: <Mail size={15} className="text-[#919191]" />, link: "mailto:example@mail.com" },
     { icon: <Phone size={15} className="text-[#919191]" />, link: "tel:+1234567890" },
   ];
