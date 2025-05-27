@@ -19,7 +19,14 @@ const PhotoPage = () => {
 
 
 const API = import.meta.env.VITE_API_URL;
+// const API = "https://parkramps-project.onrender.com";
+
+console.log(import.meta.env);
 console.log("API URL:", API);
+
+
+
+
   const exitTransition = useTransition(!isExiting, {
     from: { transform: "translateY(0%)", opacity: 1 },
     leave: { transform: "translateY(-100vh)", opacity: 0 },
@@ -53,17 +60,22 @@ console.log("API URL:", API);
 
   useEffect(() => {
     const tagsQuery = selectedTags.length > 0 ? `?tags=${selectedTags.join(",")}` : "";
-    fetch(`${API}/api/gallery${tagsQuery}`, {
-  credentials: 'include', // если используете куки и credentials:true
-})
-      .then((res) => res.json())
-      .then((data) => {
-        setImages(data);
-        setIsFadingOut(true);
-        setTimeout(() => setIsLoading(false), 800);
-      })
-      .catch((err) => console.error("Ошибка загрузки изображений:", err));
-  }, [selectedTags]);
+fetch(`${API}/api/gallery${tagsQuery}`)
+  .then(async (res) => {
+    const text = await res.text();
+    console.log('Raw response:', text);  // Выведет что пришло реально
+    try {
+      const data = JSON.parse(text);
+      setImages(data);
+      setIsFadingOut(true);
+      setTimeout(() => setIsLoading(false), 800);
+    } catch (e) {
+      console.error('Ошибка парсинга JSON:', e);
+      throw e;
+    }
+  })
+  .catch((err) => console.error("Ошибка загрузки изображений:", err));
+}, [selectedTags]);
 
   return (
     <>
