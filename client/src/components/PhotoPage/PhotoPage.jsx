@@ -60,7 +60,7 @@ console.log("API URL:", API);
 
   useEffect(() => {
     const tagsQuery = selectedTags.length > 0 ? `?tags=${selectedTags.join(",")}` : "";
-fetch(`${API}/api/gallery${tagsQuery}`)
+fetch(`${API}api/gallery${tagsQuery}`)
   .then(async (res) => {
     const text = await res.text();
     console.log('Raw response:', text);  // Выведет что пришло реально
