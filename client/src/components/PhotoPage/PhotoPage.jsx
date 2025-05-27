@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import CloudGallery from "../CloudGallery/CloudGallery";
 import { useNavigate } from "react-router-dom";
-import { useTransition, animated } from "react-spring";
+import { useTransition, animated } from "@react-spring/web";
 import LoadingScreen from "../LoadingScreen/LodingScreen";
 import SocialButtons from "../SocialButtons/SocialButtons"; // Подключаем SocialButtons
 
