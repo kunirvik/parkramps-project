@@ -139,9 +139,9 @@ export default function RampsProductDetail() {
         width,
         height,
         zIndex: 1000,
-        opacity: 1,
+        opacity: 0,
         visibility: 'visible',
-        display: 'block', // Форсируем отображение
+      
         objectFit: "contain",
         borderRadius: imageData.borderRadius || '0px'
       });
@@ -180,15 +180,21 @@ export default function RampsProductDetail() {
       
       // Анимация с улучшенными параметрами
       tl.to(transitionImage, {
-        top: finalRect.top,
-        left: finalRect.left,
-        width: finalRect.width,
-        height: finalRect.height,
-        borderRadius: '12px',
-        duration: ANIMATION_DURATION,
-        ease: ANIMATION_EASE,
-        force3D: true, // Включаем аппаратное ускорение
-        transformOrigin: "center center"
+        
+      opacity: 1,
+  duration: 0.05,
+  onComplete: () => {
+    // теперь начнем движение
+    tl.to(transitionImage, {
+      top: finalRect.top,
+      left: finalRect.left,
+      width: finalRect.width,
+      height: finalRect.height,
+      borderRadius: '12px',
+      duration: ANIMATION_DURATION,
+      ease: ANIMATION_EASE,
+    });
+  }
       });
 
     } catch (error) {
@@ -483,7 +489,13 @@ export default function RampsProductDetail() {
               src={product.image}
               alt={product.name}
               className="object-contain"
-              style={{ position: 'fixed', visibility: 'visible' }}
+         style={{
+      position: 'fixed',
+      visibility: 'hidden', // ⚠️ Начально скрыто
+      opacity: 0,           // ⚠️ Не видно
+      zIndex: 1000,
+      pointerEvents: 'none' // чтобы не мешало кликам
+    }}
             />
           )}
           
