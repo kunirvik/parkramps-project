@@ -440,60 +440,60 @@ const handleSlideChange = (swiper) => {
     navigate("/catalogue");
   };
 
-  // Оптимизированный обработчик клика по связанным продуктам
-  const handleRelatedProductClick = (relatedProductId) => {
-    const relatedIndex = productCatalogSkateparks.findIndex(p => p.id === relatedProductId);
+  // // Оптимизированный обработчик клика по связанным продуктам
+  // const handleRelatedProductClick = (relatedProductId) => {
+  //   const relatedIndex = productCatalogSkateparks.findIndex(p => p.id === relatedProductId);
     
-    if (relatedIndex !== -1 && relatedIndex !== activeProductIndex && !isAnimating) {
-      // Запоминаем новый индекс для предотвращения двойной обработки
-      lastActiveProductRef.current = relatedIndex;
+  //   if (relatedIndex !== -1 && relatedIndex !== activeProductIndex && !isAnimating) {
+  //     // Запоминаем новый индекс для предотвращения двойной обработки
+  //     lastActiveProductRef.current = relatedIndex;
       
-      // Устанавливаем флаги
-      setIsSlideChanging(true);
-      setIsAnimating(true);
+  //     // Устанавливаем флаги
+  //     setIsSlideChanging(true);
+  //     setIsAnimating(true);
       
-      // Скрываем текущую информацию
-      if (infoRef.current) {
-        gsap.to(infoRef.current, {
-          opacity: 0,
-          y: 20,
-          duration: ANIMATION_DURATION / 2,
-          ease: ANIMATION_EASE,
-          onComplete: () => {
-            // Обновляем состояние
-            setActiveProductIndex(relatedIndex);
+  //     // Скрываем текущую информацию
+  //     if (infoRef.current) {
+  //       gsap.to(infoRef.current, {
+  //         opacity: 0,
+  //         y: 20,
+  //         duration: ANIMATION_DURATION / 2,
+  //         ease: ANIMATION_EASE,
+  //         onComplete: () => {
+  //           // Обновляем состояние
+  //           setActiveProductIndex(relatedIndex);
             
-            // Синхронизируем оба свайпера
-            if (swiperRef.current) {
-              swiperRef.current.slideTo(relatedIndex, 0);
-            }
+  //           // Синхронизируем оба свайпера
+  //           if (swiperRef.current) {
+  //             swiperRef.current.slideTo(relatedIndex, 0);
+  //           }
             
-            if (thumbsSwiperRef.current) {
-              thumbsSwiperRef.current.slideTo(relatedIndex, 0);
-            }
+  //           if (thumbsSwiperRef.current) {
+  //             thumbsSwiperRef.current.slideTo(relatedIndex, 0);
+  //           }
             
-            // Обновляем URL после смены продукта (отложенно)
-            setTimeout(() => {
-              updateUrlAndParams(relatedProductId, selectedImageIndices[relatedIndex] || 0);
-            }, 50);
+  //           // Обновляем URL после смены продукта (отложенно)
+  //           setTimeout(() => {
+  //             updateUrlAndParams(relatedProductId, selectedImageIndices[relatedIndex] || 0);
+  //           }, 50);
             
-            // Отключаем переходы Swiper на время программного переключения
-            if (swiperRef.current) {
-              // Добавляем класс для отключения анимации
-              swiperRef.current.el.classList.add('swiper-no-transition');
+  //           // Отключаем переходы Swiper на время программного переключения
+  //           if (swiperRef.current) {
+  //             // Добавляем класс для отключения анимации
+  //             swiperRef.current.el.classList.add('swiper-no-transition');
               
-              // Восстанавливаем анимации после короткой задержки
-              setTimeout(() => {
-                swiperRef.current.el.classList.remove('swiper-no-transition');
-                // Анимируем описание
-                animateDescription();
-              }, 50);
-            }
-          }
-        });
-      }
-    }
-  };
+  //             // Восстанавливаем анимации после короткой задержки
+  //             setTimeout(() => {
+  //               swiperRef.current.el.classList.remove('swiper-no-transition');
+  //               // Анимируем описание
+  //               animateDescription();
+  //             }, 50);
+  //           }
+  //         }
+  //       });
+  //     }
+  //   }
+  // };
 
   // Оптимизированный обработчик выбора миниатюры
   const handleImageSelect = (index) => {
