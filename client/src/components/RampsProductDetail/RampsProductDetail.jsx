@@ -170,12 +170,12 @@ gsap.set(transitionImage, {
             }
           });
         },
-        // onInterrupt: () => {
-        //   // Обработка прерванной анимации
-        //   console.warn("Animation interrupted");
-        //   setAnimationComplete(true);
-        //   setIsAnimating(false);
-        // }
+        onInterrupt: () => {
+          // Обработка прерванной анимации
+          console.warn("Animation interrupted");
+          setAnimationComplete(true);
+          setIsAnimating(false);
+        }
       });
 
       tl.to(transitionImage, {
