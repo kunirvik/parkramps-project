@@ -132,19 +132,19 @@ export default function RampsProductDetail() {
       gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
 
       // Устанавливаем начальное состояние с форсированием стилей
-      gsap.set(transitionImage, {
-        position: "fixed",
-        top,
-        left,
-        width,
-        height,
-        zIndex: 1000,
-        opacity: 0,
-        visibility: 'visible',
-      
-        objectFit: "contain",
-        borderRadius: imageData.borderRadius || '0px'
-      });
+gsap.set(transitionImage, {
+  top,
+  left,
+  width,
+  height,
+  opacity: 1, // 🔹 сразу видно
+  objectFit: "contain",
+  borderRadius: imageData.borderRadius || '0px',
+  pointerEvents: 'none',
+  zIndex: 1000
+});
+
+ 
 
       // Создаем timeline с улучшенной обработкой
       const tl = gsap.timeline({
@@ -152,8 +152,8 @@ export default function RampsProductDetail() {
           // Показываем Swiper и скрываем переходное изображение
           gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
           gsap.set(transitionImage, { 
-            visibility: 'hidden', 
-            opacity: 0,
+            // visibility: 'hidden', 
+            // opacity: 0,
             display: 'none' // Полностью убираем элемент
           });
           
@@ -170,42 +170,52 @@ export default function RampsProductDetail() {
             }
           });
         },
-        onInterrupt: () => {
-          // Обработка прерванной анимации
-          console.warn("Animation interrupted");
-          setAnimationComplete(true);
-          setIsAnimating(false);
-        }
-      });
-      
-      // Анимация с улучшенными параметрами
-      tl.to(transitionImage, {
-        
-      opacity: 1,
-  duration: 0.05,
-  onComplete: () => {
-    // теперь начнем движение
-    tl.to(transitionImage, {
-      top: finalRect.top,
-      left: finalRect.left,
-      width: finalRect.width,
-      height: finalRect.height,
-      borderRadius: '12px',
-      duration: ANIMATION_DURATION,
-      ease: ANIMATION_EASE,
-    });
-  }
+        // onInterrupt: () => {
+        //   // Обработка прерванной анимации
+        //   console.warn("Animation interrupted");
+        //   setAnimationComplete(true);
+        //   setIsAnimating(false);
+        // }
       });
 
-    } catch (error) {
-      console.error("Animation failed:", error);
-      // Fallback: просто показываем Swiper без анимации
-      gsap.set(swiperContainerRef.current, { visibility: 'visible', opacity: 1 });
-      gsap.set(infoRef.current, { opacity: 1, y: 0 });
-      setAnimationComplete(true);
-      setIsAnimating(false);
-    }
-  };
+      tl.to(transitionImage, {
+  top: finalRect.top,
+  left: finalRect.left,
+  width: finalRect.width,
+  height: finalRect.height,
+  borderRadius: '12px',
+  duration: ANIMATION_DURATION,
+  ease: ANIMATION_EASE
+});
+      
+  //     // Анимация с улучшенными параметрами
+  //     tl.to(transitionImage, {
+        
+  //     opacity: 1,
+  // duration: 0.05,
+  // onComplete: () => {
+  //   // теперь начнем движение
+  //   tl.to(transitionImage, {
+  //     top: finalRect.top,
+  //     left: finalRect.left,
+  //     width: finalRect.width,
+  //     height: finalRect.height,
+  //     borderRadius: '12px',
+  //     duration: ANIMATION_DURATION,
+  //     ease: ANIMATION_EASE,
+  //   });
+  // }
+  //     });
+
+  //   } catch (error) {
+  //     console.error("Animation failed:", error);
+  //     // Fallback: просто показываем Swiper без анимации
+  //     gsap.set(swiperContainerRef.current, { visibility: 'visible', opacity: 1 });
+  //     gsap.set(infoRef.current, { opacity: 1, y: 0 });
+  //     setAnimationComplete(true);
+  //     setIsAnimating(false);
+  //   }
+  // };
 
   // Улучшенный обработчик инициализации Swiper
   const handleSwiperInit = (swiper) => {
@@ -491,10 +501,12 @@ export default function RampsProductDetail() {
               className="object-contain"
          style={{
       position: 'fixed',
-      visibility: 'hidden', // ⚠️ Начально скрыто
       opacity: 0,           // ⚠️ Не видно
+       top: 0,
+      left: 0,
       zIndex: 1000,
-      pointerEvents: 'none' // чтобы не мешало кликам
+      pointerEvents: 'none', // чтобы не мешало кликам
+        transition: 'none' 
     }}
             />
           )}
