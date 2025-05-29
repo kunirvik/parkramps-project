@@ -113,12 +113,20 @@ export default function RampsProductDetail() {
     setIsAnimating(true);
 
     // try {
-      // Ждем, пока элемент будет готов
-      const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
       
       const { top, left, width, height } = imageData.rect;
       const transitionImage = transitionImageRef.current;
       const swiperContainer = swiperContainerRef.current;
+// Ждем, пока элемент будет готов
+      const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
+      
+
+         if (!firstSlideImage) {
+      console.warn("Не удалось найти изображение в активном слайде");
+      setAnimationComplete(true);
+      setIsAnimating(false);
+      return;
+    }
 
       // Получаем финальную позицию
       const finalRect = firstSlideImage.getBoundingClientRect();
@@ -141,7 +149,7 @@ gsap.set(transitionImage, {
   opacity: 1, // 🔹 сразу видно
   objectFit: "contain",
   borderRadius: imageData.borderRadius || '0px',
-        visibility: 'visible', // Явно устанавливаем видимость
+   visibility: 'visible', // Явно устанавливаем видимость
   pointerEvents: 'none',
   zIndex: 1000
 });
@@ -172,12 +180,12 @@ gsap.set(transitionImage, {
             }
           });
         },
-        onInterrupt: () => {
-          // Обработка прерванной анимации
-          console.warn("Animation interrupted");
-          setAnimationComplete(true);
-          setIsAnimating(false);
-        }
+        // onInterrupt: () => {
+        //   // Обработка прерванной анимации
+        //   console.warn("Animation interrupted");
+        //   setAnimationComplete(true);
+        //   setIsAnimating(false);
+        // }
       });
 
       tl.to(transitionImage, {
