@@ -135,23 +135,23 @@ export default function RampsProductDetail() {
     }
   }, [activeProductIndex, swiperLoaded]);
 
-  // Обработчик инициализации Swiper
-  const handleSwiperInit = (swiper) => {
-    setSwiperLoaded(true);
+  // // Обработчик инициализации Swiper
+  // const handleSwiperInit = (swiper) => {
+  //   setSwiperLoaded(true);
 
-    // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
-    if (!imageData) {
-      gsap.set(infoRef.current, { opacity: 1, y: 0 });
-      return;
-    }
+  //   // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
+  //   if (!imageData) {
+  //     gsap.set(infoRef.current, { opacity: 1, y: 0 });
+  //     return;
+  //   }
 
-    // Начинаем анимацию только после полной загрузки Swiper
-    requestAnimationFrame(() => {
-      startTransitionAnimation();
-    });
-  };
+  //   // Начинаем анимацию только после полной загрузки Swiper
+  //   requestAnimationFrame(() => {
+  //     startTransitionAnimation();
+  //   });
+  // };
 
-  / Исправленная функция для запуска анимации перехода
+// Исправленная функция для запуска анимации перехода
 const startTransitionAnimation = () => {
   if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
     setAnimationComplete(true);
