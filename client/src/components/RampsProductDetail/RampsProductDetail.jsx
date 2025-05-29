@@ -112,7 +112,7 @@ export default function RampsProductDetail() {
 
     setIsAnimating(true);
 
-    try {
+    // try {
       // Ждем, пока элемент будет готов
       const firstSlideImage = await waitForElement('.swiper-slide-active img');
       
@@ -188,15 +188,15 @@ gsap.set(transitionImage, {
   ease: ANIMATION_EASE
 });
     }
-    catch (error) {
-      console.error("Animation failed:", error);
-      // Fallback: просто показываем Swiper без анимации
-      gsap.set(swiperContainerRef.current, { visibility: 'visible', opacity: 1 });
-      gsap.set(infoRef.current, { opacity: 1, y: 0 });
-      setAnimationComplete(true);
-      setIsAnimating(false);
-    }
-  };
+    // catch (error) {
+    //   console.error("Animation failed:", error);
+    //   // Fallback: просто показываем Swiper без анимации
+    //   gsap.set(swiperContainerRef.current, { visibility: 'visible', opacity: 1 });
+    //   gsap.set(infoRef.current, { opacity: 1, y: 0 });
+    //   setAnimationComplete(true);
+    //   setIsAnimating(false);
+    // }
+  // };
   //     // Анимация с улучшенными параметрами
   //     tl.to(transitionImage, {
         
