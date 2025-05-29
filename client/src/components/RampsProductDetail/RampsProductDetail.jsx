@@ -10,32 +10,27 @@ import "swiper/css";
 import "swiper/css/pagination"; 
 
 
-export default function RampsProductDetail() {
+
+export default function SkateparksProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id, } = useParams();
+  const { id } = useParams();
   const imageData = location.state?.imageData;
 
   const [searchParams] = useSearchParams();
   const slideIndexParam = Number(searchParams.get('view')) || 0;
 
-  // Состояние инициализации
-  const [initializationState, setInitializationState] = useState({
-    swiperReady: false,
-    domReady: false,
-    animationReady: false
-  });
-
   // Разделение состояний для Swiper и миниатюр
   const [activeImageIndex, setActiveImageIndex] = useState(slideIndexParam);
   const [activeProductIndex, setActiveProductIndex] = useState(
-    productCatalogRamps.findIndex(p => p.id === Number(id)) || 0
+    productCatalogSkateparks.findIndex(p => p.id === Number(id)) || 0
   );
+
 
   const [activeDetail, setActiveDetail] = useState(null);
   // Состояние для выбранных миниатюр каждого продукта
   const [selectedImageIndices, setSelectedImageIndices] = useState(
-    productCatalogRamps.map(() => 0)
+    productCatalogSkateparks.map(() => 0)
   );
 
   // Ссылки
@@ -47,7 +42,8 @@ export default function RampsProductDetail() {
   const thumbsSwiperRef = useRef(null); 
 
   // Состояния для контроля анимаций
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+    const [thumbsSwiper, setThumbsSwiper] = useState(null);
+     const [activeIndex, setActiveIndex] = useState(0);
   const [animationComplete, setAnimationComplete] = useState(!imageData);
   const [swiperLoaded, setSwiperLoaded] = useState(false);
   const [isSlideChanging, setIsSlideChanging] = useState(false);
@@ -58,33 +54,15 @@ export default function RampsProductDetail() {
   // Блокиратор для предотвращения циклических обновлений URL
   const isUrlUpdatingRef = useRef(false);
   
-  const product = productCatalogRamps[activeProductIndex];
+
+
+  const product = productCatalogSkateparks[activeProductIndex];
   if (!product) return <p>Product not found</p>;
+
 
   // Константы для анимации
   const ANIMATION_DURATION = 0.6;
   const ANIMATION_EASE = "power2.out";
-
-  // Функция ожидания элемента с повторными попытками
-  const waitForElement = (selector, maxAttempts = 10) => {
-    return new Promise((resolve, reject) => {
-      let attempts = 0;
-      
-      const check = () => {
-        const element = swiperContainerRef.current?.querySelector(selector);
-        if (element && element.getBoundingClientRect().width > 0) {
-          resolve(element);
-        } else if (attempts < maxAttempts) {
-          attempts++;
-          setTimeout(check, 100);
-        } else {
-          reject(new Error(`Element ${selector} not found after ${maxAttempts} attempts`));
-        }
-      };
-      
-      check();
-    });
-  };
 
   // Обновление URL без перезагрузки компонента
   const updateUrlAndParams = (productId, viewIndex = 0) => {
@@ -94,7 +72,7 @@ export default function RampsProductDetail() {
     isUrlUpdatingRef.current = true;
     
     // Используем replaceState вместо navigate для более мягкого обновления URL
-    const newUrl = `/product/ramps/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/skateparks/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     // Сбрасываем блокировку через небольшую задержку
@@ -103,8 +81,78 @@ export default function RampsProductDetail() {
     }, 50);
   };
 
-  // Улучшенная функция анимации перехода
-  const startTransitionAnimation = async () => {
+  // Синхронизация Swiper с состоянием при изменении URL или загрузке
+  useEffect(() => {
+    // Обновляем слайдер только когда Swiper полностью загружен
+    if (swiperRef.current && swiperLoaded && !isAnimating) {
+      // Перемещаем к нужному слайду без анимации при первичной загрузке
+      swiperRef.current.slideTo(activeProductIndex, 0);
+      
+      // Также синхронизируем свайпер миниатюр
+      if (thumbsSwiperRef.current) {
+        thumbsSwiperRef.current.slideTo(activeProductIndex, 0);
+      }
+      
+      // Устанавливаем активный индекс изображения
+      if (selectedImageIndices[activeProductIndex] !== activeImageIndex) {
+        const newIndices = [...selectedImageIndices];
+        newIndices[activeProductIndex] = activeImageIndex;
+        setSelectedImageIndices(newIndices);
+      }
+    }
+  }, [swiperLoaded]);
+
+  // Отслеживаем изменение URL-параметров
+  useEffect(() => {
+    if (swiperRef.current && swiperLoaded && !isAnimating) {
+      // Обновляем только индекс изображения, без перерисовки всего компонента
+      setActiveImageIndex(slideIndexParam);
+      
+      // Синхронизируем выбранные миниатюры с параметром из URL
+      const newIndices = [...selectedImageIndices];
+      newIndices[activeProductIndex] = slideIndexParam;
+      setSelectedImageIndices(newIndices);
+    }
+  }, [slideIndexParam, swiperLoaded]);
+
+  // Синхронизация свайпера миниатюр с основным свайпером
+  useEffect(() => {
+    if (thumbsSwiperRef.current && swiperLoaded && !isAnimating) {
+      // Явно синхронизируем позицию миниатюр с активным слайдом
+      thumbsSwiperRef.current.slideTo(activeProductIndex, ANIMATION_DURATION * 1000);
+      
+      // Активируем выделение миниатюры
+      const thumbSlides = thumbsSwiperRef.current.slides;
+      if (thumbSlides) {
+        thumbSlides.forEach((slide, i) => {
+          if (i === activeProductIndex) {
+            slide.classList.add('swiper-slide-thumb-active');
+          } else {
+            slide.classList.remove('swiper-slide-thumb-active');
+          }
+        });
+      }
+    }
+  }, [activeProductIndex, swiperLoaded]);
+
+  // Обработчик инициализации Swiper
+  const handleSwiperInit = (swiper) => {
+    setSwiperLoaded(true);
+
+    // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
+    if (!imageData) {
+      gsap.set(infoRef.current, { opacity: 1, y: 0 });
+      return;
+    }
+
+    // Начинаем анимацию только после полной загрузки Swiper
+    requestAnimationFrame(() => {
+      startTransitionAnimation();
+    });
+  };
+
+  // Функция для запуска анимации перехода
+  const startTransitionAnimation = () => {
     if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
       setAnimationComplete(true);
       return;
@@ -112,54 +160,52 @@ export default function RampsProductDetail() {
 
     setIsAnimating(true);
 
-    // try {
-      
-      const { top, left, width, height } = imageData.rect;
-      const transitionImage = transitionImageRef.current;
-      const swiperContainer = swiperContainerRef.current;
-// Ждем, пока элемент будет готов
-      const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
-      
+    const { top, left, width, height } = imageData.rect;
+    const transitionImage = transitionImageRef.current;
+    const swiperContainer = swiperContainerRef.current;
 
-         if (!firstSlideImage) {
+    // Находим элемент первого слайда
+    const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
+
+    if (!firstSlideImage) {
       console.warn("Не удалось найти изображение в активном слайде");
       setAnimationComplete(true);
       setIsAnimating(false);
       return;
     }
 
-      // Получаем финальную позицию
-      const finalRect = firstSlideImage.getBoundingClientRect();
-      
-      // Дополнительная проверка размеров
-      if (finalRect.width === 0 || finalRect.height === 0) {
-      console.warn("Target image has zero dimensions");
-         // Даем время для рендеринга и пробуем еще раз
+    // Получаем финальную позицию и размеры первого изображения
+    const finalRect = firstSlideImage.getBoundingClientRect();
+    
+    // Если размеры равны нулю, Swiper мог не успеть правильно отрендерить слайд
+    if (finalRect.width === 0 || finalRect.height === 0) {
+      console.warn("Целевое изображение имеет нулевые размеры");
+      // Даем время для рендеринга и пробуем еще раз
       setTimeout(() => {
         setIsAnimating(false);
         startTransitionAnimation();
       }, 100);
       return;
-      }
-      
-      // Скрываем Swiper перед анимацией
-      gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
+    }
+    
+    // Скрываем Swiper на время анимации
+    gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
 
-      // Устанавливаем начальное состояние с форсированием стилей
-gsap.set(transitionImage, {
-    position: "fixed",
-  top,
-  left,
-  width,
-  height,
-  opacity: 1, // 🔹 сразу видно
-  objectFit: "contain",
-  borderRadius: imageData.borderRadius || '0px',
-   visibility: 'visible', // Явно устанавливаем видимость
-  zIndex: 1000
-});
-
-     // и установим явные стили для лучшей совместимости
+    // Устанавливаем начальное состояние переходного изображения
+    gsap.set(transitionImage, {
+      position: "fixed",
+      top,
+      left,
+      width,
+      height,
+      zIndex: 1000,
+      opacity: 1,
+      visibility: 'visible', // Явно устанавливаем видимость
+      objectFit: "contain",
+      borderRadius: imageData.borderRadius || '0px'
+    });
+    
+    // и установим явные стили для лучшей совместимости
     const imageStyle = window.getComputedStyle(transitionImage);
     if (imageStyle.display === 'none' || imageStyle.visibility === 'hidden') {
       console.warn("Переходное изображение невидимо после установки стилей");
@@ -167,35 +213,27 @@ gsap.set(transitionImage, {
       transitionImage.style.visibility = 'visible';
     }
 
-      // Создаем timeline с улучшенной обработкой
-      const tl = gsap.timeline({
-        onComplete: () => {
-          // Показываем Swiper и скрываем переходное изображение
-          gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-          gsap.set(transitionImage, {  visibility: 'hidden',  opacity: 0 });
-          
-          setAnimationComplete(true);
+    // Анимируем переходное изображение
+    const tl = gsap.timeline({
+      onComplete: () => {
+        // Показываем Swiper и скрываем переходное изображение
+        gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
+        gsap.set(transitionImage, { visibility: 'hidden',  opacity: 0  });
+        setAnimationComplete(true);
 
-          // Анимируем появление информации
-          gsap.to(infoRef.current, {
-            opacity: 1,
-            y: 0,
-            duration: ANIMATION_DURATION,
-            ease: ANIMATION_EASE,
-            onComplete: () => {
-              setIsAnimating(false);
-            }
-          });
-        },
-        // onInterrupt: () => {
-        //   // Обработка прерванной анимации
-        //   console.warn("Animation interrupted");
-        //   setAnimationComplete(true);
-        //   setIsAnimating(false);
-        // }
-      });
-
- let animationStarted = false;
+        gsap.to(infoRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: ANIMATION_DURATION,
+          ease: ANIMATION_EASE,
+          onComplete: () => {
+            setIsAnimating(false);
+          }
+        });
+      }
+    });
+    
+    let animationStarted = false;
     tl.to(transitionImage, {
       top: finalRect.top,
       left: finalRect.left,
@@ -214,193 +252,7 @@ gsap.set(transitionImage, {
         }
       }
     });
-    }
-    // catch (error) {
-    //   console.error("Animation failed:", error);
-    //   // Fallback: просто показываем Swiper без анимации
-    //   gsap.set(swiperContainerRef.current, { visibility: 'visible', opacity: 1 });
-    //   gsap.set(infoRef.current, { opacity: 1, y: 0 });
-    //   setAnimationComplete(true);
-    //   setIsAnimating(false);
-    // }
-  // };
-  //     // Анимация с улучшенными параметрами
-  //     tl.to(transitionImage, {
-        
-  //     opacity: 1,
-  // duration: 0.05,
-  // onComplete: () => {
-  //   // теперь начнем движение
-  //   tl.to(transitionImage, {
-  //     top: finalRect.top,
-  //     left: finalRect.left,
-  //     width: finalRect.width,
-  //     height: finalRect.height,
-  //     borderRadius: '12px',
-  //     duration: ANIMATION_DURATION,
-  //     ease: ANIMATION_EASE,
-  //   });
-  // }
-  //     });
-
-  //   } catch (error) {
-  //     console.error("Animation failed:", error);
-  //     // Fallback: просто показываем Swiper без анимации
-  //     gsap.set(swiperContainerRef.current, { visibility: 'visible', opacity: 1 });
-  //     gsap.set(infoRef.current, { opacity: 1, y: 0 });
-  //     setAnimationComplete(true);
-  //     setIsAnimating(false);
-  //   }
-  // };
-
-  // Улучшенный обработчик инициализации Swiper
-  const handleSwiperInit = (swiper) => {
-    console.log("Swiper initialized");
-    
-    // Устанавливаем состояние готовности
-    setInitializationState(prev => ({
-      ...prev,
-      swiperReady: true
-    }));
-    
-    // Дожидаемся полной готовности DOM
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        setInitializationState(prev => ({
-          ...prev,
-          domReady: true
-        }));
-      }, 50); // Небольшая задержка для стабилизации
-    });
   };
-
-  // Эффект для запуска анимации после полной инициализации
-  useEffect(() => {
-    const { swiperReady, domReady } = initializationState;
-    
-    if (swiperReady && domReady && !initializationState.animationReady) {
-      setInitializationState(prev => ({
-        ...prev,
-        animationReady: true
-      }));
-      
-      setSwiperLoaded(true);
-
-      if (!imageData) {
-        // Без анимации - просто показываем интерфейс
-        gsap.set(infoRef.current, { opacity: 1, y: 0 });
-        setAnimationComplete(true);
-      } else {
-        // С анимацией - запускаем через небольшую задержку
-        setTimeout(() => {
-          startTransitionAnimation();
-        }, 100);
-      }
-    }
-  }, [initializationState]);
-
-  // Улучшенная синхронизация с URL-параметрами
-  useEffect(() => {
-    if (!swiperRef.current || !initializationState.animationReady || isAnimating) return;
-    
-    const targetIndex = productCatalogRamps.findIndex(p => p.id === Number(id));
-    
-    if (targetIndex !== -1 && targetIndex !== activeProductIndex) {
-      setActiveProductIndex(targetIndex);
-      swiperRef.current.slideTo(targetIndex, 0); // Без анимации при первой загрузке
-      
-      if (thumbsSwiperRef.current) {
-        thumbsSwiperRef.current.slideTo(targetIndex, 0);
-      }
-    }
-    
-    // Синхронизируем индекс изображения
-    if (slideIndexParam !== activeImageIndex) {
-      setActiveImageIndex(slideIndexParam);
-      const newIndices = [...selectedImageIndices];
-      newIndices[activeProductIndex] = slideIndexParam;
-      setSelectedImageIndices(newIndices);
-    }
-  }, [id, slideIndexParam, initializationState.animationReady]);
-
-  // Синхронизация свайпера миниатюр с основным свайпером
-  useEffect(() => {
-    if (thumbsSwiperRef.current && swiperLoaded && !isAnimating && initializationState.animationReady) {
-      // Явно синхронизируем позицию миниатюр с активным слайдом
-      thumbsSwiperRef.current.slideTo(activeProductIndex, ANIMATION_DURATION * 1000);
-      
-      // Активируем выделение миниатюры
-      const thumbSlides = thumbsSwiperRef.current.slides;
-      if (thumbSlides) {
-        thumbSlides.forEach((slide, i) => {
-          if (i === activeProductIndex) {
-            slide.classList.add('swiper-slide-thumb-active');
-          } else {
-            slide.classList.remove('swiper-slide-thumb-active');
-          }
-        });
-      }
-    }
-  }, [activeProductIndex, swiperLoaded, initializationState.animationReady]);
-
-  // Улучшенные CSS стили
-  const improvedSwiperStyles = `
-    .swiper-wrapper {
-      transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-      backface-visibility: hidden;
-      perspective: 1000px;
-    }
-    
-    .swiper-slide {
-      transition: transform ${ANIMATION_DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                  opacity ${ANIMATION_DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-      backface-visibility: hidden;
-      transform-style: preserve-3d;
-    }
-    
-    .swiper-slide img {
-      transform: translateZ(0); /* Форсируем композитный слой */
-      backface-visibility: hidden;
-    }
-    
-    .swiper-slide-active {
-      z-index: 2;
-    }
-    
-    /* Предотвращаем FOUC */
-    .custom-swiper {
-      opacity: 1 !important;
-      visibility: visible !important;
-    }
-    
-    /* Предотвращаем смещение слайдов во время анимации */
-    .swiper-no-transition .swiper-wrapper {
-      transition: none !important;
-    }
-    
-    /* Стили для активной миниатюры */
-    .swiper-slide-thumb-active {
-      opacity: 1 !important;
-      transform: scale(1.05) translateZ(0) !important;
-      border-color: black !important;
-      border-width: 2px !important;
-      border-style: solid !important;
-      border-radius: 0.5rem !important;
-    }
-  `;
-
-  // Добавляем стили для Swiper
-  useEffect(() => {
-    const styleElement = document.createElement('style');
-    styleElement.innerHTML = improvedSwiperStyles;
-    document.head.appendChild(styleElement);
-
-    return () => {
-      if (document.head.contains(styleElement)) {
-        document.head.removeChild(styleElement);
-      }
-    };
-  }, []);
 
   // Переработанная функция анимации описания
   const animateDescription = () => {
@@ -425,47 +277,51 @@ gsap.set(transitionImage, {
     });
   };
 
+
+
   // Оптимизированный обработчик смены слайда
-  const handleSlideChange = (swiper) => {
-    const newIndex = swiper.activeIndex;
+const handleSlideChange = (swiper) => {
+  const newIndex = swiper.activeIndex;
 
-    if (newIndex === activeProductIndex) return;
+  if (newIndex === activeProductIndex) return;
 
-    // Сразу синхронизируем индекс, URL и миниатюры
-    setActiveProductIndex(newIndex);
-    lastActiveProductRef.current = newIndex;
+  // Сразу синхронизируем индекс, URL и миниатюры
+  setActiveProductIndex(newIndex);
+  lastActiveProductRef.current = newIndex;
 
-    if (thumbsSwiperRef.current) {
-      thumbsSwiperRef.current.slideTo(newIndex);
-    }
+  if (thumbsSwiperRef.current) {
+    thumbsSwiperRef.current.slideTo(newIndex);
+  }
 
-    updateUrlAndParams(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+  updateUrlAndParams(productCatalogSkateparks[newIndex].id, selectedImageIndices[newIndex]);
 
-    // Затем, отдельно, запускаем анимацию описания
-    if (!isAnimating && infoRef.current) {
-      setIsSlideChanging(true);
-      setIsAnimating(true);
+  // Затем, отдельно, запускаем анимацию описания
+  if (!isAnimating && infoRef.current) {
+    setIsSlideChanging(true);
+    setIsAnimating(true);
 
-      gsap.to(infoRef.current, {
-        opacity: 0,
-        y: 20,
-        duration: ANIMATION_DURATION / 2,
-        ease: ANIMATION_EASE,
-        onComplete: () => {
-          // отложенная анимация появления
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              animateDescription();
-            }, 50);
-          });
-        }
-      });
-    }
-  };
+    gsap.to(infoRef.current, {
+      opacity: 0,
+      y: 20,
+      duration: ANIMATION_DURATION / 2,
+      ease: ANIMATION_EASE,
+      onComplete: () => {
+        // отложенная анимация появления
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            animateDescription();
+          }, 50);
+        });
+      }
+    });
+  }
+};
 
   const handleExit = () => {
     navigate("/catalogue");
   };
+
+
 
   // Оптимизированный обработчик выбора миниатюры
   const handleImageSelect = (index) => {
@@ -481,24 +337,26 @@ gsap.set(transitionImage, {
   };
 
   // Обработчик клика по миниатюре товара
-  const handleThumbnailClick = (index) => {
-    if (isAnimating || index === activeProductIndex) return;
+const handleThumbnailClick = (index) => {
+  if (isAnimating || index === activeProductIndex) return;
 
-    if (swiperRef.current) {
-      swiperRef.current.slideTo(index);
-    }
+  if (swiperRef.current) {
+    swiperRef.current.slideTo(index);
+  }
 
-    // 🧠 Не вызывай setActiveProductIndex напрямую — он вызывается внутри handleSlideChange
-  };
+  // 🧠 Не вызывай setActiveProductIndex напрямую — он вызывается внутри handleSlideChange
+};
 
-  useEffect(() => {
+useEffect(() => {
     const hash = location.hash.replace("#", "");
     if (hash) {
       setActiveDetail(hash);
     }
   }, [location]);
 
-  useEffect(() => {
+
+
+ useEffect(() => {
     if (activeDetail && containerRef.current) {
       gsap.fromTo(
         containerRef.current,
@@ -512,6 +370,8 @@ gsap.set(transitionImage, {
     setActiveDetail(detail.link.replace("#", ""));
     navigate(detail.link); // обновит URL
   };
+
+
 
   return (
     <>
@@ -535,15 +395,7 @@ gsap.set(transitionImage, {
               src={product.image}
               alt={product.name}
               className="object-contain"
-         style={{
-      position: 'fixed',
-      opacity: 0,           // ⚠️ Не видно
-       top: 0,
-      left: 0,
-      zIndex: 1000,
-      pointerEvents: 'none', // чтобы не мешало кликам
-        transition: 'none' 
-    }}
+              style={{ position: 'fixed', visibility: 'visible' }}
             />
           )}
           
@@ -559,7 +411,7 @@ gsap.set(transitionImage, {
             {/* Основной слайдер */}
             <Swiper
               className="custom-swiper mb-4"
-              style={{ height: '500px' }} 
+               style={{ height: '500px' }} 
               modules={[Pagination, Mousewheel, Thumbs]}
               pagination={{ clickable: true }}
               mousewheel={true}
@@ -571,7 +423,6 @@ gsap.set(transitionImage, {
                 640: { slidesPerView: 1.2 },
                 1024: { slidesPerView: 1.5 }
               }}
-              slideToClickedSlide={true}
               spaceBetween={20}
               initialSlide={activeProductIndex}
               speed={ANIMATION_DURATION * 1000}
@@ -585,25 +436,27 @@ gsap.set(transitionImage, {
                 if (swiper.mousewheel && !swiper.mousewheel.enabled) {
                   swiper.mousewheel.enable();
                 }
+                if (swiper.initialized) {
+                  setSwiperLoaded(true);
+                }
               }}
               preventClicks={false}
               preventClicksPropagation={false}
               touchStartPreventDefault={false}
             >
-              {productCatalogRamps.map((product, index) => (
+              {productCatalogSkateparks.map((product, index) => (
                 <SwiperSlide key={product.id} style={{ height: '100%' }}>
-                  <div className="w-full h-full flex items-center justify-center">
-                    <img
-                      src={
-                        selectedImageIndices[index] === 0 
-                          ? product.image 
-                          : product.altImages[selectedImageIndices[index] - 1]
-                      }
-                      alt={product.name}
-                      className="max-h-full w-auto object-contain"
-                      draggable="false"
-                    />
-                  </div>
+                <div className="w-full h-full flex items-center justify-center">
+                  <img
+                    src={
+                      selectedImageIndices[index] === 0 
+                        ? product.image 
+                        : product.altImages[selectedImageIndices[index] - 1]
+                    }
+                    alt={product.name}
+                    className="max-h-full w-auto object-contain"
+                    draggable="false"
+                  /></div>
                 </SwiperSlide>
               ))}
             </Swiper>
@@ -622,21 +475,29 @@ gsap.set(transitionImage, {
               speed={ANIMATION_DURATION * 1000}
               preventClicks={false}
               preventClicksPropagation={false}
-              observer={true}
-              observeParents={true}
-              resistance={false}
-              resistanceRatio={0}
-              onSlideChange={(swiper) => console.log('thumbs swiper index', swiper.activeIndex)}           
+             observer={true}
+  observeParents={true}
+  resistance={false}
+  resistanceRatio={0}
+  onSlideChange={(swiper) => console.log('thumbs swiper index', swiper.activeIndex)}
+
+  
+
+ 
+
+
+              
             >
-              {productCatalogRamps.map((product, index) => (
+              {productCatalogSkateparks.map((product, index) => (
                 <SwiperSlide key={product.id}>
                   <img
                     src={product.image}
                     onClick={() => handleThumbnailClick(index)}
-                    className={`cursor-pointer transition-all duration-300 rounded-lg border-2
-                      ${index === activeProductIndex 
-                        ? 'opacity-100 scale-105 border-black' 
-                        : 'grayscale border-transparent opacity-60 hover:opacity-100'}`}
+                  className={`cursor-pointer transition-all duration-300 rounded-lg border-2
+  ${index === activeProductIndex 
+    ? 'opacity-100 scale-105 border-black' 
+    : 'grayscale border-transparent opacity-60 hover:opacity-100'}`}
+
                     alt={product.name}
                   />
                 </SwiperSlide>
@@ -687,7 +548,7 @@ gsap.set(transitionImage, {
               <a
                 key={index}
                 href={detail.link}
-                onClick={() => handleDetailClick(detail)}
+                 onClick={() => handleDetailClick(detail)}
                 className="flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition"
               >
                 <span className="font-futura text-[#717171] font-medium">{detail.title}</span>
@@ -697,32 +558,29 @@ gsap.set(transitionImage, {
           </div>
         </div>
 
-        {activeDetail && (
-          <div className="fixed inset-0 bg-white z-50 flex flex-col">
-            <div className="flex justify-end p-4">
-              <button onClick={() => setActiveDetail(null)} className="text-2xl">×</button>
-            </div>
-
-            <div className="flex-1">
-              <Swiper
-                mousewheel={true}
-                direction="horizontal"
-                spaceBetween={20}
-                modules={[Mousewheel]}
-                loop={true} 
-                slidesPerView={1}
-                navigation
-                className="w-full h-full"
-              >
-                {product.sampleImages.map((img, index) => (
-                  <SwiperSlide key={index}>
-                    <img src={img} alt={`sample-${index}`} className="w-full h-full object-contain" />
-                  </SwiperSlide>
-                ))}
-              </Swiper>
-            </div>
+         {activeDetail && (
+        <div className="fixed inset-0 bg-white z-50 flex flex-col">
+          <div className="flex justify-end p-4">
+            <button onClick={() => setActiveDetail(null)} className="text-2xl">×</button>
           </div>
-        )}
+
+          <div className="flex-1">
+            <Swiper
+              spaceBetween={20}
+              slidesPerView={1}
+              navigation
+              pagination={{ clickable: true }}
+              className="w-full h-full"
+            >
+              {product.sampleImages.map((img, index) => (
+                <SwiperSlide key={index}>
+                  <img src={img} alt={`sample-${index}`} className="w-full h-full object-contain" />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+        </div>
+      )}
       </div>
     </>
   );
