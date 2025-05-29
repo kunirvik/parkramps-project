@@ -151,46 +151,67 @@ export default function RampsProductDetail() {
     });
   };
 
-  // Функция для запуска анимации перехода
-  const startTransitionAnimation = () => {
-    if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
-      setAnimationComplete(true);
-      return;
-    }
+  / Исправленная функция для запуска анимации перехода
+const startTransitionAnimation = () => {
+  if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
+    setAnimationComplete(true);
+    return;
+  }
 
-    setIsAnimating(true);
+  setIsAnimating(true);
 
-    const { top, left, width, height } = imageData.rect;
-    const transitionImage = transitionImageRef.current;
-    const swiperContainer = swiperContainerRef.current;
+  const { top, left, width, height } = imageData.rect;
+  const transitionImage = transitionImageRef.current;
+  const swiperContainer = swiperContainerRef.current;
 
-    // Находим элемент первого слайда
-    const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
+  // Ждем полной загрузки и рендеринга Swiper
+  const waitForSwiperRender = () => {
+    return new Promise((resolve) => {
+      const checkSlide = () => {
+        const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
+        
+        if (firstSlideImage) {
+          // Ждем загрузки изображения
+          if (firstSlideImage.complete) {
+            const rect = firstSlideImage.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+              resolve(firstSlideImage);
+              return;
+            }
+          } else {
+            // Если изображение еще не загружено, ждем события load
+            firstSlideImage.onload = () => {
+              const rect = firstSlideImage.getBoundingClientRect();
+              if (rect.width > 0 && rect.height > 0) {
+                resolve(firstSlideImage);
+              } else {
+                setTimeout(checkSlide, 50);
+              }
+            };
+            return;
+          }
+        }
+        
+        // Повторяем проверку через 50мс
+        setTimeout(checkSlide, 50);
+      };
+      
+      checkSlide();
+    });
+  };
 
-    if (!firstSlideImage) {
-      console.warn("Не удалось найти изображение в активном слайде");
-      setAnimationComplete(true);
-      setIsAnimating(false);
-      return;
-    }
-
-    // Получаем финальную позицию и размеры первого изображения
+  // Запускаем анимацию только после полной готовности
+  waitForSwiperRender().then((firstSlideImage) => {
     const finalRect = firstSlideImage.getBoundingClientRect();
     
-    // Если размеры равны нулю, Swiper мог не успеть правильно отрендерить слайд
-    if (finalRect.width === 0 || finalRect.height === 0) {
-      console.warn("Целевое изображение имеет нулевые размеры");
-      // Даем время для рендеринга и пробуем еще раз
-      setTimeout(() => {
-        setIsAnimating(false);
-        startTransitionAnimation();
-      }, 100);
-      return;
-    }
+    console.log('Начинаем анимацию перехода:', {
+      from: { top, left, width, height },
+      to: { top: finalRect.top, left: finalRect.left, width: finalRect.width, height: finalRect.height }
+    });
     
     // Скрываем Swiper на время анимации
     gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
-
+    
     // Устанавливаем начальное состояние переходного изображения
     gsap.set(transitionImage, {
       position: "fixed",
@@ -200,27 +221,32 @@ export default function RampsProductDetail() {
       height,
       zIndex: 1000,
       opacity: 1,
-      visibility: 'visible', // Явно устанавливаем видимость
+      visibility: 'visible',
+      display: 'block',
       objectFit: "contain",
       borderRadius: imageData.borderRadius || '0px'
     });
-    
-    // и установим явные стили для лучшей совместимости
-    const imageStyle = window.getComputedStyle(transitionImage);
-    if (imageStyle.display === 'none' || imageStyle.visibility === 'hidden') {
-      console.warn("Переходное изображение невидимо после установки стилей");
-      transitionImage.style.display = 'block';
-      transitionImage.style.visibility = 'visible';
-    }
 
-    // Анимируем переходное изображение
-    const tl = gsap.timeline({
+    // Анимируem переходное изображение
+    gsap.to(transitionImage, {
+      top: finalRect.top,
+      left: finalRect.left,
+      width: finalRect.width,
+      height: finalRect.height,
+      borderRadius: '12px',
+      duration: ANIMATION_DURATION,
+      ease: ANIMATION_EASE,
       onComplete: () => {
         // Показываем Swiper и скрываем переходное изображение
         gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-        gsap.set(transitionImage, { visibility: 'hidden',  opacity: 0  });
+        gsap.set(transitionImage, { 
+          visibility: 'hidden',  
+          opacity: 0,
+          display: 'none' // Полностью убираем из layout
+        });
         setAnimationComplete(true);
 
+        // Анимируем появление информации
         gsap.to(infoRef.current, {
           opacity: 1,
           y: 0,
@@ -232,27 +258,67 @@ export default function RampsProductDetail() {
         });
       }
     });
+  }).catch((error) => {
+    console.error('Ошибка при ожидании готовности Swiper:', error);
+    // Fallback: пропускаем анимацию
+    gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
+    gsap.set(transitionImage, { visibility: 'hidden', opacity: 0, display: 'none' });
+    gsap.set(infoRef.current, { opacity: 1, y: 0 });
+    setAnimationComplete(true);
+    setIsAnimating(false);
+  });
+};
+
+// Улучшенный обработчик инициализации Swiper
+const handleSwiperInit = (swiper) => {
+  console.log('Swiper инициализирован');
+  
+  // Устанавливаем флаг загрузки
+  setSwiperLoaded(true);
+
+  // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
+  if (!imageData) {
+    gsap.set(infoRef.current, { opacity: 1, y: 0 });
+    return;
+  }
+
+  // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
+  requestAnimationFrame(() => {
+    // Дополнительная задержка для полного рендеринга слайдов
+    setTimeout(() => {
+      startTransitionAnimation();
+    }, 100); // Увеличиваем задержку до 100мс
+  });
+};
+
+// Дополнительный useEffect для контроля видимости переходного изображения
+useEffect(() => {
+  if (transitionImageRef.current && imageData) {
+    const transitionImage = transitionImageRef.current;
     
-    let animationStarted = false;
-    tl.to(transitionImage, {
-      top: finalRect.top,
-      left: finalRect.left,
-      width: finalRect.width,
-      height: finalRect.height,
-      borderRadius: '12px',
-      duration: ANIMATION_DURATION,
-      ease: ANIMATION_EASE,
-      onStart: () => {
-        animationStarted = true;
-      },
-      onUpdate: function() {
-        // Контроль выполнения анимации
-        if (this.progress() > 0.1 && !animationStarted) {
-          console.warn("Анимация не началась корректно");
-        }
-      }
+    // Принудительно устанавливаем видимость при монтировании
+    gsap.set(transitionImage, {
+      position: "fixed",
+      top: imageData.rect.top,
+      left: imageData.rect.left,
+      width: imageData.rect.width,
+      height: imageData.rect.height,
+      zIndex: 1000,
+      opacity: 1,
+      visibility: 'visible',
+      display: 'block',
+      objectFit: "contain",
+      borderRadius: imageData.borderRadius || '0px'
     });
-  };
+
+    console.log('Переходное изображение установлено:', {
+      src: transitionImage.src,
+      rect: imageData.rect,
+      visible: window.getComputedStyle(transitionImage).visibility,
+      display: window.getComputedStyle(transitionImage).display
+    });
+  }
+}, [imageData]);
 
   // Переработанная функция анимации описания
   const animateDescription = () => {
@@ -389,15 +455,23 @@ useEffect(() => {
         {/* Основной контент */}
         <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
           {/* Переходное изображение - только при анимированном переходе */}
-          {!animationComplete && imageData && (
-            <img
-              ref={transitionImageRef}
-              src={product.image}
-              alt={product.name}
-              className="object-contain"
-              style={{ position: 'fixed', visibility: 'visible' }}
-            />
-          )}
+     
+{!animationComplete && imageData && (
+  <img
+    ref={transitionImageRef}
+    src={product.image}
+    alt={product.name}
+    className="object-contain pointer-events-none"
+    style={{ 
+      position: 'fixed', 
+      visibility: 'visible',
+      display: 'block',
+      zIndex: 1000
+    }}
+    onLoad={() => console.log('Переходное изображение загружено')}
+    onError={(e) => console.error('Ошибка загрузки переходного изображения:', e)}
+  />
+)}
           
           {/* Swiper галерея */}
           <div 
