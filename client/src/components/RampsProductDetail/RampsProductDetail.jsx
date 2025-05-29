@@ -114,7 +114,7 @@ export default function RampsProductDetail() {
 
     // try {
       // Ждем, пока элемент будет готов
-      const firstSlideImage = await waitForElement('.swiper-slide-active img');
+      const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
       
       const { top, left, width, height } = imageData.rect;
       const transitionImage = transitionImageRef.current;
@@ -133,6 +133,7 @@ export default function RampsProductDetail() {
 
       // Устанавливаем начальное состояние с форсированием стилей
 gsap.set(transitionImage, {
+    position: "fixed",
   top,
   left,
   width,
@@ -140,6 +141,7 @@ gsap.set(transitionImage, {
   opacity: 1, // 🔹 сразу видно
   objectFit: "contain",
   borderRadius: imageData.borderRadius || '0px',
+        visibility: 'visible', // Явно устанавливаем видимость
   pointerEvents: 'none',
   zIndex: 1000
 });
