@@ -620,7 +620,7 @@ useEffect(() => {
                 key={index}
                 href={detail.link}
                  onClick={() => handleDetailClick(detail)}
-                className="flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition"
+                className="flex justify-between items-center py-3 border-b border-gray-100 text-gray-900 hover:text-blue-600 transition"
               >
                 <span className="font-futura text-[#717171] font-medium">{detail.title}</span>
                 <span className="font-futura text-[#717171] text-lg">→</span>
