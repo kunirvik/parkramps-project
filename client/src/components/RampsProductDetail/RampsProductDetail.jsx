@@ -11,7 +11,7 @@ import "swiper/css/pagination";
 
 
 
-export default function SkateparksProductDetail() {
+export default function RampsProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
@@ -23,14 +23,14 @@ export default function SkateparksProductDetail() {
   // Разделение состояний для Swiper и миниатюр
   const [activeImageIndex, setActiveImageIndex] = useState(slideIndexParam);
   const [activeProductIndex, setActiveProductIndex] = useState(
-    productCatalogSkateparks.findIndex(p => p.id === Number(id)) || 0
+    productCatalogRamps.findIndex(p => p.id === Number(id)) || 0
   );
 
 
   const [activeDetail, setActiveDetail] = useState(null);
   // Состояние для выбранных миниатюр каждого продукта
   const [selectedImageIndices, setSelectedImageIndices] = useState(
-    productCatalogSkateparks.map(() => 0)
+    productCatalogRamps.map(() => 0)
   );
 
   // Ссылки
@@ -56,7 +56,7 @@ export default function SkateparksProductDetail() {
   
 
 
-  const product = productCatalogSkateparks[activeProductIndex];
+  const product = productCatalogRamps[activeProductIndex];
   if (!product) return <p>Product not found</p>;
 
 
@@ -72,7 +72,7 @@ export default function SkateparksProductDetail() {
     isUrlUpdatingRef.current = true;
     
     // Используем replaceState вместо navigate для более мягкого обновления URL
-    const newUrl = `/product/skateparks/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/ramps/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     // Сбрасываем блокировку через небольшую задержку
@@ -293,7 +293,7 @@ const handleSlideChange = (swiper) => {
     thumbsSwiperRef.current.slideTo(newIndex);
   }
 
-  updateUrlAndParams(productCatalogSkateparks[newIndex].id, selectedImageIndices[newIndex]);
+  updateUrlAndParams(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
 
   // Затем, отдельно, запускаем анимацию описания
   if (!isAnimating && infoRef.current) {
@@ -444,7 +444,7 @@ useEffect(() => {
               preventClicksPropagation={false}
               touchStartPreventDefault={false}
             >
-              {productCatalogSkateparks.map((product, index) => (
+              {productCatalogRamps.map((product, index) => (
                 <SwiperSlide key={product.id} style={{ height: '100%' }}>
                 <div className="w-full h-full flex items-center justify-center">
                   <img
@@ -488,7 +488,7 @@ useEffect(() => {
 
               
             >
-              {productCatalogSkateparks.map((product, index) => (
+              {productCatalogRamps.map((product, index) => (
                 <SwiperSlide key={product.id}>
                   <img
                     src={product.image}
