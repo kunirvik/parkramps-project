@@ -133,7 +133,13 @@ export default function RampsProductDetail() {
       
       // Дополнительная проверка размеров
       if (finalRect.width === 0 || finalRect.height === 0) {
-        throw new Error("Target image has zero dimensions");
+      console.warn("Target image has zero dimensions");
+         // Даем время для рендеринга и пробуем еще раз
+      setTimeout(() => {
+        setIsAnimating(false);
+        startTransitionAnimation();
+      }, 100);
+      return;
       }
       
       // Скрываем Swiper перед анимацией
