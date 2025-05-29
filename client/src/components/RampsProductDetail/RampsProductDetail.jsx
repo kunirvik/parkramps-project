@@ -156,22 +156,23 @@ gsap.set(transitionImage, {
   objectFit: "contain",
   borderRadius: imageData.borderRadius || '0px',
    visibility: 'visible', // Явно устанавливаем видимость
-  pointerEvents: 'none',
   zIndex: 1000
 });
 
- 
+     // и установим явные стили для лучшей совместимости
+    const imageStyle = window.getComputedStyle(transitionImage);
+    if (imageStyle.display === 'none' || imageStyle.visibility === 'hidden') {
+      console.warn("Переходное изображение невидимо после установки стилей");
+      transitionImage.style.display = 'block';
+      transitionImage.style.visibility = 'visible';
+    }
 
       // Создаем timeline с улучшенной обработкой
       const tl = gsap.timeline({
         onComplete: () => {
           // Показываем Swiper и скрываем переходное изображение
           gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-          gsap.set(transitionImage, { 
-            // visibility: 'hidden', 
-            // opacity: 0,
-            display: 'none' // Полностью убираем элемент
-          });
+          gsap.set(transitionImage, {  visibility: 'hidden',  opacity: 0 });
           
           setAnimationComplete(true);
 
@@ -194,15 +195,25 @@ gsap.set(transitionImage, {
         // }
       });
 
-      tl.to(transitionImage, {
-  top: finalRect.top,
-  left: finalRect.left,
-  width: finalRect.width,
-  height: finalRect.height,
-  borderRadius: '12px',
-  duration: ANIMATION_DURATION,
-  ease: ANIMATION_EASE
-});
+ let animationStarted = false;
+    tl.to(transitionImage, {
+      top: finalRect.top,
+      left: finalRect.left,
+      width: finalRect.width,
+      height: finalRect.height,
+      borderRadius: '12px',
+      duration: ANIMATION_DURATION,
+      ease: ANIMATION_EASE,
+      onStart: () => {
+        animationStarted = true;
+      },
+      onUpdate: function() {
+        // Контроль выполнения анимации
+        if (this.progress() > 0.1 && !animationStarted) {
+          console.warn("Анимация не началась корректно");
+        }
+      }
+    });
     }
     // catch (error) {
     //   console.error("Animation failed:", error);
