@@ -1577,7 +1577,7 @@ export default function SkateparksProductDetail() {
   }, [activeProductIndex, swiperLoaded]);
 
   // Обработчик инициализации Swiper
-  / 1. Улучшенная инициализация Swiper
+
 const handleSwiperInit = (swiper) => {
   console.log('Swiper initialized');
   setSwiperLoaded(true);
