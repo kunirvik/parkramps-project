@@ -1577,22 +1577,30 @@ export default function SkateparksProductDetail() {
   }, [activeProductIndex, swiperLoaded]);
 
   // Обработчик инициализации Swiper
-  const handleSwiperInit = (swiper) => {
-    setSwiperLoaded(true);
+  / 1. Улучшенная инициализация Swiper
+const handleSwiperInit = (swiper) => {
+  console.log('Swiper initialized');
+  setSwiperLoaded(true);
 
-    // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
-    if (!imageData) {
-      gsap.set(infoRef.current, { opacity: 1, y: 0 });
-      return;
-    }
+  // Если нет анимации перехода, сразу показываем
+  if (!imageData) {
+    gsap.set(infoRef.current, { opacity: 1, y: 0 });
+    gsap.set(swiperContainerRef.current, { visibility: 'visible', opacity: 1 });
+    return;
+  }
 
-    // Начинаем анимацию только после полной загрузки Swiper
-    requestAnimationFrame(() => {
+  // Подготавливаем элементы для анимации
+  gsap.set(infoRef.current, { opacity: 0, y: 20 });
+  
+  // Важно: даем время Swiper полностью отрендериться
+  requestAnimationFrame(() => {
+    setTimeout(() => {
       startTransitionAnimation();
-    });
-  };
-
+    }, 100); // Небольшая задержка для полной готовности
+  });
+};
 // Улучшенная функция анимации перехода
+// Полностью переработанная функция анимации перехода
 const startTransitionAnimation = () => {
   if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
     setAnimationComplete(true);
@@ -1626,16 +1634,17 @@ const startTransitionAnimation = () => {
     return;
   }
 
-  // ИСПРАВЛЕНИЕ 1: Копируем все CSS-свойства финального изображения
+  // Получаем стили целевого изображения
   const finalStyles = window.getComputedStyle(firstSlideImage);
   
-  // Скрываем Swiper на время анимации
+  // КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Скрываем Swiper, но НЕ скрываем целевое изображение
   gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
+  // Важно: НЕ скрываем firstSlideImage отдельно
 
-  // ИСПРАВЛЕНИЕ 2: Устанавливаем начальное состояние с учетом финальных стилей
+  // Устанавливаем начальное состояние переходного изображения
   gsap.set(transitionImage, {
     position: "fixed",
-    top: Math.round(top), // Округляем для избежания субпиксельных значений
+    top: Math.round(top),
     left: Math.round(left),
     width: Math.round(width),
     height: Math.round(height),
@@ -1645,55 +1654,19 @@ const startTransitionAnimation = () => {
     objectFit: finalStyles.objectFit || "contain",
     objectPosition: finalStyles.objectPosition || "center",
     borderRadius: imageData.borderRadius || '0px',
-    // Добавляем transform-origin для более точного позиционирования
     transformOrigin: 'center center',
-    // Принудительно включаем аппаратное ускорение
-    force3D: true
+    force3D: true,
+    // Убеждаемся, что изображение остается видимым
+    display: 'block'
   });
 
-  // ИСПРАВЛЕНИЕ 3: Добавляем предварительную подготовку финального изображения
-  gsap.set(firstSlideImage, {
-    opacity: 0, // Скрываем финальное изображение до завершения анимации
-    visibility: 'visible'
-  });
+  console.log('Starting transition animation...');
+  console.log('Initial position:', { top, left, width, height });
+  console.log('Final position:', finalRect);
 
-  // ИСПРАВЛЕНИЕ 4: Плавная анимация с кроссфейдом
-  const tl = gsap.timeline({
-    onComplete: () => {
-      // Плавно показываем финальное изображение
-      gsap.to(firstSlideImage, {
-        opacity: 1,
-        duration: 0.2,
-        ease: "power1.out"
-      });
-      
-      // Одновременно скрываем переходное изображение
-      gsap.to(transitionImage, {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power1.out",
-        onComplete: () => {
-          gsap.set(transitionImage, { visibility: 'hidden' });
-          gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-          setAnimationComplete(true);
-
-          // Анимируем информацию о продукте
-          gsap.to(infoRef.current, {
-            opacity: 1,
-            y: 0,
-            duration: ANIMATION_DURATION,
-            ease: ANIMATION_EASE,
-            onComplete: () => {
-              setIsAnimating(false);
-            }
-          });
-        }
-      });
-    }
-  });
-
-  // ИСПРАВЛЕНИЕ 5: Используем более точные финальные координаты
-  tl.to(transitionImage, {
+  // ИСПРАВЛЕНИЕ: Используем последовательные анимации вместо timeline
+  // Шаг 1: Анимируем позицию и размер
+  gsap.to(transitionImage, {
     top: Math.round(finalRect.top),
     left: Math.round(finalRect.left),
     width: Math.round(finalRect.width),
@@ -1701,10 +1674,70 @@ const startTransitionAnimation = () => {
     borderRadius: finalStyles.borderRadius || '12px',
     duration: ANIMATION_DURATION,
     ease: ANIMATION_EASE,
-    // Добавляем свойства для более плавной анимации
     force3D: true,
-    // Синхронизируем object-fit анимацию
-    objectFit: finalStyles.objectFit || "contain"
+    onUpdate: function() {
+      // Отладочная информация
+      console.log('Animation progress:', this.progress());
+    },
+    onComplete: () => {
+      console.log('Position animation completed');
+      
+      // Шаг 2: ТОЛЬКО после завершения позиционирования делаем кроссфейд
+      
+      // Сначала показываем Swiper (но изображение в нем пока прозрачное)
+      gsap.set(swiperContainer, { visibility: 'visible' });
+      gsap.set(firstSlideImage, { opacity: 0 }); // Убеждаемся что цель прозрачна
+      
+      // Плавно показываем контейнер
+      gsap.to(swiperContainer, {
+        opacity: 1,
+        duration: 0.2,
+        ease: "power1.out",
+        onComplete: () => {
+          console.log('Swiper container shown');
+          
+          // Шаг 3: Кроссфейд между переходным и целевым изображением
+          const crossfadeTl = gsap.timeline({
+            onComplete: () => {
+              console.log('Crossfade completed');
+              
+              // Убираем переходное изображение
+              gsap.set(transitionImage, { 
+                visibility: 'hidden',
+                opacity: 0,
+                display: 'none'
+              });
+              
+              setAnimationComplete(true);
+
+              // Анимируем информацию о продукте
+              gsap.to(infoRef.current, {
+                opacity: 1,
+                y: 0,
+                duration: ANIMATION_DURATION,
+                ease: ANIMATION_EASE,
+                onComplete: () => {
+                  setIsAnimating(false);
+                  console.log('Full animation sequence completed');
+                }
+              });
+            }
+          });
+          
+          // Одновременное исчезновение переходного и появление целевого
+          crossfadeTl.to(transitionImage, {
+            opacity: 0,
+            duration: 0.3,
+            ease: "power1.out"
+          }, 0)
+          .to(firstSlideImage, {
+            opacity: 1,
+            duration: 0.3,
+            ease: "power1.out"
+          }, 0);
+        }
+      });
+    }
   });
 };
 
@@ -1753,32 +1786,24 @@ useEffect(() => {
   };
 
 
-  // ИСПРАВЛЕНИЕ 6: Улучшенные CSS стили для предотвращения рывков
-const improvedSwiperStyles = `
+  /// 2. Улучшенные стили для предотвращения мерцания
+const enhancedSwiperStyles = `
+  .custom-swiper {
+    /* Предотвращаем любые переходы во время инициализации */
+    transition: none !important;
+  }
+  
   .custom-swiper .swiper-slide img {
-    transition: opacity 0.3s ease-out;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
+    /* Убираем любые переходы которые могут конфликтовать */
+    transition: none !important;
   }
   
   .custom-swiper .swiper-wrapper {
     transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-  }
-  
-  .custom-swiper .swiper-slide {
-    will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-  }
-  
-  /* Предотвращение дрожания изображений */
-  .custom-swiper img {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-    transform: translateZ(0);
-    -webkit-transform: translateZ(0);
   }
   
   /* Стили для переходного изображения */
@@ -1788,8 +1813,32 @@ const improvedSwiperStyles = `
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     will-change: transform, opacity;
+    /* Принудительно убираем любые переходы */
+    transition: none !important;
+    pointer-events: none;
+  }
+  
+  /* Убеждаемся что переходное изображение всегда на переднем плане */
+  .transition-image {
+    z-index: 9999 !important;
   }
 `;
+
+// 3. Безопасная очистка анимаций при размонтировании
+useEffect(() => {
+  return () => {
+    // Очищаем все активные анимации при размонтировании
+    if (transitionImageRef.current) {
+      gsap.killTweensOf(transitionImageRef.current);
+    }
+    if (swiperContainerRef.current) {
+      gsap.killTweensOf(swiperContainerRef.current);
+    }
+    if (infoRef.current) {
+      gsap.killTweensOf(infoRef.current);
+    }
+  };
+}, []);
 
 // Применение улучшенных стилей
 useEffect(() => {
