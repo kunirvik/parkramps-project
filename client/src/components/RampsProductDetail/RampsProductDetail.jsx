@@ -35,12 +35,6 @@ export default function RampsProductDetail() {
 
 
   
-// Добавляем состояние для отслеживания загрузки переходного изображения
-const [transitionImageLoaded, setTransitionImageLoaded] = useState(false);
-const [preloadedImages, setPreloadedImages] = useState(new Set());
-
-
-
   // Ссылки
   const containerRef = useRef(null);
   const transitionImageRef = useRef(null);
@@ -62,6 +56,8 @@ const [preloadedImages, setPreloadedImages] = useState(new Set());
   // Блокиратор для предотвращения циклических обновлений URL
   const isUrlUpdatingRef = useRef(false);
   
+
+
   const product = productCatalogRamps[activeProductIndex];
   if (!product) return <p>Product not found</p>;
 
@@ -69,49 +65,6 @@ const [preloadedImages, setPreloadedImages] = useState(new Set());
   // Константы для анимации
   const ANIMATION_DURATION = 0.6;
   const ANIMATION_EASE = "power2.out";
-
-    //1 Функция предзагрузки изображения
-  const preloadImage = (src) => {
-    return new Promise((resolve, reject) => {
-      if (preloadedImages.has(src)) {
-        resolve(src);
-        return;
-      }
-
-      const img = new Image();
-      img.onload = () => {
-        setPreloadedImages(prev => new Set([...prev, src]));
-        resolve(src);
-      };
-      img.onerror = reject;
-      img.src = src;
-    });
-  };
-
-
-
-  //2 Эффект для предзагрузки переходного изображения
-  useEffect(() => {
-    if (imageData && product?.image) {
-      console.log('Начинаем предзагрузку переходного изображения:', product.image);
-      
-      preloadImage(product.image)
-        .then(() => {
-          console.log('Переходное изображение предзагружено');
-          setTransitionImageLoaded(true);
-        })
-        .catch((error) => {
-          console.error('Ошибка предзагрузки переходного изображения:', error);
-          // Если предзагрузка не удалась, все равно показываем анимацию
-          setTransitionImageLoaded(true);
-        });
-    } else if (!imageData) {
-      // Если нет данных для анимации, сразу помечаем как загруженное
-      setTransitionImageLoaded(true);
-    }
-  }, [imageData, product?.image]);
-
-
 
   // Обновление URL без перезагрузки компонента
   const updateUrlAndParams = (productId, viewIndex = 0) => {
@@ -331,29 +284,13 @@ const handleSwiperInit = (swiper) => {
     return;
   }
 
-  // // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
-  // requestAnimationFrame(() => {
-  //   // Дополнительная задержка для полного рендеринга слайдов
-  //   setTimeout(() => {
-  //     startTransitionAnimation();
-  //   }, 100); // Увеличиваем задержку до 100мс
-  // });
-
-  // Ждем загрузки переходного изображения перед анимацией
-  const startAnimationWhenReady = () => {
-    if (transitionImageLoaded) {
-      requestAnimationFrame(() => {
-        setTimeout(() => {
-          startTransitionAnimation();
-        }, 50);
-      });
-    } else {
-      // Проверяем каждые 50мс до загрузки
-      setTimeout(startAnimationWhenReady, 50);
-    }
-  };
-
-  startAnimationWhenReady();
+  // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
+  requestAnimationFrame(() => {
+    // Дополнительная задержка для полного рендеринга слайдов
+    setTimeout(() => {
+      startTransitionAnimation();
+    }, 100); // Увеличиваем задержку до 100мс
+  });
 };
 
 // Дополнительный useEffect для контроля видимости переходного изображения
