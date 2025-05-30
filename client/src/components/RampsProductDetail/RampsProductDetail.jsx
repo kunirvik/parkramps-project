@@ -11,6 +11,7 @@ import "swiper/css/pagination";
 
 
 
+
 export default function RampsProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -25,7 +26,6 @@ export default function RampsProductDetail() {
   const [activeProductIndex, setActiveProductIndex] = useState(
     productCatalogRamps.findIndex(p => p.id === Number(id)) || 0
   );
-
 
   const [activeDetail, setActiveDetail] = useState(null);
   // Состояние для выбранных миниатюр каждого продукта
@@ -42,40 +42,69 @@ export default function RampsProductDetail() {
   const thumbsSwiperRef = useRef(null); 
 
   // Состояния для контроля анимаций
-    const [thumbsSwiper, setThumbsSwiper] = useState(null);
-     const [activeIndex, setActiveIndex] = useState(0);
+  const [thumbsSwiper, setThumbsSwiper] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const [animationComplete, setAnimationComplete] = useState(!imageData);
   const [swiperLoaded, setSwiperLoaded] = useState(false);
   const [isSlideChanging, setIsSlideChanging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  // НОВОЕ: Состояние для отслеживания загрузки переходного изображения
+  const [transitionImageLoaded, setTransitionImageLoaded] = useState(false);
   
   // Последний активный продукт для предотвращения двойных обновлений
   const lastActiveProductRef = useRef(activeProductIndex);
   // Блокиратор для предотвращения циклических обновлений URL
   const isUrlUpdatingRef = useRef(false);
-  
-
 
   const product = productCatalogRamps[activeProductIndex];
   if (!product) return <p>Product not found</p>;
-
 
   // Константы для анимации
   const ANIMATION_DURATION = 0.6;
   const ANIMATION_EASE = "power2.out";
 
+  // НОВАЯ ФУНКЦИЯ: Предзагрузка переходного изображения
+  const preloadTransitionImage = () => {
+    return new Promise((resolve, reject) => {
+      if (!imageData || !product.image) {
+        resolve();
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        console.log('Переходное изображение предзагружено');
+        setTransitionImageLoaded(true);
+        resolve(img);
+      };
+      img.onerror = (error) => {
+        console.error('Ошибка предзагрузки переходного изображения:', error);
+        reject(error);
+      };
+      img.src = product.image;
+    });
+  };
+
+  // ОБНОВЛЕННЫЙ useEffect для предзагрузки изображения
+  useEffect(() => {
+    if (imageData && !transitionImageLoaded) {
+      preloadTransitionImage().catch(() => {
+        // Если предзагрузка не удалась, просто пропускаем анимацию
+        setAnimationComplete(true);
+        setTransitionImageLoaded(true);
+      });
+    }
+  }, [imageData, product.image]);
+
   // Обновление URL без перезагрузки компонента
   const updateUrlAndParams = (productId, viewIndex = 0) => {
-    // Предотвращаем циклические обновления
     if (isUrlUpdatingRef.current) return;
     
     isUrlUpdatingRef.current = true;
     
-    // Используем replaceState вместо navigate для более мягкого обновления URL
     const newUrl = `/product/ramps/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
-    // Сбрасываем блокировку через небольшую задержку
     setTimeout(() => {
       isUrlUpdatingRef.current = false;
     }, 50);
@@ -83,17 +112,13 @@ export default function RampsProductDetail() {
 
   // Синхронизация Swiper с состоянием при изменении URL или загрузке
   useEffect(() => {
-    // Обновляем слайдер только когда Swiper полностью загружен
     if (swiperRef.current && swiperLoaded && !isAnimating) {
-      // Перемещаем к нужному слайду без анимации при первичной загрузке
       swiperRef.current.slideTo(activeProductIndex, 0);
       
-      // Также синхронизируем свайпер миниатюр
       if (thumbsSwiperRef.current) {
         thumbsSwiperRef.current.slideTo(activeProductIndex, 0);
       }
       
-      // Устанавливаем активный индекс изображения
       if (selectedImageIndices[activeProductIndex] !== activeImageIndex) {
         const newIndices = [...selectedImageIndices];
         newIndices[activeProductIndex] = activeImageIndex;
@@ -102,26 +127,20 @@ export default function RampsProductDetail() {
     }
   }, [swiperLoaded]);
 
-  // Отслеживаем изменение URL-параметров
   useEffect(() => {
     if (swiperRef.current && swiperLoaded && !isAnimating) {
-      // Обновляем только индекс изображения, без перерисовки всего компонента
       setActiveImageIndex(slideIndexParam);
       
-      // Синхронизируем выбранные миниатюры с параметром из URL
       const newIndices = [...selectedImageIndices];
       newIndices[activeProductIndex] = slideIndexParam;
       setSelectedImageIndices(newIndices);
     }
   }, [slideIndexParam, swiperLoaded]);
 
-  // Синхронизация свайпера миниатюр с основным свайпером
   useEffect(() => {
     if (thumbsSwiperRef.current && swiperLoaded && !isAnimating) {
-      // Явно синхронизируем позицию миниатюр с активным слайдом
       thumbsSwiperRef.current.slideTo(activeProductIndex, ANIMATION_DURATION * 1000);
       
-      // Активируем выделение миниатюры
       const thumbSlides = thumbsSwiperRef.current.slides;
       if (thumbSlides) {
         thumbSlides.forEach((slide, i) => {
@@ -135,190 +154,179 @@ export default function RampsProductDetail() {
     }
   }, [activeProductIndex, swiperLoaded]);
 
-  // // Обработчик инициализации Swiper
-  // const handleSwiperInit = (swiper) => {
-  //   setSwiperLoaded(true);
+  // ОБНОВЛЕННАЯ функция для запуска анимации перехода
+  const startTransitionAnimation = () => {
+    if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating || !transitionImageLoaded) {
+      setAnimationComplete(true);
+      return;
+    }
 
-  //   // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
-  //   if (!imageData) {
-  //     gsap.set(infoRef.current, { opacity: 1, y: 0 });
-  //     return;
-  //   }
+    setIsAnimating(true);
 
-  //   // Начинаем анимацию только после полной загрузки Swiper
-  //   requestAnimationFrame(() => {
-  //     startTransitionAnimation();
-  //   });
-  // };
+    const { top, left, width, height } = imageData.rect;
+    const transitionImage = transitionImageRef.current;
+    const swiperContainer = swiperContainerRef.current;
 
-// Исправленная функция для запуска анимации перехода
-const startTransitionAnimation = () => {
-  if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
-    setAnimationComplete(true);
-    return;
-  }
-
-  setIsAnimating(true);
-
-  const { top, left, width, height } = imageData.rect;
-  const transitionImage = transitionImageRef.current;
-  const swiperContainer = swiperContainerRef.current;
-
-  // Ждем полной загрузки и рендеринга Swiper
-  const waitForSwiperRender = () => {
-    return new Promise((resolve) => {
-      const checkSlide = () => {
-        const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
-        
-        if (firstSlideImage) {
-          // Ждем загрузки изображения
-          if (firstSlideImage.complete) {
-            const rect = firstSlideImage.getBoundingClientRect();
-            if (rect.width > 0 && rect.height > 0) {
-              resolve(firstSlideImage);
-              return;
-            }
-          } else {
-            // Если изображение еще не загружено, ждем события load
-            firstSlideImage.onload = () => {
+    // Ждем полной загрузки и рендеринга Swiper
+    const waitForSwiperRender = () => {
+      return new Promise((resolve) => {
+        const checkSlide = () => {
+          const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
+          
+          if (firstSlideImage) {
+            if (firstSlideImage.complete) {
               const rect = firstSlideImage.getBoundingClientRect();
               if (rect.width > 0 && rect.height > 0) {
                 resolve(firstSlideImage);
-              } else {
-                setTimeout(checkSlide, 50);
+                return;
               }
-            };
-            return;
+            } else {
+              firstSlideImage.onload = () => {
+                const rect = firstSlideImage.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                  resolve(firstSlideImage);
+                } else {
+                  setTimeout(checkSlide, 50);
+                }
+              };
+              return;
+            }
           }
-        }
+          
+          setTimeout(checkSlide, 50);
+        };
         
-        // Повторяем проверку через 50мс
-        setTimeout(checkSlide, 50);
-      };
+        checkSlide();
+      });
+    };
+
+    // Запускаем анимацию только после полной готовности
+    waitForSwiperRender().then((firstSlideImage) => {
+      const finalRect = firstSlideImage.getBoundingClientRect();
       
-      checkSlide();
+      console.log('Начинаем анимацию перехода:', {
+        from: { top, left, width, height },
+        to: { top: finalRect.top, left: finalRect.left, width: finalRect.width, height: finalRect.height }
+      });
+      
+      // Скрываем Swiper на время анимации
+      gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
+      
+      // Устанавливаем начальное состояние переходного изображения
+      gsap.set(transitionImage, {
+        position: "fixed",
+        top,
+        left,
+        width,
+        height,
+        zIndex: 1000,
+        opacity: 1,
+        visibility: 'visible',
+        display: 'block',
+        objectFit: "contain",
+        borderRadius: imageData.borderRadius || '0px'
+      });
+
+      // Анимируем переходное изображение
+      gsap.to(transitionImage, {
+        top: finalRect.top,
+        left: finalRect.left,
+        width: finalRect.width,
+        height: finalRect.height,
+        borderRadius: '12px',
+        duration: ANIMATION_DURATION,
+        ease: ANIMATION_EASE,
+        onComplete: () => {
+          // Показываем Swiper и скрываем переходное изображение
+          gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
+          gsap.set(transitionImage, { 
+            visibility: 'hidden',  
+            opacity: 0,
+            display: 'none'
+          });
+          setAnimationComplete(true);
+
+          // Анимируем появление информации
+          gsap.to(infoRef.current, {
+            opacity: 1,
+            y: 0,
+            duration: ANIMATION_DURATION,
+            ease: ANIMATION_EASE,
+            onComplete: () => {
+              setIsAnimating(false);
+            }
+          });
+        }
+      });
+    }).catch((error) => {
+      console.error('Ошибка при ожидании готовности Swiper:', error);
+      // Fallback: пропускаем анимацию
+      gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
+      gsap.set(transitionImage, { visibility: 'hidden', opacity: 0, display: 'none' });
+      gsap.set(infoRef.current, { opacity: 1, y: 0 });
+      setAnimationComplete(true);
+      setIsAnimating(false);
     });
   };
 
-  // Запускаем анимацию только после полной готовности
-  waitForSwiperRender().then((firstSlideImage) => {
-    const finalRect = firstSlideImage.getBoundingClientRect();
+  // ОБНОВЛЕННЫЙ обработчик инициализации Swiper
+  const handleSwiperInit = (swiper) => {
+    console.log('Swiper инициализирован');
     
-    console.log('Начинаем анимацию перехода:', {
-      from: { top, left, width, height },
-      to: { top: finalRect.top, left: finalRect.left, width: finalRect.width, height: finalRect.height }
-    });
-    
-    // Скрываем Swiper на время анимации
-    gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
-    
-    // Устанавливаем начальное состояние переходного изображения
-    gsap.set(transitionImage, {
-      position: "fixed",
-      top,
-      left,
-      width,
-      height,
-      zIndex: 1000,
-      opacity: 1,
-      visibility: 'visible',
-      display: 'block',
-      objectFit: "contain",
-      borderRadius: imageData.borderRadius || '0px'
-    });
+    setSwiperLoaded(true);
 
-    // Анимируem переходное изображение
-    gsap.to(transitionImage, {
-      top: finalRect.top,
-      left: finalRect.left,
-      width: finalRect.width,
-      height: finalRect.height,
-      borderRadius: '12px',
-      duration: ANIMATION_DURATION,
-      ease: ANIMATION_EASE,
-      onComplete: () => {
-        // Показываем Swiper и скрываем переходное изображение
-        gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-        gsap.set(transitionImage, { 
-          visibility: 'hidden',  
-          opacity: 0,
-          display: 'none' // Полностью убираем из layout
-        });
-        setAnimationComplete(true);
+    // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
+    if (!imageData) {
+      gsap.set(infoRef.current, { opacity: 1, y: 0 });
+      return;
+    }
 
-        // Анимируем появление информации
-        gsap.to(infoRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: ANIMATION_DURATION,
-          ease: ANIMATION_EASE,
-          onComplete: () => {
-            setIsAnimating(false);
-          }
+    // Для анимированного перехода проверяем готовность переходного изображения
+    const checkAndStartAnimation = () => {
+      if (transitionImageLoaded) {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            startTransitionAnimation();
+          }, 100);
         });
+      } else {
+        // Если изображение еще не загружено, ждем немного и проверяем снова
+        setTimeout(checkAndStartAnimation, 50);
       }
-    });
-  }).catch((error) => {
-    console.error('Ошибка при ожидании готовности Swiper:', error);
-    // Fallback: пропускаем анимацию
-    gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-    gsap.set(transitionImage, { visibility: 'hidden', opacity: 0, display: 'none' });
-    gsap.set(infoRef.current, { opacity: 1, y: 0 });
-    setAnimationComplete(true);
-    setIsAnimating(false);
-  });
-};
+    };
 
-// Улучшенный обработчик инициализации Swiper
-const handleSwiperInit = (swiper) => {
-  console.log('Swiper инициализирован');
-  
-  // Устанавливаем флаг загрузки
-  setSwiperLoaded(true);
+    checkAndStartAnimation();
+  };
 
-  // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
-  if (!imageData) {
-    gsap.set(infoRef.current, { opacity: 1, y: 0 });
-    return;
-  }
+  // ОБНОВЛЕННЫЙ useEffect для контроля видимости переходного изображения
+  useEffect(() => {
+    if (transitionImageRef.current && imageData && transitionImageLoaded) {
+      const transitionImage = transitionImageRef.current;
+      
+      // Принудительно устанавливаем видимость при монтировании
+      gsap.set(transitionImage, {
+        position: "fixed",
+        top: imageData.rect.top,
+        left: imageData.rect.left,
+        width: imageData.rect.width,
+        height: imageData.rect.height,
+        zIndex: 1000,
+        opacity: 1,
+        visibility: 'visible',
+        display: 'block',
+        objectFit: "contain",
+        borderRadius: imageData.borderRadius || '0px'
+      });
 
-  // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
-  requestAnimationFrame(() => {
-    // Дополнительная задержка для полного рендеринга слайдов
-    setTimeout(() => {
-      startTransitionAnimation();
-    }, 100); // Увеличиваем задержку до 100мс
-  });
-};
-
-// Дополнительный useEffect для контроля видимости переходного изображения
-useEffect(() => {
-  if (transitionImageRef.current && imageData) {
-    const transitionImage = transitionImageRef.current;
-    
-    // Принудительно устанавливаем видимость при монтировании
-    gsap.set(transitionImage, {
-      position: "fixed",
-      top: imageData.rect.top,
-      left: imageData.rect.left,
-      width: imageData.rect.width,
-      height: imageData.rect.height,
-      zIndex: 1000,
-      opacity: 1,
-      visibility: 'visible',
-      display: 'block',
-      objectFit: "contain",
-      borderRadius: imageData.borderRadius || '0px'
-    });
-
-    console.log('Переходное изображение установлено:', {
-      src: transitionImage.src,
-      rect: imageData.rect,
-      visible: window.getComputedStyle(transitionImage).visibility,
-      display: window.getComputedStyle(transitionImage).display
-    });
-  }
-}, [imageData]);
+      console.log('Переходное изображение установлено:', {
+        src: transitionImage.src,
+        rect: imageData.rect,
+        loaded: transitionImageLoaded,
+        visible: window.getComputedStyle(transitionImage).visibility,
+        display: window.getComputedStyle(transitionImage).display
+      });
+    }
+  }, [imageData, transitionImageLoaded]);
 
   // Переработанная функция анимации описания
   const animateDescription = () => {
@@ -326,70 +334,59 @@ useEffect(() => {
     
     setIsAnimating(true);
     
-    // Сначала скрываем
     gsap.set(infoRef.current, { opacity: 0, y: 20 });
     
-    // Затем анимируем появление
     gsap.to(infoRef.current, {
       opacity: 1, 
       y: 0, 
       duration: ANIMATION_DURATION,
       ease: ANIMATION_EASE,
       onComplete: () => {
-        // Только после завершения анимации сбрасываем флаги
         setIsSlideChanging(false);
         setIsAnimating(false);
       }
     });
   };
 
-
-
   // Оптимизированный обработчик смены слайда
-const handleSlideChange = (swiper) => {
-  const newIndex = swiper.activeIndex;
+  const handleSlideChange = (swiper) => {
+    const newIndex = swiper.activeIndex;
 
-  if (newIndex === activeProductIndex) return;
+    if (newIndex === activeProductIndex) return;
 
-  // Сразу синхронизируем индекс, URL и миниатюры
-  setActiveProductIndex(newIndex);
-  lastActiveProductRef.current = newIndex;
+    setActiveProductIndex(newIndex);
+    lastActiveProductRef.current = newIndex;
 
-  if (thumbsSwiperRef.current) {
-    thumbsSwiperRef.current.slideTo(newIndex);
-  }
+    if (thumbsSwiperRef.current) {
+      thumbsSwiperRef.current.slideTo(newIndex);
+    }
 
-  updateUrlAndParams(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+    updateUrlAndParams(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
 
-  // Затем, отдельно, запускаем анимацию описания
-  if (!isAnimating && infoRef.current) {
-    setIsSlideChanging(true);
-    setIsAnimating(true);
+    if (!isAnimating && infoRef.current) {
+      setIsSlideChanging(true);
+      setIsAnimating(true);
 
-    gsap.to(infoRef.current, {
-      opacity: 0,
-      y: 20,
-      duration: ANIMATION_DURATION / 2,
-      ease: ANIMATION_EASE,
-      onComplete: () => {
-        // отложенная анимация появления
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            animateDescription();
-          }, 50);
-        });
-      }
-    });
-  }
-};
+      gsap.to(infoRef.current, {
+        opacity: 0,
+        y: 20,
+        duration: ANIMATION_DURATION / 2,
+        ease: ANIMATION_EASE,
+        onComplete: () => {
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              animateDescription();
+            }, 50);
+          });
+        }
+      });
+    }
+  };
 
   const handleExit = () => {
     navigate("/catalogue");
   };
 
-
-
-  // Оптимизированный обработчик выбора миниатюры
   const handleImageSelect = (index) => {
     if (isAnimating || !swiperRef.current) return;
 
@@ -398,31 +395,25 @@ const handleSlideChange = (swiper) => {
     setSelectedImageIndices(newSelectedImageIndices);
     setActiveImageIndex(index);
 
-    // Обновляем URL с новым индексом изображения
     updateUrlAndParams(product.id, index);
   };
 
-  // Обработчик клика по миниатюре товара
-const handleThumbnailClick = (index) => {
-  if (isAnimating || index === activeProductIndex) return;
+  const handleThumbnailClick = (index) => {
+    if (isAnimating || index === activeProductIndex) return;
 
-  if (swiperRef.current) {
-    swiperRef.current.slideTo(index);
-  }
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(index);
+    }
+  };
 
-  // 🧠 Не вызывай setActiveProductIndex напрямую — он вызывается внутри handleSlideChange
-};
-
-useEffect(() => {
+  useEffect(() => {
     const hash = location.hash.replace("#", "");
     if (hash) {
       setActiveDetail(hash);
     }
   }, [location]);
 
-
-
- useEffect(() => {
+  useEffect(() => {
     if (activeDetail && containerRef.current) {
       gsap.fromTo(
         containerRef.current,
@@ -434,10 +425,8 @@ useEffect(() => {
 
   const handleDetailClick = (detail) => {
     setActiveDetail(detail.link.replace("#", ""));
-    navigate(detail.link); // обновит URL
+    navigate(detail.link);
   };
-
-
 
   return (
     <>
@@ -454,24 +443,23 @@ useEffect(() => {
 
         {/* Основной контент */}
         <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
-          {/* Переходное изображение - только при анимированном переходе */}
-     
-{!animationComplete && imageData && (
-  <img
-    ref={transitionImageRef}
-    src={product.image}
-    alt={product.name}
-    className="object-contain pointer-events-none"
-    style={{ 
-      position: 'fixed', 
-      visibility: 'visible',
-      display: 'block',
-      zIndex: 1000
-    }}
-    onLoad={() => console.log('Переходное изображение загружено')}
-    onError={(e) => console.error('Ошибка загрузки переходного изображения:', e)}
-  />
-)}
+          {/* ОБНОВЛЕННОЕ переходное изображение - показывается только когда загружено */}
+          {!animationComplete && imageData && transitionImageLoaded && (
+            <img
+              ref={transitionImageRef}
+              src={product.image}
+              alt={product.name}
+              className="object-contain pointer-events-none"
+              style={{ 
+                position: 'fixed', 
+                visibility: 'visible',
+                display: 'block',
+                zIndex: 1000
+              }}
+              onLoad={() => console.log('Переходное изображение в DOM загружено')}
+              onError={(e) => console.error('Ошибка загрузки переходного изображения в DOM:', e)}
+            />
+          )}
           
           {/* Swiper галерея */}
           <div 
@@ -485,7 +473,7 @@ useEffect(() => {
             {/* Основной слайдер */}
             <Swiper
               className="custom-swiper mb-4"
-               style={{ height: '500px' }} 
+              style={{ height: '500px' }} 
               modules={[Pagination, Mousewheel, Thumbs]}
               pagination={{ clickable: true }}
               mousewheel={true}
@@ -520,17 +508,18 @@ useEffect(() => {
             >
               {productCatalogRamps.map((product, index) => (
                 <SwiperSlide key={product.id} style={{ height: '100%' }}>
-                <div className="w-full h-full flex items-center justify-center">
-                  <img
-                    src={
-                      selectedImageIndices[index] === 0 
-                        ? product.image 
-                        : product.altImages[selectedImageIndices[index] - 1]
-                    }
-                    alt={product.name}
-                    className="max-h-full w-auto object-contain"
-                    draggable="false"
-                  /></div>
+                  <div className="w-full h-full flex items-center justify-center">
+                    <img
+                      src={
+                        selectedImageIndices[index] === 0 
+                          ? product.image 
+                          : product.altImages[selectedImageIndices[index] - 1]
+                      }
+                      alt={product.name}
+                      className="max-h-full w-auto object-contain"
+                      draggable="false"
+                    />
+                  </div>
                 </SwiperSlide>
               ))}
             </Swiper>
@@ -549,29 +538,21 @@ useEffect(() => {
               speed={ANIMATION_DURATION * 1000}
               preventClicks={false}
               preventClicksPropagation={false}
-             observer={true}
-  observeParents={true}
-  resistance={false}
-  resistanceRatio={0}
-  onSlideChange={(swiper) => console.log('thumbs swiper index', swiper.activeIndex)}
-
-  
-
- 
-
-
-              
+              observer={true}
+              observeParents={true}
+              resistance={false}
+              resistanceRatio={0}
+              onSlideChange={(swiper) => console.log('thumbs swiper index', swiper.activeIndex)}
             >
               {productCatalogRamps.map((product, index) => (
                 <SwiperSlide key={product.id}>
                   <img
                     src={product.image}
                     onClick={() => handleThumbnailClick(index)}
-                  className={`cursor-pointer transition-all duration-300 rounded-lg border-2
-  ${index === activeProductIndex 
-    ? 'opacity-100 scale-105 border-black' 
-    : 'grayscale border-transparent opacity-60 hover:opacity-100'}`}
-
+                    className={`cursor-pointer transition-all duration-300 rounded-lg border-2
+                      ${index === activeProductIndex 
+                        ? 'opacity-100 scale-105 border-black' 
+                        : 'grayscale border-transparent opacity-60 hover:opacity-100'}`}
                     alt={product.name}
                   />
                 </SwiperSlide>
@@ -591,12 +572,10 @@ useEffect(() => {
               position: 'relative'
             }}
           >
-            {/* Product information */}
             <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">{product.name}</h1>
             <p className="font-futura text-[#717171] font-medium">{product.description}</p>
             <p className="font-futura text-[#717171] font-medium mt-2">Дизайн: {product.designer}, {product.year}</p>
             
-            {/* Image thumbnails for the current product */}
             <div className="mt-8 flex flex-wrap justify-start gap-4">
               {[product.image, ...product.altImages].map((img, index) => (
                 <button
@@ -605,24 +584,23 @@ useEffect(() => {
                   className={`border rounded-lg p-1 transition hover:scale-105 ${
                     selectedImageIndices[activeProductIndex] === index ? "border-black" : "border-transparent"
                   }`}
-                  disabled={isAnimating} // Отключаем кнопки во время анимации
+                  disabled={isAnimating}
                 >
                   <img
                     src={img}
                     alt={`${product.name} Mini ${index + 1}`}
                     className="w-16 h-16 object-contain rounded"
-                    draggable="false" // Предотвращаем случайные перетаскивания
+                    draggable="false"
                   />
                 </button>
               ))}
             </div>
 
-            {/* Product details */}
             {product.details.map((detail, index) => (
               <a
                 key={index}
                 href={detail.link}
-                 onClick={() => handleDetailClick(detail)}
+                onClick={() => handleDetailClick(detail)}
                 className="flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition"
               >
                 <span className="font-futura text-[#717171] font-medium">{detail.title}</span>
@@ -632,29 +610,29 @@ useEffect(() => {
           </div>
         </div>
 
-         {activeDetail && (
-        <div className="fixed inset-0 bg-white z-50 flex flex-col">
-          <div className="flex justify-end p-4">
-            <button onClick={() => setActiveDetail(null)} className="text-2xl">×</button>
-          </div>
+        {activeDetail && (
+          <div className="fixed inset-0 bg-white z-50 flex flex-col">
+            <div className="flex justify-end p-4">
+              <button onClick={() => setActiveDetail(null)} className="text-2xl">×</button>
+            </div>
 
-          <div className="flex-1">
-            <Swiper
-              spaceBetween={20}
-              slidesPerView={1}
-              navigation
-              pagination={{ clickable: true }}
-              className="w-full h-full"
-            >
-              {product.sampleImages.map((img, index) => (
-                <SwiperSlide key={index}>
-                  <img src={img} alt={`sample-${index}`} className="w-full h-full object-contain" />
-                </SwiperSlide>
-              ))}
-            </Swiper>
+            <div className="flex-1">
+              <Swiper
+                spaceBetween={20}
+                slidesPerView={1}
+                navigation
+                pagination={{ clickable: true }}
+                className="w-full h-full"
+              >
+                {product.sampleImages.map((img, index) => (
+                  <SwiperSlide key={index}>
+                    <img src={img} alt={`sample-${index}`} className="w-full h-full object-contain" />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </>
   );
