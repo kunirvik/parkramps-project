@@ -40,6 +40,7 @@ export default function RampsProductDetail() {
   const infoRef = useRef(null);
   const swiperRef = useRef(null);
   const thumbsSwiperRef = useRef(null); 
+const imageDataRef = useRef(location.state?.imageData || null);
 
   // Состояния для контроля анимаций
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -137,14 +138,14 @@ export default function RampsProductDetail() {
 
 
    const startTransitionAnimation = () => {
-    if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
+    if (!transitionImageRef.current || !swiperContainerRef.current || !imageDataRef.current || isAnimating) {
       setAnimationComplete(true);
       return;
     }
 
     setIsAnimating(true);
 
-    const { top, left, width, height } = imageData.rect;
+    const { top, left, width, height } = imageDataRef.current.rect;
     const transitionImage = transitionImageRef.current;
     const swiperContainer = swiperContainerRef.current;
 
@@ -186,7 +187,7 @@ export default function RampsProductDetail() {
       opacity: 1,
       visibility: 'visible', // Явно устанавливаем видимость
       objectFit: "contain",
-      borderRadius: imageData.borderRadius || '0px'
+      borderRadius: imageDataRef.current.borderRadius || '0px'
     });
     
     // и установим явные стили для лучшей совместимости
@@ -279,22 +280,24 @@ const handleSwiperInit = (swiper) => {
 
 // Дополнительный useEffect для контроля видимости переходного изображения
 useEffect(() => {
-  if (transitionImageRef.current && imageData) {
+  if (transitionImageRef.current && imageDataRef.current
+
+  ) {
     const transitionImage = transitionImageRef.current;
     
     // Принудительно устанавливаем видимость при монтировании
     gsap.set(transitionImage, {
       position: "fixed",
-      top: imageData.rect.top,
-      left: imageData.rect.left,
-      width: imageData.rect.width,
-      height: imageData.rect.height,
+      top: imageDataRef.current.rect.top,
+      left: imageDataRef.current.rect.left,
+      width: imageDataRef.current.rect.width,
+      height: imageDataRef.current.rect.height,
       zIndex: 1000,
       opacity: 1,
       visibility: 'visible',
       display: 'block',
       objectFit: "contain",
-      borderRadius: imageData.borderRadius || '0px'
+      borderRadius: imageDataRef.current.borderRadius || '0px'
     });
 
     console.log('Переходное изображение установлено:', {
