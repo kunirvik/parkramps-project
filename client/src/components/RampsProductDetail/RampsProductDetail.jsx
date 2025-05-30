@@ -66,6 +66,8 @@ export default function RampsProductDetail() {
   const ANIMATION_DURATION = 0.6;
   const ANIMATION_EASE = "power2.out";
 
+
+  
   // Обновление URL без перезагрузки компонента
   const updateUrlAndParams = (productId, viewIndex = 0) => {
     // Предотвращаем циклические обновления
@@ -152,7 +154,48 @@ export default function RampsProductDetail() {
   //     startTransitionAnimation();
   //   });
   // };
+// Добавляем состояние для отслеживания загрузки переходного изображения
+const [transitionImageLoaded, setTransitionImageLoaded] = useState(false);
+const [preloadedImages, setPreloadedImages] = useState(new Set());
 
+// Функция предзагрузки изображения
+const preloadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    if (preloadedImages.has(src)) {
+      resolve(src);
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      setPreloadedImages(prev => new Set([...prev, src]));
+      resolve(src);
+    };
+    img.onerror = reject;
+    img.src = src;
+  });
+};
+
+// Эффект для предзагрузки переходного изображения
+useEffect(() => {
+  if (imageData && product?.image) {
+    console.log('Начинаем предзагрузку переходного изображения:', product.image);
+    
+    preloadImage(product.image)
+      .then(() => {
+        console.log('Переходное изображение предзагружено');
+        setTransitionImageLoaded(true);
+      })
+      .catch((error) => {
+        console.error('Ошибка предзагрузки переходного изображения:', error);
+        // Если предзагрузка не удалась, все равно показываем анимацию
+        setTransitionImageLoaded(true);
+      });
+  } else if (!imageData) {
+    // Если нет данных для анимации, сразу помечаем как загрузженное
+    setTransitionImageLoaded(true);
+  }
+}, [imageData, product?.image]);
 // Исправленная функция для запуска анимации перехода
 const startTransitionAnimation = () => {
   if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
