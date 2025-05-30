@@ -794,7 +794,7 @@ useEffect(() => {
       </div>
     </>
   );
-}
+
 
 // export default function RampsProductDetail() {
 //   const location = useLocation();
