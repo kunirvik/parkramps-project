@@ -165,7 +165,6 @@ const [animationComplete, setAnimationComplete] = useState(!imageDataRef.current
     // Получаем финальную позицию и размеры первого изображения
     const finalRect = firstSlideImage.getBoundingClientRect();
     
-    
     // Если размеры равны нулю, Swiper мог не успеть правильно отрендерить слайд
     if (finalRect.width === 0 || finalRect.height === 0) {
       console.warn("Целевое изображение имеет нулевые размеры");
@@ -243,54 +242,44 @@ const [animationComplete, setAnimationComplete] = useState(!imageDataRef.current
     });
   };
 
-  // Обработчик инициализации Swiper
-  const handleSwiperInit = (swiper) => {
-    setSwiperLoaded(true);
+  // // Обработчик инициализации Swiper
+  // const handleSwiperInit = (swiper) => {
+  //   setSwiperLoaded(true);
 
-    // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
-    if (!imageData) {
-      gsap.set(infoRef.current, { opacity: 1, y: 0 });
-      return;
-    }
+  //   // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
+  //   if (!imageData) {
+  //     gsap.set(infoRef.current, { opacity: 1, y: 0 });
+  //     return;
+  //   }
 
-    // Начинаем анимацию только после полной загрузки Swiper
-    requestAnimationFrame(() => {
-      startTransitionAnimation();
-    });
-  };
+  //   // Начинаем анимацию только после полной загрузки Swiper
+  //   requestAnimationFrame(() => {
+  //     startTransitionAnimation();
+  //   });
+  // };
 
 
-// // Улучшенный обработчик инициализации Swiper
-// const handleSwiperInit = (swiper) => {
-//   console.log('Swiper инициализирован');
+// Улучшенный обработчик инициализации Swiper
+const handleSwiperInit = (swiper) => {
+  console.log('Swiper инициализирован');
   
-//   // Устанавливаем флаг загрузки
-//   setSwiperLoaded(true);
+  // Устанавливаем флаг загрузки
+  setSwiperLoaded(true);
 
-//   // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
-//   if (!imageData) {
-//     gsap.set(infoRef.current, { opacity: 1, y: 0 });
-//     return;
-//   }
+  // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
+  if (!imageData) {
+    gsap.set(infoRef.current, { opacity: 1, y: 0 });
+    return;
+  }
 
-//   // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
-//   requestAnimationFrame(() => {
-//     // Дополнительная задержка для полного рендеринга слайдов
-//     setTimeout(() => {
-//       startTransitionAnimation();
-//     }, 100); // Увеличиваем задержку до 100мс
-//   });
-// };
-
-useEffect(() => {
-  if (!swiperLoaded || !transitionImageLoaded || animationComplete || !imageDataRef.current) return;
-
-  const timer = setTimeout(() => {
-    startTransitionAnimation();
-  }, 50); // Небольшая задержка после загрузки
-
-  return () => clearTimeout(timer);
-}, [swiperLoaded, transitionImageLoaded]);
+  // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
+  requestAnimationFrame(() => {
+    // Дополнительная задержка для полного рендеринга слайдов
+    setTimeout(() => {
+      startTransitionAnimation();
+    }, 100); // Увеличиваем задержку до 100мс
+  });
+};
 
 // Дополнительный useEffect для контроля видимости переходного изображения
 useEffect(() => {
@@ -471,11 +460,6 @@ useEffect(() => {
       display: 'block',
       zIndex: 1000
     }}
-    onLoad={() => {
-      console.log('Переходное изображение загружено')
-          setTransitionImageLoaded(true);}
-    }
-
     onError={(e) => console.error('Ошибка загрузки переходного изображения:', e)}
   />
 )}
