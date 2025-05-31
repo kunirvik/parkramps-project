@@ -125,14 +125,14 @@ export default function SkateparksProductDetail() {
   const isUrlUpdatingRef = useRef(false);
   
   // Найдем категорию и продукт
-  const categoryIndex = productCatalogg.findIndex(cat => cat.category === category);
+  const categoryIndex = productCatalogSkateparks.findIndex(cat => cat.category === category);
   
   // Если категория не найдена, показываем ошибку
   if (categoryIndex === -1) {
     return <div className="text-center mt-10 p-4">Категория не найдена</div>;
   }
 
-  const product = productCatalogg[activeProductIndex];
+  const product = productCatalogSkateparks[activeProductIndex];
   if (!product) return <p>Product not found</p>;
 
   // Получаем связанные продукты
