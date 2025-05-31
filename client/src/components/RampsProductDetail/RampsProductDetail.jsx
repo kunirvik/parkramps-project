@@ -238,46 +238,44 @@ export default function RampsProductDetail() {
     });
   };
 
-  // // Обработчик инициализации Swiper
-  // const handleSwiperInit = (swiper) => {
-  //   setSwiperLoaded(true);
+  // Обработчик инициализации Swiper
+  const handleSwiperInit = (swiper) => {
+    setSwiperLoaded(true);
 
-  //   // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
-  //   if (!imageData) {
-  //     gsap.set(infoRef.current, { opacity: 1, y: 0 });
-  //     return;
-  //   }
+    // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
+    if (!imageData) {
+      gsap.set(infoRef.current, { opacity: 1, y: 0 });
+      return;
+    }
 
-  //   // Начинаем анимацию только после полной загрузки Swiper
-  //   requestAnimationFrame(() => {
-  //     startTransitionAnimation();
-  //   });
-  // };
-
-
-// Улучшенный обработчик инициализации Swiper
-const handleSwiperInit = (swiper) => {
-  console.log('Swiper инициализирован');
-  
-  // Устанавливаем флаг загрузки
-  setSwiperLoaded(true);
-
-  // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
-  if (!imageData) {
-    gsap.set(infoRef.current, { opacity: 1, y: 0 });
-    return;
-  }
- requestAnimationFrame(() => {
+    // Начинаем анимацию только после полной загрузки Swiper
+    requestAnimationFrame(() => {
       startTransitionAnimation();
-    })
-  // // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
-  // requestAnimationFrame(() => {
-  //   // Дополнительная задержка для полного рендеринга слайдов
-  //   setTimeout(() => {
-  //     startTransitionAnimation();
-  //   }, 100); // Увеличиваем задержку до 100мс
-  // });
-};
+    });
+  };
+
+
+// // Улучшенный обработчик инициализации Swiper
+// const handleSwiperInit = (swiper) => {
+//   console.log('Swiper инициализирован');
+  
+//   // Устанавливаем флаг загрузки
+//   setSwiperLoaded(true);
+
+//   // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
+//   if (!imageData) {
+//     gsap.set(infoRef.current, { opacity: 1, y: 0 });
+//     return;
+//   }
+
+//   // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
+//   requestAnimationFrame(() => {
+//     // Дополнительная задержка для полного рендеринга слайдов
+//     setTimeout(() => {
+//       startTransitionAnimation();
+//     }, 100); // Увеличиваем задержку до 100мс
+//   });
+// };
 
 // Дополнительный useEffect для контроля видимости переходного изображения
 useEffect(() => {
