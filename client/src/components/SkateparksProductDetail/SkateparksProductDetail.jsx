@@ -12,8 +12,7 @@ import "swiper/css/mousewheel";
   // import ProductDetailPage from '../ProductDetailPage/ProductDetailPage';
 
 
-const productCatalogSkateparks
-kateparks= [ {id: 1,
+const productCatalogSkateparks = [ {id: 1,
      name: "skatepark",
    image: "/images/skateparks/park.png",
     altImages: ["/images/skateparks/parkfront.png","/images/skateparks/parktop.png", ],
