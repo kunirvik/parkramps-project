@@ -206,18 +206,6 @@ export default function SkateparksProductDetail() {
     }
   }, [activeProductIndex, swiperLoaded]);
 
-    const handleSwiperInit = (swiper) => {
-    setSwiperLoaded(true);
-
-    if (!imageData) {
-      gsap.set(infoRef.current, { opacity: 1, y: 0 });
-      return;
-    }
-
-    requestAnimationFrame(() => {
-      startTransitionAnimation();
-    });
-  };
 
 const startTransitionAnimation = () => {
   if (!transitionImageRef.current || !swiperContainerRef.current || !imageData) {
@@ -232,6 +220,7 @@ const startTransitionAnimation = () => {
   const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
 
   if (!firstSlideImage) {
+       setAnimationComplete(true);
     setAnimationComplete(true);
     return;
   }
@@ -293,6 +282,21 @@ const startTransitionAnimation = () => {
     }
   });
 };
+
+
+    const handleSwiperInit = (swiper) => {
+    setSwiperLoaded(true);
+
+    if (!imageData) {
+      gsap.set(infoRef.current, { opacity: 1, y: 0 });
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      startTransitionAnimation();
+    });
+  };
+
 
   // Переработанная функция анимации описания
   const animateDescription = () => {
@@ -360,6 +364,8 @@ const handleSlideChange = (swiper) => {
   const handleExit = () => {
     navigate("/catalogue");
   };
+
+
 
 
 

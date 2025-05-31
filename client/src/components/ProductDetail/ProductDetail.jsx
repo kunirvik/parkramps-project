@@ -1576,21 +1576,7 @@ export default function SkateparksProductDetail() {
     }
   }, [activeProductIndex, swiperLoaded]);
 
-  // Обработчик инициализации Swiper
-  const handleSwiperInit = (swiper) => {
-    setSwiperLoaded(true);
-
-    // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
-    if (!imageData) {
-      gsap.set(infoRef.current, { opacity: 1, y: 0 });
-      return;
-    }
-
-    // Начинаем анимацию только после полной загрузки Swiper
-    requestAnimationFrame(() => {
-      startTransitionAnimation();
-    });
-  };
+  
 
   // Функция для запуска анимации перехода
   const startTransitionAnimation = () => {
@@ -1694,7 +1680,21 @@ export default function SkateparksProductDetail() {
       }
     });
   };
+// Обработчик инициализации Swiper
+  const handleSwiperInit = (swiper) => {
+    setSwiperLoaded(true);
 
+    // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
+    if (!imageData) {
+      gsap.set(infoRef.current, { opacity: 1, y: 0 });
+      return;
+    }
+
+    // Начинаем анимацию только после полной загрузки Swiper
+    requestAnimationFrame(() => {
+      startTransitionAnimation();
+    });
+  };
   // Переработанная функция анимации описания
   const animateDescription = () => {
     if (!infoRef.current || isAnimating) return;
