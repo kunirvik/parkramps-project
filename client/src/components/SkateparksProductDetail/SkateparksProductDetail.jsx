@@ -239,6 +239,7 @@ const startTransitionAnimation = () => {
     zIndex: 1000,
     opacity: 1,
     objectFit: "contain",
+    visibility: 'visible', // Явно устанавливаем видимость
     borderRadius: imageData.borderRadius || '0px'
   });
 
