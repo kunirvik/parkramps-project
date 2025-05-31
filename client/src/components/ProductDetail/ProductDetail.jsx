@@ -418,43 +418,43 @@ export default function SkateparksProductDetail() {
     });
   };
 
-  // // Улучшенные CSS для устранения дерганья при свайпе
-  // const swiperStyles = `
-  //   .swiper-wrapper {
-  //     transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-  //   }
-  //   .swiper-slide {
-  //     transition: transform ${ANIMATION_DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-  //                 opacity ${ANIMATION_DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-  //   }
-  //   .swiper-slide-active {
-  //     z-index: 2;
-  //   }
-  //   /* Предотвращаем смещение слайдов во время анимации */
-  //   .swiper-no-transition .swiper-wrapper {
-  //     transition: none !important;
-  //   }
-  //   /* Стили для активной миниатюры */
-  //   .swiper-slide-thumb-active {
-  //     opacity: 1 !important;
-  //     transform: scale(1.05) !important;
-  //     border-color: black !important;
-  //     border-width: 2px !important;
-  //     border-style: solid !important;
-  //     border-radius: 0.5rem !important;
-  //   }
-  // `;
+  // Улучшенные CSS для устранения дерганья при свайпе
+  const swiperStyles = `
+    .swiper-wrapper {
+      transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    }
+    .swiper-slide {
+      transition: transform ${ANIMATION_DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                  opacity ${ANIMATION_DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    }
+    .swiper-slide-active {
+      z-index: 2;
+    }
+    /* Предотвращаем смещение слайдов во время анимации */
+    .swiper-no-transition .swiper-wrapper {
+      transition: none !important;
+    }
+    /* Стили для активной миниатюры */
+    .swiper-slide-thumb-active {
+      opacity: 1 !important;
+      transform: scale(1.05) !important;
+      border-color: black !important;
+      border-width: 2px !important;
+      border-style: solid !important;
+      border-radius: 0.5rem !important;
+    }
+  `;
 
-  // // Добавляем стили для Swiper
-  // useEffect(() => {
-  //   const styleElement = document.createElement('style');
-  //   styleElement.innerHTML = swiperStyles;
-  //   document.head.appendChild(styleElement);
+  // Добавляем стили для Swiper
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = swiperStyles;
+    document.head.appendChild(styleElement);
 
-  //   return () => {
-  //     document.head.removeChild(styleElement);
-  //   };
-  // }, []);
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   // Оптимизированный обработчик смены слайда
 const handleSlideChange = (swiper) => {
