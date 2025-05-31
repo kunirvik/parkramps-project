@@ -95,13 +95,13 @@ export default function SkateparksProductDetail() {
   const [activeImageIndex, setActiveImageIndex] = useState(slideIndexParam);
   const [activeProductIndex, setActiveProductIndex] = useState(
     productCatalogSkateparks
-    g.findIndex(p => p.id === Number(id)) || 0
+    .findIndex(p => p.id === Number(id)) || 0
   );
   
   // Состояние для выбранных миниатюр каждого продукта
   const [selectedImageIndices, setSelectedImageIndices] = useState(
-    productCatalogSateparks
-    g.map(() => 0)
+    productCatalogSkateparks
+    .map(() => 0)
   );
 
   // Ссылки
@@ -419,8 +419,8 @@ const handleSlideChange = (swiper) => {
     thumbsSwiperRef.current.slideTo(newIndex);
   }
 
-  updateUrlAndParams(productCatalogSateparks
-    g[newIndex].id, selectedImageIndices[newIndex]);
+  updateUrlAndParams(productCatalogSkateparks
+    [newIndex].id, selectedImageIndices[newIndex]);
 
   // Затем, отдельно, запускаем анимацию описания
   if (!isAnimating && infoRef.current) {
@@ -450,7 +450,7 @@ const handleSlideChange = (swiper) => {
 
   // Оптимизированный обработчик клика по связанным продуктам
   const handleRelatedProductClick = (relatedProductId) => {
-    const relatedIndex = productCatalogSateparks
+    const relatedIndex = productCatalogSkateparks
     g.findIndex(p => p.id === relatedProductId);
     
     if (relatedIndex !== -1 && relatedIndex !== activeProductIndex && !isAnimating) {
@@ -600,10 +600,9 @@ const handleThumbnailClick = (index) => {
               preventClicksPropagation={false}
               touchStartPreventDefault={false}
             >
-              {productCatalogSk
-      ateparks
+              {productCatalogSkateparks
 
-    S
+    
         .map((product, index) => (
                 <SwiperSlide key={product.id} style={{ height: '100%' }}>
                 <div className="w-full h-full flex items-center justify-center">
@@ -648,10 +647,9 @@ const handleThumbnailClick = (index) => {
 
               
             >
-              {productCatalogSk
-      ateparks
+              {productCatalogSkateparks
 
-    S
+    
         .map((product, index) => (
                 <SwiperSlide key={product.id}>
                   <img
