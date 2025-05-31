@@ -283,8 +283,8 @@ export default function SkateparksProductDetail() {
     
     // Устанавливаем начальное состояние переходного изображения
     gsap.set(transitionImage, {
-      // position: "fixed",
-      position: 'absolute',
+      position: "fixed",
+      // position: absolute,
       top,
       left,
       width,
