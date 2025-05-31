@@ -140,30 +140,44 @@ const [animationComplete, setAnimationComplete] = useState(!imageDataRef.current
   }, [activeProductIndex, swiperLoaded]);
 
 
-const startTransitionAnimation = (retryCount = 0) => {
-  if (!transitionImageRef.current || !swiperContainerRef.current || !imageDataRef.current || isAnimating) {
-    setAnimationComplete(true);
-    return;
-  }
+   const startTransitionAnimation = () => {
+    if (!transitionImageRef.current || !swiperContainerRef.current || !imageDataRef.current || isAnimating) {
+      setAnimationComplete(true);
+      return;
+    }
 
-  setIsAnimating(true);
+    setIsAnimating(true);
 
-  const { top, left, width, height } = imageDataRef.current.rect;
-  const transitionImage = transitionImageRef.current;
-  const swiperContainer = swiperContainerRef.current;
+    const { top, left, width, height } = imageDataRef.current.rect;
+    const transitionImage = transitionImageRef.current;
+    const swiperContainer = swiperContainerRef.current;
 
-  const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
+    // Находим элемент первого слайда
+    const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
 
-  if (!firstSlideImage) {
-    console.warn("Не удалось найти изображение в активном слайде");
-    setAnimationComplete(true);
-    setIsAnimating(false);
-    return;
-  }
+    if (!firstSlideImage) {
+      console.warn("Не удалось найти изображение в активном слайде");
+      setAnimationComplete(true);
+      setIsAnimating(false);
+      return;
+    }
 
-  const finalRect = firstSlideImage.getBoundingClientRect();
+    // Получаем финальную позицию и размеры первого изображения
+    const finalRect = firstSlideImage.getBoundingClientRect();
 
-  // Повторная попытка, если слайд не отрисовался
+    
+    
+    // // Если размеры равны нулю, Swiper мог не успеть правильно отрендерить слайд
+    // if (finalRect.width === 0 || finalRect.height === 0) {
+    //   console.warn("Целевое изображение имеет нулевые размеры");
+    //   // Даем время для рендеринга и пробуем еще раз
+    //   setTimeout(() => {
+    //     setIsAnimating(false);
+    //     startTransitionAnimation();
+    //   }, 100);
+    //   return;
+    // }
+      // Повторная попытка, если слайд не отрисовался
   if ((finalRect.width === 0 || finalRect.height === 0) && retryCount < 10) {
     console.warn("Целевое изображение имеет нулевые размеры, повторная попытка...", retryCount);
     setTimeout(() => {
@@ -172,50 +186,72 @@ const startTransitionAnimation = (retryCount = 0) => {
     }, 100);
     return;
   }
+    
+    // Скрываем Swiper на время анимации
+    gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
 
-  // Всё нормально — начинаем анимацию
-  gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
-
-  gsap.set(transitionImage, {
-    position: "fixed",
-    top,
-    left,
-    width,
-    height,
-    zIndex: 1000,
-    opacity: 1,
-    visibility: 'visible',
-    objectFit: "contain",
-    borderRadius: imageDataRef.current.borderRadius || '0px'
-  });
-
-  const tl = gsap.timeline({
-    onComplete: () => {
-      gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-      gsap.set(transitionImage, { visibility: 'hidden', opacity: 0 });
-      setAnimationComplete(true);
-      gsap.to(infoRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: ANIMATION_DURATION,
-        ease: ANIMATION_EASE,
-        onComplete: () => {
-          setIsAnimating(false);
-        }
-      });
+    // Устанавливаем начальное состояние переходного изображения
+    gsap.set(transitionImage, {
+      position: "fixed",
+      top,
+      left,
+      width,
+      height,
+      zIndex: 1000,
+      opacity: 1,
+      visibility: 'visible', // Явно устанавливаем видимость
+      objectFit: "contain",
+      borderRadius: imageDataRef.current.borderRadius || '0px'
+    });
+    
+    // и установим явные стили для лучшей совместимости
+    const imageStyle = window.getComputedStyle(transitionImage);
+    if (imageStyle.display === 'none' || imageStyle.visibility === 'hidden') {
+      console.warn("Переходное изображение невидимо после установки стилей");
+      transitionImage.style.display = 'block';
+      transitionImage.style.visibility = 'visible';
     }
-  });
 
-  tl.to(transitionImage, {
-    top: finalRect.top,
-    left: finalRect.left,
-    width: finalRect.width,
-    height: finalRect.height,
-    borderRadius: '12px',
-    duration: ANIMATION_DURATION,
-    ease: ANIMATION_EASE,
-  });
-};
+    // Анимируем переходное изображение
+    const tl = gsap.timeline({
+      onComplete: () => {
+        // Показываем Swiper и скрываем переходное изображение
+        gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
+        gsap.set(transitionImage, { visibility: 'hidden',  opacity: 0  });
+        setAnimationComplete(true);
+
+        gsap.to(infoRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: ANIMATION_DURATION,
+          ease: ANIMATION_EASE,
+          onComplete: () => {
+            setIsAnimating(false);
+          }
+        });
+      }
+    });
+    
+    let animationStarted = false;
+    tl.to(transitionImage, {
+      top: finalRect.top,
+      left: finalRect.left,
+      width: finalRect.width,
+      height: finalRect.height,
+      borderRadius: '12px',
+      duration: ANIMATION_DURATION,
+      ease: ANIMATION_EASE,
+      onStart: () => {
+        animationStarted = true;
+      },
+      onUpdate: function() {
+        // Контроль выполнения анимации
+        if (this.progress() > 0.1 && !animationStarted) {
+          console.warn("Анимация не началась корректно");
+        }
+      }
+    });
+  };
 
   // // Обработчик инициализации Swiper
   // const handleSwiperInit = (swiper) => {
