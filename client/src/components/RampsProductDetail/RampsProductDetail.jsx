@@ -167,25 +167,16 @@ const [animationComplete, setAnimationComplete] = useState(!imageDataRef.current
 
     
     
-    // // Если размеры равны нулю, Swiper мог не успеть правильно отрендерить слайд
-    // if (finalRect.width === 0 || finalRect.height === 0) {
-    //   console.warn("Целевое изображение имеет нулевые размеры");
-    //   // Даем время для рендеринга и пробуем еще раз
-    //   setTimeout(() => {
-    //     setIsAnimating(false);
-    //     startTransitionAnimation();
-    //   }, 100);
-    //   return;
-    // }
-      // Повторная попытка, если слайд не отрисовался
-  if ((finalRect.width === 0 || finalRect.height === 0) && retryCount < 10) {
-    console.warn("Целевое изображение имеет нулевые размеры, повторная попытка...", retryCount);
-    setTimeout(() => {
-      setIsAnimating(false);
-      startTransitionAnimation(retryCount + 1);
-    }, 100);
-    return;
-  }
+    // Если размеры равны нулю, Swiper мог не успеть правильно отрендерить слайд
+    if (finalRect.width === 0 || finalRect.height === 0) {
+      console.warn("Целевое изображение имеет нулевые размеры");
+      // Даем время для рендеринга и пробуем еще раз
+      setTimeout(() => {
+        setIsAnimating(false);
+        startTransitionAnimation();
+      }, 100);
+      return;
+    }
     
     // Скрываем Swiper на время анимации
     gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
@@ -269,6 +260,30 @@ const [animationComplete, setAnimationComplete] = useState(!imageDataRef.current
   //   });
   // };
 
+const waitForActiveSlideImageAndAnimate = () => {
+  const swiperContainer = swiperContainerRef.current;
+  const firstSlideImage = swiperContainer?.querySelector('.swiper-slide-active img');
+
+  if (!firstSlideImage) {
+    console.warn("Нет изображения в активном слайде");
+    return;
+  }
+
+  // Если изображение уже загружено
+  if (firstSlideImage.complete && firstSlideImage.naturalWidth > 0) {
+    startTransitionAnimation();
+  } else {
+    // Ждём его загрузки
+    firstSlideImage.onload = () => {
+      console.log("Активное изображение загружено — запускаем анимацию");
+      startTransitionAnimation();
+    };
+    firstSlideImage.onerror = () => {
+      console.warn("Ошибка загрузки изображения слайда");
+      setAnimationComplete(true);
+    };
+  }
+};
 
 // Улучшенный обработчик инициализации Swiper
 const handleSwiperInit = (swiper) => {
@@ -286,10 +301,12 @@ const handleSwiperInit = (swiper) => {
   // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
   requestAnimationFrame(() => {
     // Дополнительная задержка для полного рендеринга слайдов
-    setTimeout(() => {
-      startTransitionAnimation();
-    }, 100); // Увеличиваем задержку до 100мс
-  });
+  //   setTimeout(() => {
+  //     startTransitionAnimation();
+  //   }, 100); // Увеличиваем задержку до 100мс
+
+  waitForActiveSlideImageAndAnimate();  
+});
 };
 
 useEffect(() => {
