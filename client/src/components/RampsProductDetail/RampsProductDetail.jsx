@@ -19,8 +19,6 @@ export default function RampsProductDetail() {
 
   const [searchParams] = useSearchParams();
   const slideIndexParam = Number(searchParams.get('view')) || 0;
-  
-const [transitionImageLoaded, setTransitionImageLoaded] = useState(false);
 
   // Разделение состояний для Swiper и миниатюр
   const [activeImageIndex, setActiveImageIndex] = useState(slideIndexParam);
@@ -42,12 +40,11 @@ const [transitionImageLoaded, setTransitionImageLoaded] = useState(false);
   const infoRef = useRef(null);
   const swiperRef = useRef(null);
   const thumbsSwiperRef = useRef(null); 
-// const imageData = useRef(location.state?.imageData || null);
 
   // Состояния для контроля анимаций
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
      const [activeIndex, setActiveIndex] = useState(0);
-const [animationComplete, setAnimationComplete] = useState(!imageData.current);
+  const [animationComplete, setAnimationComplete] = useState(!imageData);
   const [swiperLoaded, setSwiperLoaded] = useState(false);
   const [isSlideChanging, setIsSlideChanging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -140,14 +137,14 @@ const [animationComplete, setAnimationComplete] = useState(!imageData.current);
 
 
    const startTransitionAnimation = () => {
-    if (!transitionImageRef.current || !swiperContainerRef.current || !imageData.current || isAnimating) {
+    if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
       setAnimationComplete(true);
       return;
     }
 
     setIsAnimating(true);
 
-    const { top, left, width, height } = imageData.current.rect;
+    const { top, left, width, height } = imageData.rect;
     const transitionImage = transitionImageRef.current;
     const swiperContainer = swiperContainerRef.current;
 
@@ -189,7 +186,7 @@ const [animationComplete, setAnimationComplete] = useState(!imageData.current);
       opacity: 1,
       visibility: 'visible', // Явно устанавливаем видимость
       objectFit: "contain",
-      borderRadius: imageData.current.borderRadius || '0px'
+      borderRadius: imageData.borderRadius || '0px'
     });
     
     // и установим явные стили для лучшей совместимости
@@ -282,24 +279,22 @@ const handleSwiperInit = (swiper) => {
 
 // Дополнительный useEffect для контроля видимости переходного изображения
 useEffect(() => {
-  if (transitionImageRef.current && imageData.current
-
-  ) {
+  if (transitionImageRef.current && imageData) {
     const transitionImage = transitionImageRef.current;
     
     // Принудительно устанавливаем видимость при монтировании
     gsap.set(transitionImage, {
       position: "fixed",
-      top: imageData.current.rect.top,
-      left: imageData.current.rect.left,
-      width: imageData.current.rect.width,
-      height: imageData.current.rect.height,
+      top: imageData.rect.top,
+      left: imageData.rect.left,
+      width: imageData.rect.width,
+      height: imageData.rect.height,
       zIndex: 1000,
       opacity: 1,
       visibility: 'visible',
       display: 'block',
       objectFit: "contain",
-      borderRadius: imageData.current.borderRadius || '0px'
+      borderRadius: imageData.borderRadius || '0px'
     });
 
     console.log('Переходное изображение установлено:', {
