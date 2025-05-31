@@ -20,6 +20,9 @@ export default function RampsProductDetail() {
   const [searchParams] = useSearchParams();
   const slideIndexParam = Number(searchParams.get('view')) || 0;
 
+
+const [transitionImageLoaded, setTransitionImageLoaded] = useState(false);
+
   // Разделение состояний для Swiper и миниатюр
   const [activeImageIndex, setActiveImageIndex] = useState(slideIndexParam);
   const [activeProductIndex, setActiveProductIndex] = useState(
@@ -278,6 +281,16 @@ const handleSwiperInit = (swiper) => {
   });
 };
 
+useEffect(() => {
+  if (!swiperLoaded || !transitionImageLoaded || animationComplete || !imageDataRef.current) return;
+
+  const timer = setTimeout(() => {
+    startTransitionAnimation();
+  }, 50); // Небольшая задержка после загрузки
+
+  return () => clearTimeout(timer);
+}, [swiperLoaded, transitionImageLoaded]);
+
 // Дополнительный useEffect для контроля видимости переходного изображения
 useEffect(() => {
   if (transitionImageRef.current && imageDataRef.current
@@ -445,7 +458,7 @@ useEffect(() => {
         <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
           {/* Переходное изображение - только при анимированном переходе */}
      
-{!animationComplete && imageData && (
+{!animationComplete && imageDataRef.current && (
   <img
     ref={transitionImageRef}
     src={product.image}
@@ -457,7 +470,11 @@ useEffect(() => {
       display: 'block',
       zIndex: 1000
     }}
-    onLoad={() => console.log('Переходное изображение загружено')}
+    onLoad={() => {
+      console.log('Переходное изображение загружено')
+          setTransitionImageLoaded(true);}
+    }
+
     onError={(e) => console.error('Ошибка загрузки переходного изображения:', e)}
   />
 )}
