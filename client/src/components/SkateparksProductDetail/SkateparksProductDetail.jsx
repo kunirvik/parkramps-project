@@ -219,61 +219,80 @@ export default function SkateparksProductDetail() {
     });
   };
 
-  const startTransitionAnimation = () => {
-    if (!transitionImageRef.current || !swiperContainerRef.current || !imageData) {
-      setAnimationComplete(true);
-      return;
+const startTransitionAnimation = () => {
+  if (!transitionImageRef.current || !swiperContainerRef.current || !imageData) {
+    setAnimationComplete(true);
+    return;
+  }
+
+  const { top, left, width, height } = imageData.rect;
+  const transitionImage = transitionImageRef.current;
+  const swiperContainer = swiperContainerRef.current;
+
+  const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
+
+  if (!firstSlideImage) {
+    setAnimationComplete(true);
+    return;
+  }
+
+  const finalRect = firstSlideImage.getBoundingClientRect();
+
+  // Подготавливаем галерею (но оставляем невидимой)
+  gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
+
+  gsap.set(transitionImage, {
+    position: "fixed",
+    top,
+    left,
+    width,
+    height,
+    zIndex: 1000,
+    opacity: 1,
+    objectFit: "contain",
+    borderRadius: imageData.borderRadius || '0px'
+  });
+
+  gsap.to(transitionImage, {
+    top: finalRect.top,
+    left: finalRect.left,
+    width: finalRect.width,
+    height: finalRect.height,
+    borderRadius: '12px',
+    duration: 0.6,
+    ease: "power2.inOut",
+    onComplete: () => {
+      // Сначала делаем галерею видимой, но прозрачной
+      gsap.set(swiperContainer, { visibility: 'visible', opacity: 0 });
+      
+      // Плавно показываем галерею и одновременно скрываем переходное изображение
+      gsap.to(swiperContainer, {
+        opacity: 1,
+        duration: 0.3,
+        ease: "power2.out"
+      });
+      
+      gsap.to(transitionImage, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power2.out",
+        onComplete: () => {
+          gsap.set(transitionImage, { visibility: 'hidden' });
+          setAnimationComplete(true);
+        }
+      });
+
+      // Анимируем появление информации с небольшой задержкой
+      gsap.to(infoRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay: 0.2, // Небольшая задержка для более плавного появления
+        ease: "power2.out",
+      });
     }
-
-    const { top, left, width, height } = imageData.rect;
-    const transitionImage = transitionImageRef.current;
-    const swiperContainer = swiperContainerRef.current;
-
-    const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
-
-    if (!firstSlideImage) {
-      setAnimationComplete(true);
-      return;
-    }
-
-    const finalRect = firstSlideImage.getBoundingClientRect();
-
-    gsap.set(swiperContainer, { visibility: 'hidden' });
-
-    gsap.set(transitionImage, {
-      position: "fixed",
-      top,
-      left,
-      width,
-      height,
-      zIndex: 1000,
-      opacity: 1,
-      objectFit: "contain",
-      borderRadius: imageData.borderRadius || '0px'
-    });
-
-    gsap.to(transitionImage, {
-      top: finalRect.top,
-      left: finalRect.left,
-      width: finalRect.width,
-      height: finalRect.height,
-      borderRadius: '12px',
-      duration: 0.6,
-      ease: "power2.inOut",
-      onComplete: () => {
-        gsap.set(swiperContainer, { visibility: 'visible' });
-        gsap.set(transitionImage, { visibility: 'hidden' });
-        setAnimationComplete(true);
-
-        gsap.to(infoRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 0.8,
-          ease: "power2.out",
-        });
-      }
-    });
-  };
+  });
+};
 
   // Переработанная функция анимации описания
   const animateDescription = () => {
