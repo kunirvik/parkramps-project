@@ -214,7 +214,8 @@ const startTransitionAnimation = () => {
     
     // Устанавливаем начальное состояние переходного изображения
     gsap.set(transitionImage, {
-      position: "fixed",
+      // position: "fixed",
+      position: absolute,
       top,
       left,
       width,
@@ -242,7 +243,7 @@ const startTransitionAnimation = () => {
         gsap.set(transitionImage, { 
           visibility: 'hidden',  
           opacity: 0,
-          display: 'none' // Полностью убираем из layout
+          // display: 'none' // Полностью убираем из layout
         });
         setAnimationComplete(true);
 
