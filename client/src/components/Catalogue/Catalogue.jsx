@@ -62,6 +62,7 @@ const preloadImage = (src) => {
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
+    
   });
 };
 

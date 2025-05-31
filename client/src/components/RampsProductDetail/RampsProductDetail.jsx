@@ -158,7 +158,7 @@ const startTransitionAnimation = () => {
     return;
   }
 
-  // setIsAnimating(true);
+  setIsAnimating(true);
 
   const { top, left, width, height } = imageData.rect;
   const transitionImage = transitionImageRef.current;
