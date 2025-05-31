@@ -1626,7 +1626,8 @@ export default function SkateparksProductDetail() {
       width,
       height,
       zIndex: 1000,
-      opacity: 1,
+      opacity: 0.5,
+      overflow:'hidden',
       visibility: 'visible', // Явно устанавливаем видимость
       objectFit: "contain",
       borderRadius: imageData.borderRadius || '0px'
@@ -1720,6 +1721,10 @@ export default function SkateparksProductDetail() {
 
   // Улучшенные CSS для устранения дерганья при свайпе
   const swiperStyles = `
+    /* Предотвращаем появление скроллбара */
+  body {
+    overflow-y: hidden !important;
+  }
     .swiper-wrapper {
       transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
     }
