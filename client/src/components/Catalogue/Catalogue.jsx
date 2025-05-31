@@ -55,7 +55,15 @@ export default function Catalogue() {
     }, 500);
   };
 
-
+// В Catalogue.jsx, перед навигацией
+const preloadImage = (src) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+};
 
   // Start animation when component mounts
   useEffect(() => {
@@ -81,7 +89,9 @@ export default function Catalogue() {
     setTooltip({ ...tooltip, show: false });
   };
 
-  const handleClick = (product, e) => {
+  const handleClick = async (product, e) => {
+
+   
     // Hide tooltip immediately on click
     setTooltip({ ...tooltip, show: false });
     
@@ -98,7 +108,13 @@ export default function Catalogue() {
         width: imgRect.width,
         height: imgRect.height,
       },
-    };
+    }; 
+    
+    try {
+    await preloadImage(product.image);
+  } catch (error) {
+    console.warn('Не удалось предзагрузить изображение:', error);
+  }
     const firstProductInCategory = products
     .filter(p => p.category === product.category)
     .reduce((minProduct, current) => current.id < minProduct.id ? current : minProduct, product);
