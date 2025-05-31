@@ -164,7 +164,6 @@ const [animationComplete, setAnimationComplete] = useState(!imageDataRef.current
 
     // Получаем финальную позицию и размеры первого изображения
     const finalRect = firstSlideImage.getBoundingClientRect();
-
     
     
     // Если размеры равны нулю, Swiper мог не успеть правильно отрендерить слайд
@@ -260,30 +259,6 @@ const [animationComplete, setAnimationComplete] = useState(!imageDataRef.current
   //   });
   // };
 
-const waitForActiveSlideImageAndAnimate = () => {
-  const swiperContainer = swiperContainerRef.current;
-  const firstSlideImage = swiperContainer?.querySelector('.swiper-slide-active img');
-
-  if (!firstSlideImage) {
-    console.warn("Нет изображения в активном слайде");
-    return;
-  }
-
-  // Если изображение уже загружено
-  if (firstSlideImage.complete && firstSlideImage.naturalWidth > 0) {
-    startTransitionAnimation();
-  } else {
-    // Ждём его загрузки
-    firstSlideImage.onload = () => {
-      console.log("Активное изображение загружено — запускаем анимацию");
-      startTransitionAnimation();
-    };
-    firstSlideImage.onerror = () => {
-      console.warn("Ошибка загрузки изображения слайда");
-      setAnimationComplete(true);
-    };
-  }
-};
 
 // Улучшенный обработчик инициализации Swiper
 const handleSwiperInit = (swiper) => {
@@ -301,12 +276,10 @@ const handleSwiperInit = (swiper) => {
   // Для анимированного перехода ждем следующий кадр и затем дополнительную задержку
   requestAnimationFrame(() => {
     // Дополнительная задержка для полного рендеринга слайдов
-  //   setTimeout(() => {
-  //     startTransitionAnimation();
-  //   }, 100); // Увеличиваем задержку до 100мс
-
-  waitForActiveSlideImageAndAnimate();  
-});
+    setTimeout(() => {
+      startTransitionAnimation();
+    }, 100); // Увеличиваем задержку до 100мс
+  });
 };
 
 useEffect(() => {
