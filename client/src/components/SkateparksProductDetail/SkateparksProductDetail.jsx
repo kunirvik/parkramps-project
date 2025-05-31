@@ -206,63 +206,40 @@ export default function SkateparksProductDetail() {
     }
   }, [activeProductIndex, swiperLoaded]);
 
-  // Обработчик инициализации Swiper
-  const handleSwiperInit = (swiper) => {
+    const handleSwiperInit = (swiper) => {
     setSwiperLoaded(true);
 
-    // Если нет анимации (прямой переход/перезагрузка), просто показываем галерею
     if (!imageData) {
       gsap.set(infoRef.current, { opacity: 1, y: 0 });
       return;
     }
 
-    // Начинаем анимацию только после полной загрузки Swiper
     requestAnimationFrame(() => {
       startTransitionAnimation();
     });
   };
 
-  // Функция для запуска анимации перехода
   const startTransitionAnimation = () => {
-    if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
+    if (!transitionImageRef.current || !swiperContainerRef.current || !imageData) {
       setAnimationComplete(true);
       return;
     }
-
-    setIsAnimating(true);
 
     const { top, left, width, height } = imageData.rect;
     const transitionImage = transitionImageRef.current;
     const swiperContainer = swiperContainerRef.current;
 
-    // Находим элемент первого слайда
     const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
 
     if (!firstSlideImage) {
-      console.warn("Не удалось найти изображение в активном слайде");
       setAnimationComplete(true);
-      setIsAnimating(false);
       return;
     }
 
-    // Получаем финальную позицию и размеры первого изображения
     const finalRect = firstSlideImage.getBoundingClientRect();
-    
-    // Если размеры равны нулю, Swiper мог не успеть правильно отрендерить слайд
-    if (finalRect.width === 0 || finalRect.height === 0) {
-      console.warn("Целевое изображение имеет нулевые размеры");
-      // Даем время для рендеринга и пробуем еще раз
-      setTimeout(() => {
-        setIsAnimating(false);
-        startTransitionAnimation();
-      }, 100);
-      return;
-    }
-    
-    // Скрываем Swiper на время анимации
-    gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
 
-    // Устанавливаем начальное состояние переходного изображения
+    gsap.set(swiperContainer, { visibility: 'hidden' });
+
     gsap.set(transitionImage, {
       position: "fixed",
       top,
@@ -271,56 +248,29 @@ export default function SkateparksProductDetail() {
       height,
       zIndex: 1000,
       opacity: 1,
-      visibility: 'visible', // Явно устанавливаем видимость
       objectFit: "contain",
       borderRadius: imageData.borderRadius || '0px'
     });
-    
-    // и установим явные стили для лучшей совместимости
-    const imageStyle = window.getComputedStyle(transitionImage);
-    if (imageStyle.display === 'none' || imageStyle.visibility === 'hidden') {
-      console.warn("Переходное изображение невидимо после установки стилей");
-      transitionImage.style.display = 'block';
-      transitionImage.style.visibility = 'visible';
-    }
 
-    // Анимируем переходное изображение
-    const tl = gsap.timeline({
-      onComplete: () => {
-        // Показываем Swiper и скрываем переходное изображение
-        gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-        gsap.set(transitionImage, { visibility: 'hidden',  opacity: 0  });
-        setAnimationComplete(true);
-
-        gsap.to(infoRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: ANIMATION_DURATION,
-          ease: ANIMATION_EASE,
-          onComplete: () => {
-            setIsAnimating(false);
-          }
-        });
-      }
-    });
-    
-    let animationStarted = false;
-    tl.to(transitionImage, {
+    gsap.to(transitionImage, {
       top: finalRect.top,
       left: finalRect.left,
       width: finalRect.width,
       height: finalRect.height,
       borderRadius: '12px',
-      duration: ANIMATION_DURATION,
-      ease: ANIMATION_EASE,
-      onStart: () => {
-        animationStarted = true;
-      },
-      onUpdate: function() {
-        // Контроль выполнения анимации
-        if (this.progress() > 0.1 && !animationStarted) {
-          console.warn("Анимация не началась корректно");
-        }
+      duration: 0.6,
+      ease: "power2.inOut",
+      onComplete: () => {
+        gsap.set(swiperContainer, { visibility: 'visible' });
+        gsap.set(transitionImage, { visibility: 'hidden' });
+        setAnimationComplete(true);
+
+        gsap.to(infoRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power2.out",
+        });
       }
     });
   };
