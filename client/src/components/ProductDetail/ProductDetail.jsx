@@ -1441,7 +1441,7 @@ const productCatalog = [ {id: 1,
 ]  ;
 
 
-export default function SkateparksProductDetail() {
+export default function ProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const { id, category } = useParams();
