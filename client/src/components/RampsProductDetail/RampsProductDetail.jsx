@@ -45,7 +45,7 @@ const imageDataRef = useRef(location.state?.imageData || null);
   // Состояния для контроля анимаций
     const [thumbsSwiper, setThumbsSwiper] = useState(null);
      const [activeIndex, setActiveIndex] = useState(0);
-  const [animationComplete, setAnimationComplete] = useState(!imageData);
+const [animationComplete, setAnimationComplete] = useState(!imageDataRef.current);
   const [swiperLoaded, setSwiperLoaded] = useState(false);
   const [isSlideChanging, setIsSlideChanging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
