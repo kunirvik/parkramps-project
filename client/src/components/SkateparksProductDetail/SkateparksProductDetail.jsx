@@ -264,8 +264,8 @@ const startTransitionAnimation = () => {
       
       gsap.to(transitionImage, {
         opacity: 0,
-        duration: 0.3,
-        ease: "power2.out",
+        duration: 0.6,
+        ease: "power2.in",
         onComplete: () => {
           gsap.set(transitionImage, { visibility: 'hidden' });
           setAnimationComplete(true);
