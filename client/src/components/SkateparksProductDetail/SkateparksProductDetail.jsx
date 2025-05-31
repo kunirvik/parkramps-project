@@ -391,7 +391,7 @@ useEffect(() => {
     setActiveDetail(detail.link.replace("#", ""));
     navigate(detail.link); // обновит URL
   };
-ё
+
 
 
   return (
