@@ -368,7 +368,7 @@ useEffect(() => {
     
     // Принудительно устанавливаем видимость при монтировании
     gsap.set(transitionImage, {
-      position: "fixed",
+      position: "absolute",
       top: imageData.rect.top,
       left: imageData.rect.left,
       width: imageData.rect.width,
@@ -608,8 +608,7 @@ const handleThumbnailClick = (index) => {
 
         {/* Основной контент */}
         <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
-          {/* Переходное изображение - только при анимированном переходе */}
-          {!animationComplete && imageData && (
+        {!animationComplete && imageData && (
             <img
               ref={transitionImageRef}
               src={product.image}
@@ -627,7 +626,8 @@ const handleThumbnailClick = (index) => {
               visibility: !imageData || animationComplete ? 'visible' : 'hidden',
               opacity: !imageData || animationComplete ? 1 : 0
             }}
-          >
+          >  {/* Переходное изображение - только при анимированном переходе */}
+          
             {/* Основной слайдер */}
             <Swiper
               className="custom-swiper mb-4"

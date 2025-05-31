@@ -472,8 +472,8 @@ useEffect(() => {
     onLoad={() => console.log('Переходное изображение загружено')}
     onError={(e) => console.error('Ошибка загрузки переходного изображения:', e)}
   />
-)}
           
+)} 
           {/* Swiper галерея */}
           <div 
             ref={swiperContainerRef} 
@@ -579,6 +579,7 @@ useEffect(() => {
               ))}
             </Swiper>
           </div>
+      
           
           {/* Информация о продукте */}
           <div 
