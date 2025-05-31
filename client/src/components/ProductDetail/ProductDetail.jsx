@@ -1626,7 +1626,7 @@ export default function SkateparksProductDetail() {
       width,
       height,
       zIndex: 1000,
-      opacity: 0.5,
+      opacity: 1,
       overflow:'hidden',
       visibility: 'visible', // Явно устанавливаем видимость
       objectFit: "contain",
