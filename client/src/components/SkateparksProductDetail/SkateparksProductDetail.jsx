@@ -278,6 +278,8 @@ export default function SkateparksProductDetail() {
       to: { top: finalRect.top, left: finalRect.left, width: finalRect.width, height: finalRect.height }
     });
     
+    console.log('swiper-wrapper transform:', getComputedStyle(document.querySelector('.swiper-wrapper')).transform);
+
     // Скрываем Swiper на время анимации
     gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
     
