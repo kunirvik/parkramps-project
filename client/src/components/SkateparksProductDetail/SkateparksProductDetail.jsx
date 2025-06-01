@@ -621,7 +621,10 @@ const handleThumbnailClick = (index) => {
         <button onClick={() => navigate(-1)} className="self-start mb-6 text-gray-200 hover:text-gray-800">
           ← Back
         </button>
- {!animationComplete && imageData && (
+
+        {/* Основной контент */}
+        <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
+        {!animationComplete && imageData && (
             <img
               ref={transitionImageRef}
               src={product.image}
@@ -630,9 +633,6 @@ const handleThumbnailClick = (index) => {
               style={{ position: 'fixed', visibility: 'visible' }}
             />
           )}
-        {/* Основной контент */}
-        <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
-       
           
           {/* Swiper галерея */}
           <div 
