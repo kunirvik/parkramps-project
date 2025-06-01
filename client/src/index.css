@@ -69,11 +69,3 @@ body{
 .custom-swiper .swiper-pagination-bullet-active {
   background-color: #d81dcc; /* синий */
 }
-
-#transition-image-fix {
-  all: unset;
-  position: fixed;
-  top: 0; left: 0;
-  will-change: top, left, width, height;
-  pointer-events: none;
-}

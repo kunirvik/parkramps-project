@@ -610,7 +610,7 @@ const handleThumbnailClick = (index) => {
         <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
         {!animationComplete && imageData && (
             <img
-            id="transition-image-fix"
+           
               ref={transitionImageRef}
               src={product.image}
               alt={product.name}
@@ -623,7 +623,7 @@ const handleThumbnailClick = (index) => {
           <div 
 
             ref={swiperContainerRef} 
-            className="w-full lg:w-3/4 mb-8"
+            className="w-full lg:w-3/4 "
             style={{ 
               visibility: !imageData || animationComplete ? 'visible' : 'hidden',
               opacity: !imageData || animationComplete ? 1 : 0
@@ -632,7 +632,7 @@ const handleThumbnailClick = (index) => {
           
             {/* Основной слайдер */}
             <Swiper
-              className="custom-swiper mb-4"
+              className="custom-swiper "
                style={{ height: '500px' }} 
               modules={[Pagination, Mousewheel, Thumbs]}
               pagination={{ clickable: true }}
