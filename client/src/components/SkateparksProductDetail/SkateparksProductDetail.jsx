@@ -221,7 +221,7 @@ export default function SkateparksProductDetail() {
 
   
 
-const startTransitionAnimation = () => {
+  const startTransitionAnimation = () => {
   if (!transitionImageRef.current || !swiperContainerRef.current || !imageData || isAnimating) {
     setAnimationComplete(true);
     return;
@@ -233,11 +233,14 @@ const startTransitionAnimation = () => {
   const transitionImage = transitionImageRef.current;
   const swiperContainer = swiperContainerRef.current;
 
+  // Ждем полной загрузки и рендеринга Swiper
   const waitForSwiperRender = () => {
     return new Promise((resolve) => {
       const checkSlide = () => {
         const firstSlideImage = swiperContainer.querySelector('.swiper-slide-active img');
+        
         if (firstSlideImage) {
+          // Ждем загрузки изображения
           if (firstSlideImage.complete) {
             const rect = firstSlideImage.getBoundingClientRect();
             if (rect.width > 0 && rect.height > 0) {
@@ -245,6 +248,7 @@ const startTransitionAnimation = () => {
               return;
             }
           } else {
+            // Если изображение еще не загружено, ждем события load
             firstSlideImage.onload = () => {
               const rect = firstSlideImage.getBoundingClientRect();
               if (rect.width > 0 && rect.height > 0) {
@@ -256,39 +260,44 @@ const startTransitionAnimation = () => {
             return;
           }
         }
+        
+        // Повторяем проверку через 50мс
         setTimeout(checkSlide, 50);
       };
+      
       checkSlide();
     });
   };
 
+  // Запускаем анимацию только после полной готовности
   waitForSwiperRender().then((firstSlideImage) => {
-    const rect = firstSlideImage.getBoundingClientRect();
+    const finalRect = firstSlideImage.getBoundingClientRect();
+//     const getAbsoluteRect = (el) => {
+//   const rect = el.getBoundingClientRect();
+//   return {
+//     top: rect.top + window.scrollY,
+//     left: rect.left + window.scrollX,
+//     width: rect.width,
+//     height: rect.height,
+//   };
+// };
 
-    // ➕ Получаем смещение от transform: matrix(...) у .swiper-wrapper
-    const swiperWrapper = document.querySelector('.swiper-wrapper');
-    const swiperTransform = getComputedStyle(swiperWrapper).transform;
+// const finalRect = getAbsoluteRect(firstSlideImage);
 
-    let translateX = 0;
-    if (swiperTransform && swiperTransform.startsWith("matrix")) {
-      const matrixValues = swiperTransform.match(/matrix.*\((.+)\)/)[1].split(", ");
-      translateX = parseFloat(matrixValues[4]) || 0;
-    }
+    console.log('swiper-wrapper transform:', getComputedStyle(document.querySelector('.swiper-wrapper')).transform);
 
-    // ➕ Корректируем финальные координаты
-    const finalRect = {
-      top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX - translateX,
-      width: rect.width,
-      height: rect.height,
-    };
-
+    console.log('Начинаем анимацию перехода:', {
+      from: { top, left, width, height },
+      to: { top: finalRect.top, left: finalRect.left, width: finalRect.width, height: finalRect.height }
+    });
+    
     // Скрываем Swiper на время анимации
     gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
-
+    
     // Устанавливаем начальное состояние переходного изображения
     gsap.set(transitionImage, {
       position: "fixed",
+      // position: "absolute",
       top,
       left,
       width,
@@ -301,7 +310,7 @@ const startTransitionAnimation = () => {
       borderRadius: imageData.borderRadius || '0px'
     });
 
-    // Анимируем
+    // Анимируem переходное изображение
     gsap.to(transitionImage, {
       top: finalRect.top,
       left: finalRect.left,
@@ -311,11 +320,16 @@ const startTransitionAnimation = () => {
       duration: ANIMATION_DURATION,
       ease: ANIMATION_EASE,
       onComplete: () => {
+        // Показываем Swiper и скрываем переходное изображение
         gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-        gsap.set(transitionImage, { visibility: 'hidden', opacity: 0 });
-
+        gsap.set(transitionImage, { 
+          visibility: 'hidden',  
+          opacity: 0,
+          // display: 'none' // Полностью убираем из layout
+        });
         setAnimationComplete(true);
 
+        // Анимируем появление информации
         gsap.to(infoRef.current, {
           opacity: 1,
           y: 0,
@@ -329,14 +343,14 @@ const startTransitionAnimation = () => {
     });
   }).catch((error) => {
     console.error('Ошибка при ожидании готовности Swiper:', error);
+    // Fallback: пропускаем анимацию
     gsap.set(swiperContainer, { visibility: 'visible', opacity: 1 });
-    gsap.set(transitionImageRef.current, { visibility: 'hidden', opacity: 0 });
+    gsap.set(transitionImage, { visibility: 'hidden', opacity: 0, display: 'none' });
     gsap.set(infoRef.current, { opacity: 1, y: 0 });
     setAnimationComplete(true);
     setIsAnimating(false);
   });
 };
-
 
 // // Улучшенный обработчик инициализации Swiper
 // const handleSwiperInit = (swiper) => {
