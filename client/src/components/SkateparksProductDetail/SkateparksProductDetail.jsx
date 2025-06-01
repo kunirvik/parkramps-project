@@ -610,6 +610,7 @@ const handleThumbnailClick = (index) => {
         <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
         {!animationComplete && imageData && (
             <img
+            id="transition-image-fix"
               ref={transitionImageRef}
               src={product.image}
               alt={product.name}
@@ -620,6 +621,7 @@ const handleThumbnailClick = (index) => {
           
           {/* Swiper галерея */}
           <div 
+
             ref={swiperContainerRef} 
             className="w-full lg:w-3/4 mb-8"
             style={{ 
