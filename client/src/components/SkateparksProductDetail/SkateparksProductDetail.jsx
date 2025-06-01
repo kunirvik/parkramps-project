@@ -272,18 +272,21 @@ export default function SkateparksProductDetail() {
   // Запускаем анимацию только после полной готовности
   waitForSwiperRender().then((firstSlideImage) => {
     // const finalRect = firstSlideImage.getBoundingClientRect();
-    const getAbsoluteRect = (el) => {
-  const rect = el.getBoundingClientRect();
-  return {
-    top: rect.top + window.scrollY,
-    left: rect.left + window.scrollX,
-    width: rect.width,
-    height: rect.height,
-  };
-};
+   const rect = firstSlideImage.getBoundingClientRect();
+const swiperTransform = getComputedStyle(document.querySelector('.swiper-wrapper')).transform;
 
-const finalRect = getAbsoluteRect(firstSlideImage);
-console.log('swiper-wrapper transform:', getComputedStyle(document.querySelector('.swiper-wrapper')).transform);
+let translateX = 0;
+if (swiperTransform && swiperTransform.startsWith('matrix')) {
+  const matrixValues = swiperTransform.match(/matrix.*\((.+)\)/)[1].split(', ');
+  translateX = parseFloat(matrixValues[4]) || 0; // X offset
+}
+
+const finalRect = {
+  top: rect.top + window.scrollY,
+  left: rect.left + window.scrollX - translateX,
+  width: rect.width,
+  height: rect.height
+};
 
     
     console.log('Начинаем анимацию перехода:', {
@@ -618,10 +621,7 @@ const handleThumbnailClick = (index) => {
         <button onClick={() => navigate(-1)} className="self-start mb-6 text-gray-200 hover:text-gray-800">
           ← Back
         </button>
-
-        {/* Основной контент */}
-        <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
-        {!animationComplete && imageData && (
+ {!animationComplete && imageData && (
             <img
               ref={transitionImageRef}
               src={product.image}
@@ -630,6 +630,9 @@ const handleThumbnailClick = (index) => {
               style={{ position: 'fixed', visibility: 'visible' }}
             />
           )}
+        {/* Основной контент */}
+        <div className={`w-full flex flex-col lg:flex-row gap-8 relative`}>
+       
           
           {/* Swiper галерея */}
           <div 
