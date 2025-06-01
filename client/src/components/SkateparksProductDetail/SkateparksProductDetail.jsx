@@ -278,8 +278,6 @@ export default function SkateparksProductDetail() {
       to: { top: finalRect.top, left: finalRect.left, width: finalRect.width, height: finalRect.height }
     });
     
-    console.log('swiper-wrapper transform:', getComputedStyle(document.querySelector('.swiper-wrapper')).transform);
-
     // Скрываем Swiper на время анимации
     gsap.set(swiperContainer, { visibility: 'hidden', opacity: 0 });
     
@@ -625,7 +623,7 @@ const handleThumbnailClick = (index) => {
           <div 
 
             ref={swiperContainerRef} 
-            className="w-full lg:w-3/4 "
+            className="w-full lg:w-3/4 mb-8"
             style={{ 
               visibility: !imageData || animationComplete ? 'visible' : 'hidden',
               opacity: !imageData || animationComplete ? 1 : 0
@@ -634,7 +632,7 @@ const handleThumbnailClick = (index) => {
           
             {/* Основной слайдер */}
             <Swiper
-              className="custom-swiper "
+              className="custom-swiper mb-4"
                style={{ height: '500px' }} 
               modules={[Pagination, Mousewheel, Thumbs]}
               pagination={{ clickable: true }}

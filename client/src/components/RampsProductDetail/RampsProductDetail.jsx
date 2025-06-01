@@ -185,7 +185,7 @@ const startTransitionAnimation = () => {
               if (rect.width > 0 && rect.height > 0) {
                 resolve(firstSlideImage);
               } else {
-                setTimeout(checkSlide, 50);
+                setTimeout(checkSlide, 0);
               }
             };
             return;
@@ -193,7 +193,7 @@ const startTransitionAnimation = () => {
         }
         
         // Повторяем проверку через 50мс
-        setTimeout(checkSlide, 50);
+        setTimeout(checkSlide, 0);
       };
       
       checkSlide();
