@@ -272,7 +272,19 @@ export default function SkateparksProductDetail() {
   // Запускаем анимацию только после полной готовности
   waitForSwiperRender().then((firstSlideImage) => {
     // const finalRect = firstSlideImage.getBoundingClientRect();
-   const rect = firstSlideImage.getBoundingClientRect();
+//     const getAbsoluteRect = (el) => {
+//   const rect = el.getBoundingClientRect();
+//   return {
+//     top: rect.top + window.scrollY,
+//     left: rect.left + window.scrollX,
+//     width: rect.width,
+//     height: rect.height,
+//   };
+// };
+
+// const finalRect = getAbsoluteRect(firstSlideImage);
+
+const rect = firstSlideImage.getBoundingClientRect();
 const swiperTransform = getComputedStyle(document.querySelector('.swiper-wrapper')).transform;
 
 let translateX = 0;
@@ -288,7 +300,9 @@ const finalRect = {
   height: rect.height
 };
 
-    
+
+    console.log('swiper-wrapper transform:', getComputedStyle(document.querySelector('.swiper-wrapper')).transform);
+
     console.log('Начинаем анимацию перехода:', {
       from: { top, left, width, height },
       to: { top: finalRect.top, left: finalRect.left, width: finalRect.width, height: finalRect.height }
