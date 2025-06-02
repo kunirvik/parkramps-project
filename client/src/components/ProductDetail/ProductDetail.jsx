@@ -1653,10 +1653,10 @@ export default function ProductDetail() {
     }
 
     // Анимируем появление новой информации
-    setTimeout(async () => {
+    // setTimeout(async () => {
       await animateInfo('in');
       updateAnimationState({ slideChanging: false, inProgress: false });
-    }, 50);
+    // }, 50);
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
       swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
