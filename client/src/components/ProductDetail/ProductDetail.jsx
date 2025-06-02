@@ -1584,21 +1584,24 @@ export default function ProductDetail() {
     // Скрываем swiper
     gsap.set(swiperEl, { visibility: 'hidden', opacity: 0 });
 
-    // Устанавливаем начальное состояние
+    // Устанавливаем начальное состояние в контейнере
     gsap.set(transitionEl, {
-      position: "fixed",
-      top, left, width, height,
+      position: "absolute",
+      top: top - window.scrollY,
+      left: left - window.scrollX,
+      width, height,
       zIndex: 1000,
       opacity: 1,
       visibility: 'visible',
       objectFit: "contain",
-      borderRadius: imageData.borderRadius || '0px'
+      borderRadius: imageData.borderRadius || '0px',
+      pointerEvents: 'none'
     });
 
     // Анимируем переход
     gsap.to(transitionEl, {
-      top: finalRect.top,
-      left: finalRect.left,
+      top: finalRect.top - window.scrollY,
+      left: finalRect.left - window.scrollX,
       width: finalRect.width,
       height: finalRect.height,
       borderRadius: '12px',
@@ -1718,10 +1721,14 @@ export default function ProductDetail() {
     setSelectedImageIndices(newIndices);
   }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
 
-  // Стили
+  // Стили и блокировка скролла
   useEffect(() => {
     const styles = `
-      body { overflow-y: hidden !important; }
+      html, body { 
+        overflow: hidden !important; 
+        height: 100% !important;
+        width: 100% !important;
+      }
       .swiper-wrapper { 
         transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
       }
@@ -1737,13 +1744,34 @@ export default function ProductDetail() {
         border: 2px solid black !important;
         border-radius: 0.5rem !important;
       }
+      .transition-image-container {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+        z-index: 9999 !important;
+      }
     `;
 
     const styleElement = document.createElement('style');
     styleElement.innerHTML = styles;
     document.head.appendChild(styleElement);
 
-    return () => document.head.removeChild(styleElement);
+    // Дополнительно блокируем скролл на body/html
+    const originalBodyStyle = document.body.style.overflow;
+    const originalHtmlStyle = document.documentElement.style.overflow;
+    
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+
+    return () => {
+      document.head.removeChild(styleElement);
+      document.body.style.overflow = originalBodyStyle;
+      document.documentElement.style.overflow = originalHtmlStyle;
+    };
   }, []);
 
   // Ранний возврат для невалидной категории
@@ -1774,13 +1802,21 @@ export default function ProductDetail() {
         <div className="w-full flex flex-col lg:flex-row gap-8 relative">
           {/* Переходное изображение */}
           {!animationState.complete && imageData && (
-            <img
-              ref={refs.transitionImage}
-              src={currentProduct.image}
-              alt={currentProduct.name}
-              className="object-contain"
-              style={{ position: 'fixed', visibility: 'visible' }}
-            />
+            <div className="transition-image-container">
+              <img
+                ref={refs.transitionImage}
+                src={currentProduct.image}
+                alt={currentProduct.name}
+                className="object-contain"
+                style={{ 
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  visibility: 'visible',
+                  pointerEvents: 'none'
+                }}
+              />
+            </div>
           )}
           
           {/* Swiper галерея */}
@@ -1957,7 +1993,6 @@ export default function ProductDetail() {
     </>
   );
 }
-
 
 // export default function ProductDetail() {
 //   const location = useLocation();
