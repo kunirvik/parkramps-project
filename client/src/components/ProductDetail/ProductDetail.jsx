@@ -1480,14 +1480,8 @@ export default function ProductDetail() {
   const [animationState, setAnimationState] = useState({
     complete: !imageData,
     inProgress: false,
-    slideChanging: false
-  });
-
-  // Состояние для синхронизации свайперов
-  const [syncState, setSyncState] = useState({
-    isMainSwiperControlling: false,
-    isThumbsSwiperControlling: false,
-    lastSyncTime: 0
+    slideChanging: false,
+    swiperLoaded: false
   });
 
   // Refs
@@ -1496,7 +1490,8 @@ export default function ProductDetail() {
     transitionImage: useRef(null),
     swiperContainer: useRef(null),
     info: useRef(null),
-    urlUpdateBlocked: useRef(false)
+    urlUpdateBlocked: useRef(false),
+    lastActiveProduct: useRef(activeProductIndex)
   };
 
   // Мемоизированные значения
@@ -1537,41 +1532,6 @@ export default function ProductDetail() {
   const updateAnimationState = useCallback((updates) => {
     setAnimationState(prev => ({ ...prev, ...updates }));
   }, []);
-
-  const updateSyncState = useCallback((updates) => {
-    setSyncState(prev => ({ ...prev, ...updates, lastSyncTime: Date.now() }));
-  }, []);
-
-  const syncSwiper = useCallback((sourceSwiper, targetSwiper, index, immediate = false) => {
-    if (!targetSwiper || !sourceSwiper) return;
-    
-    const speed = immediate ? 0 : SWIPER_CONFIG.SPEED / 2;
-    const currentTime = Date.now();
-    
-    // Предотвращаем циклическую синхронизацию
-    if (currentTime - syncState.lastSyncTime < 50) return;
-    
-    targetSwiper.slideTo(index, speed);
-    
-    // Обновляем визуальное состояние миниатюр
-    if (targetSwiper === swiperInstances.thumbs) {
-      const thumbSlides = targetSwiper.slides;
-      if (thumbSlides) {
-        thumbSlides.forEach((slide, i) => {
-          const img = slide.querySelector('img');
-          if (img) {
-            if (i === index) {
-              img.classList.remove('grayscale', 'opacity-60');
-              img.classList.add('opacity-100', 'scale-105', 'border-black');
-            } else {
-              img.classList.add('grayscale', 'opacity-60');
-              img.classList.remove('opacity-100', 'scale-105', 'border-black');
-            }
-          }
-        });
-      }
-    }
-  }, [syncState.lastSyncTime, swiperInstances.thumbs]);
 
   // Анимации
   const animateInfo = useCallback((direction = 'in') => {
@@ -1666,6 +1626,7 @@ export default function ProductDetail() {
   // Обработчики событий
   const handleSwiperInit = useCallback((swiper) => {
     setSwiperInstances(prev => ({ ...prev, main: swiper }));
+    updateAnimationState({ swiperLoaded: true });
     
     if (!imageData) {
       gsap.set(refs.info.current, { opacity: 1, y: 0 });
@@ -1673,53 +1634,36 @@ export default function ProductDetail() {
     }
 
     requestAnimationFrame(startTransitionAnimation);
-  }, [imageData, startTransitionAnimation]);
+  }, [imageData, startTransitionAnimation, updateAnimationState]);
 
   const handleSlideChange = useCallback(async (swiper) => {
     const newIndex = swiper.activeIndex;
     
     if (newIndex === activeProductIndex || animationState.inProgress) return;
 
-    // Определяем источник изменения
-    const isFromMainSwiper = swiper === swiperInstances.main;
-    const isFromThumbsSwiper = swiper === swiperInstances.thumbs;
-
-    // Предотвращаем рекурсивные вызовы
-    if (isFromMainSwiper && syncState.isThumbsSwiperControlling) return;
-    if (isFromThumbsSwiper && syncState.isMainSwiperControlling) return;
-
-    // Устанавливаем флаг контроля
-    if (isFromMainSwiper) {
-      updateSyncState({ isMainSwiperControlling: true, isThumbsSwiperControlling: false });
-    } else if (isFromThumbsSwiper) {
-      updateSyncState({ isThumbsSwiperControlling: true, isMainSwiperControlling: false });
-    }
-
     updateAnimationState({ slideChanging: true, inProgress: true });
 
-    // Синхронизируем свайперы
-    if (isFromMainSwiper && swiperInstances.thumbs) {
-      syncSwiper(swiperInstances.main, swiperInstances.thumbs, newIndex);
-    } else if (isFromThumbsSwiper && swiperInstances.main) {
-      syncSwiper(swiperInstances.thumbs, swiperInstances.main, newIndex);
+    // Сразу синхронизируем индекс, URL и миниатюры
+    setActiveProductIndex(newIndex);
+    refs.lastActiveProduct.current = newIndex;
+
+    // Синхронизируем thumbs swiper
+    if (swiperInstances.thumbs) {
+      swiperInstances.thumbs.slideTo(newIndex);
     }
 
-    // Анимируем скрытие информации только при смене продукта
-    await animateInfo('out');
-
-    // Обновляем состояние
-    setActiveProductIndex(newIndex);
     updateUrl(productCatalog[newIndex].id, selectedImageIndices[newIndex]);
 
-    // Анимируем появление новой информации
+    // Анимируем скрытие информации
+    await animateInfo('out');
+
+    // Анимируем появление новой информации с задержкой
     setTimeout(async () => {
       await animateInfo('in');
       updateAnimationState({ slideChanging: false, inProgress: false });
-      updateSyncState({ isMainSwiperControlling: false, isThumbsSwiperControlling: false });
     }, 50);
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
-      swiperInstances, updateUrl, animateInfo, updateAnimationState, 
-      syncState, updateSyncState, syncSwiper]);
+      swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
   const handleImageSelect = useCallback((index) => {
     if (animationState.inProgress) return;
@@ -1744,6 +1688,9 @@ export default function ProductDetail() {
     if (relatedIndex === -1 || relatedIndex === activeProductIndex || 
         animationState.inProgress) return;
 
+    // Запоминаем новый индекс для предотвращения двойной обработки
+    refs.lastActiveProduct.current = relatedIndex;
+    
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     // Скрываем текущую информацию
@@ -1752,7 +1699,7 @@ export default function ProductDetail() {
     // Обновляем состояние
     setActiveProductIndex(relatedIndex);
 
-    // Синхронизируем swiper'ы без анимации
+    // Синхронизируем оба свайпера без анимации
     if (swiperInstances.main) {
       swiperInstances.main.slideTo(relatedIndex, 0);
     }
@@ -1760,27 +1707,79 @@ export default function ProductDetail() {
       swiperInstances.thumbs.slideTo(relatedIndex, 0);
     }
 
-    // Обновляем URL
+    // Обновляем URL после смены продукта (отложенно)
     setTimeout(() => {
       updateUrl(relatedProductId, selectedImageIndices[relatedIndex] || 0);
     }, 50);
 
-    // Показываем новую информацию
-    setTimeout(async () => {
-      await animateInfo('in');
-      updateAnimationState({ slideChanging: false, inProgress: false });
-    }, 100);
+    // Отключаем переходы Swiper на время программного переключения
+    if (swiperInstances.main) {
+      // Добавляем класс для отключения анимации
+      swiperInstances.main.el.classList.add('swiper-no-transition');
+      
+      // Восстанавливаем анимации после короткой задержки
+      setTimeout(async () => {
+        swiperInstances.main.el.classList.remove('swiper-no-transition');
+        // Анимируем описание
+        await animateInfo('in');
+        updateAnimationState({ slideChanging: false, inProgress: false });
+      }, 50);
+    }
   }, [activeProductIndex, animationState.inProgress, swiperInstances, 
       selectedImageIndices, updateUrl, animateInfo, updateAnimationState]);
 
-  // Effects
+  // Effects для синхронизации Swiper с состоянием при изменении URL или загрузке
   useEffect(() => {
-    if (!swiperInstances.main || animationState.inProgress) return;
+    // Обновляем слайдер только когда Swiper полностью загружен
+    if (swiperInstances.main && animationState.swiperLoaded && !animationState.inProgress) {
+      // Перемещаем к нужному слайду без анимации при первичной загрузке
+      swiperInstances.main.slideTo(activeProductIndex, 0);
+      
+      // Также синхронизируем свайпер миниатюр
+      if (swiperInstances.thumbs) {
+        swiperInstances.thumbs.slideTo(activeProductIndex, 0);
+      }
+      
+      // Устанавливаем активный индекс изображения
+      if (selectedImageIndices[activeProductIndex] !== slideIndexParam) {
+        const newIndices = [...selectedImageIndices];
+        newIndices[activeProductIndex] = slideIndexParam;
+        setSelectedImageIndices(newIndices);
+      }
+    }
+  }, [animationState.swiperLoaded, swiperInstances.main, swiperInstances.thumbs, 
+      activeProductIndex, slideIndexParam, selectedImageIndices, animationState.inProgress]);
 
-    const newIndices = [...selectedImageIndices];
-    newIndices[activeProductIndex] = slideIndexParam;
-    setSelectedImageIndices(newIndices);
-  }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
+  // Отслеживаем изменение URL-параметров
+  useEffect(() => {
+    if (swiperInstances.main && animationState.swiperLoaded && !animationState.inProgress) {
+      // Синхронизируем выбранные миниатюры с параметром из URL
+      const newIndices = [...selectedImageIndices];
+      newIndices[activeProductIndex] = slideIndexParam;
+      setSelectedImageIndices(newIndices);
+    }
+  }, [slideIndexParam, animationState.swiperLoaded, swiperInstances.main, 
+      activeProductIndex, selectedImageIndices, animationState.inProgress]);
+
+  // Синхронизация свайпера миниатюр с основным свайпером
+  useEffect(() => {
+    if (swiperInstances.thumbs && animationState.swiperLoaded && !animationState.inProgress) {
+      // Явно синхронизируем позицию миниатюр с активным слайдом
+      swiperInstances.thumbs.slideTo(activeProductIndex, ANIMATION_CONFIG.DURATION * 1000);
+      
+      // Активируем выделение миниатюры
+      const thumbSlides = swiperInstances.thumbs.slides;
+      if (thumbSlides) {
+        thumbSlides.forEach((slide, i) => {
+          if (i === activeProductIndex) {
+            slide.classList.add('swiper-slide-thumb-active');
+          } else {
+            slide.classList.remove('swiper-slide-thumb-active');
+          }
+        });
+      }
+    }
+  }, [activeProductIndex, animationState.swiperLoaded, swiperInstances.thumbs, animationState.inProgress]);
 
   // Стили и блокировка скролла
   useEffect(() => {
@@ -1912,6 +1911,15 @@ export default function ProductDetail() {
               resistanceRatio={SWIPER_CONFIG.RESISTANCE_RATIO}
               onInit={handleSwiperInit}
               onSlideChange={handleSlideChange}
+              onSwiper={(swiper) => {
+                setSwiperInstances(prev => ({ ...prev, main: swiper }));
+                if (swiper.mousewheel && !swiper.mousewheel.enabled) {
+                  swiper.mousewheel.enable();
+                }
+                if (swiper.initialized) {
+                  updateAnimationState({ swiperLoaded: true });
+                }
+              }}
               preventClicks={false}
               preventClicksPropagation={false}
               touchStartPreventDefault={false}
@@ -1951,6 +1959,7 @@ export default function ProductDetail() {
               observeParents={true}
               resistance={false}
               resistanceRatio={0}
+              onSlideChange={(swiper) => console.log('thumbs swiper index', swiper.activeIndex)}
             >
               {productCatalog.map((product, index) => (
                 <SwiperSlide key={product.id}>
