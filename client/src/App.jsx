@@ -6,7 +6,7 @@ import Catalogue from "./components/Catalogue/Catalogue";
 import PhotoPage from "./components/PhotoPage/PhotoPage";
 import RampsProductDetail from "./components/RampsProductDetail/RampsProductDetail";
 import SkateparksProductDetail from "./components/SkateparksProductDetail/SkateparksProductDetail"
-import DiyProductDetail from "./DiyProductDetail/DiyProductDetail";
+import DiyProductDetail from "./components/DiyProductDetail/DiyProductDetail";
 import './App.css'
 
 function App() {
