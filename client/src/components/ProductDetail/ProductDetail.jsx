@@ -1480,8 +1480,7 @@ export default function ProductDetail() {
   const [animationState, setAnimationState] = useState({
     complete: !imageData,
     inProgress: false,
-    slideChanging: false,
-    swiperLoaded: false
+    slideChanging: false
   });
 
   // Refs
@@ -1490,8 +1489,7 @@ export default function ProductDetail() {
     transitionImage: useRef(null),
     swiperContainer: useRef(null),
     info: useRef(null),
-    urlUpdateBlocked: useRef(false),
-    lastActiveProduct: useRef(activeProductIndex)
+    urlUpdateBlocked: useRef(false)
   };
 
   // Мемоизированные значения
@@ -1626,7 +1624,6 @@ export default function ProductDetail() {
   // Обработчики событий
   const handleSwiperInit = useCallback((swiper) => {
     setSwiperInstances(prev => ({ ...prev, main: swiper }));
-    updateAnimationState({ swiperLoaded: true });
     
     if (!imageData) {
       gsap.set(refs.info.current, { opacity: 1, y: 0 });
@@ -1634,7 +1631,7 @@ export default function ProductDetail() {
     }
 
     requestAnimationFrame(startTransitionAnimation);
-  }, [imageData, startTransitionAnimation, updateAnimationState]);
+  }, [imageData, startTransitionAnimation]);
 
   const handleSlideChange = useCallback(async (swiper) => {
     const newIndex = swiper.activeIndex;
@@ -1643,21 +1640,19 @@ export default function ProductDetail() {
 
     updateAnimationState({ slideChanging: true, inProgress: true });
 
-    // Сразу синхронизируем индекс, URL и миниатюры
+    // Анимируем скрытие информации
+    await animateInfo('out');
+
+    // Обновляем состояние
     setActiveProductIndex(newIndex);
-    refs.lastActiveProduct.current = newIndex;
+    updateUrl(productCatalog[newIndex].id, selectedImageIndices[newIndex]);
 
     // Синхронизируем thumbs swiper
     if (swiperInstances.thumbs) {
       swiperInstances.thumbs.slideTo(newIndex);
     }
 
-    updateUrl(productCatalog[newIndex].id, selectedImageIndices[newIndex]);
-
-    // Анимируем скрытие информации
-    await animateInfo('out');
-
-    // Анимируем появление новой информации с задержкой
+    // Анимируем появление новой информации
     setTimeout(async () => {
       await animateInfo('in');
       updateAnimationState({ slideChanging: false, inProgress: false });
@@ -1688,9 +1683,6 @@ export default function ProductDetail() {
     if (relatedIndex === -1 || relatedIndex === activeProductIndex || 
         animationState.inProgress) return;
 
-    // Запоминаем новый индекс для предотвращения двойной обработки
-    refs.lastActiveProduct.current = relatedIndex;
-    
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     // Скрываем текущую информацию
@@ -1699,7 +1691,7 @@ export default function ProductDetail() {
     // Обновляем состояние
     setActiveProductIndex(relatedIndex);
 
-    // Синхронизируем оба свайпера без анимации
+    // Синхронизируем swiper'ы без анимации
     if (swiperInstances.main) {
       swiperInstances.main.slideTo(relatedIndex, 0);
     }
@@ -1707,79 +1699,27 @@ export default function ProductDetail() {
       swiperInstances.thumbs.slideTo(relatedIndex, 0);
     }
 
-    // Обновляем URL после смены продукта (отложенно)
+    // Обновляем URL
     setTimeout(() => {
       updateUrl(relatedProductId, selectedImageIndices[relatedIndex] || 0);
     }, 50);
 
-    // Отключаем переходы Swiper на время программного переключения
-    if (swiperInstances.main) {
-      // Добавляем класс для отключения анимации
-      swiperInstances.main.el.classList.add('swiper-no-transition');
-      
-      // Восстанавливаем анимации после короткой задержки
-      setTimeout(async () => {
-        swiperInstances.main.el.classList.remove('swiper-no-transition');
-        // Анимируем описание
-        await animateInfo('in');
-        updateAnimationState({ slideChanging: false, inProgress: false });
-      }, 50);
-    }
+    // Показываем новую информацию
+    setTimeout(async () => {
+      await animateInfo('in');
+      updateAnimationState({ slideChanging: false, inProgress: false });
+    }, 100);
   }, [activeProductIndex, animationState.inProgress, swiperInstances, 
       selectedImageIndices, updateUrl, animateInfo, updateAnimationState]);
 
-  // Effects для синхронизации Swiper с состоянием при изменении URL или загрузке
+  // Effects
   useEffect(() => {
-    // Обновляем слайдер только когда Swiper полностью загружен
-    if (swiperInstances.main && animationState.swiperLoaded && !animationState.inProgress) {
-      // Перемещаем к нужному слайду без анимации при первичной загрузке
-      swiperInstances.main.slideTo(activeProductIndex, 0);
-      
-      // Также синхронизируем свайпер миниатюр
-      if (swiperInstances.thumbs) {
-        swiperInstances.thumbs.slideTo(activeProductIndex, 0);
-      }
-      
-      // Устанавливаем активный индекс изображения
-      if (selectedImageIndices[activeProductIndex] !== slideIndexParam) {
-        const newIndices = [...selectedImageIndices];
-        newIndices[activeProductIndex] = slideIndexParam;
-        setSelectedImageIndices(newIndices);
-      }
-    }
-  }, [animationState.swiperLoaded, swiperInstances.main, swiperInstances.thumbs, 
-      activeProductIndex, slideIndexParam, selectedImageIndices, animationState.inProgress]);
+    if (!swiperInstances.main || animationState.inProgress) return;
 
-  // Отслеживаем изменение URL-параметров
-  useEffect(() => {
-    if (swiperInstances.main && animationState.swiperLoaded && !animationState.inProgress) {
-      // Синхронизируем выбранные миниатюры с параметром из URL
-      const newIndices = [...selectedImageIndices];
-      newIndices[activeProductIndex] = slideIndexParam;
-      setSelectedImageIndices(newIndices);
-    }
-  }, [slideIndexParam, animationState.swiperLoaded, swiperInstances.main, 
-      activeProductIndex, selectedImageIndices, animationState.inProgress]);
-
-  // Синхронизация свайпера миниатюр с основным свайпером
-  useEffect(() => {
-    if (swiperInstances.thumbs && animationState.swiperLoaded && !animationState.inProgress) {
-      // Явно синхронизируем позицию миниатюр с активным слайдом
-      swiperInstances.thumbs.slideTo(activeProductIndex, ANIMATION_CONFIG.DURATION * 1000);
-      
-      // Активируем выделение миниатюры
-      const thumbSlides = swiperInstances.thumbs.slides;
-      if (thumbSlides) {
-        thumbSlides.forEach((slide, i) => {
-          if (i === activeProductIndex) {
-            slide.classList.add('swiper-slide-thumb-active');
-          } else {
-            slide.classList.remove('swiper-slide-thumb-active');
-          }
-        });
-      }
-    }
-  }, [activeProductIndex, animationState.swiperLoaded, swiperInstances.thumbs, animationState.inProgress]);
+    const newIndices = [...selectedImageIndices];
+    newIndices[activeProductIndex] = slideIndexParam;
+    setSelectedImageIndices(newIndices);
+  }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
 
   // Стили и блокировка скролла
   useEffect(() => {
@@ -1911,15 +1851,6 @@ export default function ProductDetail() {
               resistanceRatio={SWIPER_CONFIG.RESISTANCE_RATIO}
               onInit={handleSwiperInit}
               onSlideChange={handleSlideChange}
-              onSwiper={(swiper) => {
-                setSwiperInstances(prev => ({ ...prev, main: swiper }));
-                if (swiper.mousewheel && !swiper.mousewheel.enabled) {
-                  swiper.mousewheel.enable();
-                }
-                if (swiper.initialized) {
-                  updateAnimationState({ swiperLoaded: true });
-                }
-              }}
               preventClicks={false}
               preventClicksPropagation={false}
               touchStartPreventDefault={false}
@@ -1959,7 +1890,6 @@ export default function ProductDetail() {
               observeParents={true}
               resistance={false}
               resistanceRatio={0}
-              onSlideChange={(swiper) => console.log('thumbs swiper index', swiper.activeIndex)}
             >
               {productCatalog.map((product, index) => (
                 <SwiperSlide key={product.id}>
@@ -2063,7 +1993,6 @@ export default function ProductDetail() {
     </>
   );
 }
-
 // export default function ProductDetail() {
 //   const location = useLocation();
 //   const navigate = useNavigate();
