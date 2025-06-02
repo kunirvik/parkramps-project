@@ -1483,19 +1483,13 @@ export default function ProductDetail() {
     slideChanging: false
   });
 
-  // Refs для синхронизации и управления
+  // Refs
   const refs = {
     container: useRef(null),
     transitionImage: useRef(null),
     swiperContainer: useRef(null),
     info: useRef(null),
-    urlUpdateBlocked: useRef(false),
-    // Новые refs для синхронизации
-    lastSlideIndex: useRef(activeProductIndex),
-    lastImageIndex: useRef(slideIndexParam),
-    pendingUpdates: useRef(new Set()),
-    syncInProgress: useRef(false),
-    updateTimeout: useRef(null)
+    urlUpdateBlocked: useRef(false)
   };
 
   // Мемоизированные значения
@@ -1503,154 +1497,39 @@ export default function ProductDetail() {
     productCatalog[activeProductIndex], [activeProductIndex]
   );
 
+  // const relatedProducts = useMemo(() => 
+  //   currentProduct?.relatedProducts
+  //     ?.map(id => productCatalog.find(p => p.id === id))
+  //     .filter(Boolean) || [], 
+  //   [currentProduct]
+  // );
+
   const currentImages = useMemo(() => 
     currentProduct ? [currentProduct.image, ...currentProduct.altImages] : [], 
     [currentProduct]
   );
 
-  // Утилиты для синхронизации
-  const clearPendingUpdate = useCallback((type) => {
-    refs.pendingUpdates.current.delete(type);
-  }, []);
+  // // Проверка валидности категории
+  // const categoryExists = useMemo(() => 
+  //   productCatalog.some(cat => cat.category === category), [category]
+  // );
 
-  const addPendingUpdate = useCallback((type) => {
-    refs.pendingUpdates.current.add(type);
-  }, []);
-
-  const hasPendingUpdates = useCallback(() => {
-    return refs.pendingUpdates.current.size > 0;
-  }, []);
-
-  const updateUrl = useCallback((productId, viewIndex = 0, immediate = false) => {
-    if (refs.urlUpdateBlocked.current && !immediate) return;
+  // Утилиты
+  const updateUrl = useCallback((productId, viewIndex = 0) => {
+    if (refs.urlUpdateBlocked.current) return;
     
     refs.urlUpdateBlocked.current = true;
     const newUrl = `/product/sets/${productId}?view=${viewIndex}`;
+    window.history.replaceState(null, '', newUrl);
     
-    // Очищаем предыдущий таймаут
-    if (refs.updateTimeout.current) {
-      clearTimeout(refs.updateTimeout.current);
-    }
-    
-    if (immediate) {
-      window.history.replaceState(null, '', newUrl);
+    setTimeout(() => {
       refs.urlUpdateBlocked.current = false;
-    } else {
-      refs.updateTimeout.current = setTimeout(() => {
-        window.history.replaceState(null, '', newUrl);
-        refs.urlUpdateBlocked.current = false;
-        refs.updateTimeout.current = null;
-      }, 100);
-    }
+    }, 50);
   }, []);
 
   const updateAnimationState = useCallback((updates) => {
     setAnimationState(prev => ({ ...prev, ...updates }));
   }, []);
-
-  // Централизованная функция синхронизации
-  const syncAllComponents = useCallback(async (productIndex, imageIndex, source = 'unknown') => {
-    if (refs.syncInProgress.current) {
-      console.log('Sync already in progress, queuing update');
-      addPendingUpdate(`${productIndex}-${imageIndex}-${source}`);
-      return;
-    }
-
-    refs.syncInProgress.current = true;
-    
-    try {
-      console.log(`Syncing from ${source}:`, { productIndex, imageIndex });
-
-      // Проверяем, нужно ли обновление
-      const needsProductUpdate = refs.lastSlideIndex.current !== productIndex;
-      const needsImageUpdate = refs.lastImageIndex.current !== imageIndex;
-      
-      if (!needsProductUpdate && !needsImageUpdate) {
-        console.log('No sync needed');
-        return;
-      }
-
-      // Обновляем состояния
-      if (needsProductUpdate) {
-        setActiveProductIndex(productIndex);
-        refs.lastSlideIndex.current = productIndex;
-      }
-
-      if (needsImageUpdate || needsProductUpdate) {
-        setSelectedImageIndices(prev => {
-          const newIndices = [...prev];
-          newIndices[productIndex] = imageIndex;
-          return newIndices;
-        });
-        refs.lastImageIndex.current = imageIndex;
-      }
-
-      // Синхронизируем swiper'ы
-      const promises = [];
-      
-      if (swiperInstances.main && needsProductUpdate) {
-        if (swiperInstances.main.activeIndex !== productIndex) {
-          // Используем более мягкую анимацию для программного изменения
-          promises.push(new Promise(resolve => {
-            const onSlideChangeTransitionEnd = () => {
-              swiperInstances.main.off('slideChangeTransitionEnd', onSlideChangeTransitionEnd);
-              resolve();
-            };
-            swiperInstances.main.on('slideChangeTransitionEnd', onSlideChangeTransitionEnd);
-            swiperInstances.main.slideTo(productIndex, SWIPER_CONFIG.SPEED * 0.8);
-          }));
-        }
-      }
-
-      if (swiperInstances.thumbs && needsProductUpdate) {
-        if (swiperInstances.thumbs.activeIndex !== productIndex) {
-          promises.push(new Promise(resolve => {
-            const onSlideChangeTransitionEnd = () => {
-              swiperInstances.thumbs.off('slideChangeTransitionEnd', onSlideChangeTransitionEnd);
-              resolve();
-            };
-            swiperInstances.thumbs.on('slideChangeTransitionEnd', onSlideChangeTransitionEnd);
-            swiperInstances.thumbs.slideTo(productIndex, SWIPER_CONFIG.SPEED * 0.6);
-          }));
-        }
-      }
-
-      // Ждем завершения анимаций swiper'ов
-      if (promises.length > 0) {
-        await Promise.all(promises);
-      }
-
-      // Обновляем URL
-      const currentProductId = productCatalog[productIndex]?.id;
-      if (currentProductId) {
-        updateUrl(currentProductId, imageIndex, source === 'url');
-      }
-
-      console.log('Sync completed successfully');
-
-    } catch (error) {
-      console.error('Sync error:', error);
-    } finally {
-      refs.syncInProgress.current = false;
-      
-      // Обрабатываем отложенные обновления
-      if (hasPendingUpdates()) {
-        const pendingUpdate = Array.from(refs.pendingUpdates.current)[0];
-        refs.pendingUpdates.current.clear();
-        
-        if (pendingUpdate) {
-          const [nextProductIndex, nextImageIndex, nextSource] = pendingUpdate.split('-');
-          setTimeout(() => {
-            syncAllComponents(
-              parseInt(nextProductIndex), 
-              parseInt(nextImageIndex), 
-              nextSource
-            );
-          }, 50);
-        }
-      }
-    }
-  }, [swiperInstances, updateUrl, addPendingUpdate, hasPendingUpdates]);
 
   // Анимации
   const animateInfo = useCallback((direction = 'in') => {
@@ -1744,7 +1623,6 @@ export default function ProductDetail() {
 
   // Обработчики событий
   const handleSwiperInit = useCallback((swiper) => {
-    console.log('Main swiper initialized');
     setSwiperInstances(prev => ({ ...prev, main: swiper }));
     
     if (!imageData) {
@@ -1755,78 +1633,93 @@ export default function ProductDetail() {
     requestAnimationFrame(startTransitionAnimation);
   }, [imageData, startTransitionAnimation]);
 
-  const handleSlideChange = useCallback((swiper) => {
+  const handleSlideChange = useCallback(async (swiper) => {
     const newIndex = swiper.activeIndex;
-    console.log('Slide changed to:', newIndex);
     
-    if (newIndex === activeProductIndex) return;
+    if (newIndex === activeProductIndex || animationState.inProgress) return;
 
-    // Используем debounce для предотвращения множественных вызовов
-    if (refs.slideChangeTimeout) {
-      clearTimeout(refs.slideChangeTimeout);
+    updateAnimationState({ slideChanging: true, inProgress: true });
+
+    // Анимируем скрытие информации
+    await animateInfo('out');
+
+    // Обновляем состояние
+    setActiveProductIndex(newIndex);
+    updateUrl(productCatalog[newIndex].id, selectedImageIndices[newIndex]);
+
+    // Синхронизируем thumbs swiper
+    if (swiperInstances.thumbs) {
+      swiperInstances.thumbs.slideTo(newIndex);
     }
-    
-    refs.slideChangeTimeout = setTimeout(() => {
-      syncAllComponents(newIndex, selectedImageIndices[newIndex] || 0, 'swiper');
+
+    // Анимируем появление новой информации
+    setTimeout(async () => {
+      await animateInfo('in');
+      updateAnimationState({ slideChanging: false, inProgress: false });
     }, 50);
-  }, [activeProductIndex, selectedImageIndices, syncAllComponents]);
+  }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
+      swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
   const handleImageSelect = useCallback((index) => {
     if (animationState.inProgress) return;
-    
-    console.log('Image selected:', index);
-    syncAllComponents(activeProductIndex, index, 'image-select');
-  }, [animationState.inProgress, activeProductIndex, syncAllComponents]);
+
+    const newIndices = [...selectedImageIndices];
+    newIndices[activeProductIndex] = index;
+    setSelectedImageIndices(newIndices);
+    updateUrl(currentProduct.id, index);
+  }, [animationState.inProgress, selectedImageIndices, activeProductIndex, 
+      currentProduct?.id, updateUrl]);
 
   const handleThumbnailClick = useCallback((index) => {
-    if (animationState.inProgress || index === activeProductIndex) return;
+    if (animationState.inProgress || index === activeProductIndex || !swiperInstances.main) 
+      return;
     
-    console.log('Thumbnail clicked:', index);
-    syncAllComponents(index, selectedImageIndices[index] || 0, 'thumbnail');
-  }, [animationState.inProgress, activeProductIndex, selectedImageIndices, syncAllComponents]);
+    swiperInstances.main.slideTo(index);
+  }, [animationState.inProgress, activeProductIndex, swiperInstances.main]);
 
-  // Обработчик инициализации thumbs swiper
-  const handleThumbsInit = useCallback((swiper) => {
-    console.log('Thumbs swiper initialized');
-    setSwiperInstances(prev => ({ ...prev, thumbs: swiper }));
-  }, []);
+  const handleRelatedProductClick = useCallback(async (relatedProductId) => {
+    const relatedIndex = productCatalog.findIndex(p => p.id === relatedProductId);
+    
+    if (relatedIndex === -1 || relatedIndex === activeProductIndex || 
+        animationState.inProgress) return;
+
+    updateAnimationState({ slideChanging: true, inProgress: true });
+
+    // Скрываем текущую информацию
+    await animateInfo('out');
+
+    // Обновляем состояние
+    setActiveProductIndex(relatedIndex);
+
+    // Синхронизируем swiper'ы без анимации
+    if (swiperInstances.main) {
+      swiperInstances.main.slideTo(relatedIndex, 0);
+    }
+    if (swiperInstances.thumbs) {
+      swiperInstances.thumbs.slideTo(relatedIndex, 0);
+    }
+
+    // Обновляем URL
+    setTimeout(() => {
+      updateUrl(relatedProductId, selectedImageIndices[relatedIndex] || 0);
+    }, 50);
+
+    // Показываем новую информацию
+    setTimeout(async () => {
+      await animateInfo('in');
+      updateAnimationState({ slideChanging: false, inProgress: false });
+    }, 100);
+  }, [activeProductIndex, animationState.inProgress, swiperInstances, 
+      selectedImageIndices, updateUrl, animateInfo, updateAnimationState]);
 
   // Effects
-  
-  // Синхронизация с URL параметрами
   useEffect(() => {
-    const productId = Number(id);
-    const productIndex = productCatalog.findIndex(p => p.id === productId);
-    
-    if (productIndex !== -1 && (
-      productIndex !== activeProductIndex || 
-      slideIndexParam !== selectedImageIndices[productIndex]
-    )) {
-      console.log('URL sync needed:', { productIndex, slideIndexParam });
-      syncAllComponents(productIndex, slideIndexParam, 'url');
-    }
-  }, [id, slideIndexParam, activeProductIndex, selectedImageIndices, syncAllComponents]);
+    if (!swiperInstances.main || animationState.inProgress) return;
 
-  // Инициализация swiper'ов
-  useEffect(() => {
-    if (swiperInstances.main && swiperInstances.thumbs && !refs.syncInProgress.current) {
-      console.log('Both swipers ready, performing initial sync');
-      syncAllComponents(activeProductIndex, selectedImageIndices[activeProductIndex] || 0, 'init');
-    }
-  }, [swiperInstances.main, swiperInstances.thumbs, activeProductIndex, selectedImageIndices, syncAllComponents]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (refs.updateTimeout.current) {
-        clearTimeout(refs.updateTimeout.current);
-      }
-      if (refs.slideChangeTimeout) {
-        clearTimeout(refs.slideChangeTimeout);
-      }
-      refs.pendingUpdates.current.clear();
-    };
-  }, []);
+    const newIndices = [...selectedImageIndices];
+    newIndices[activeProductIndex] = slideIndexParam;
+    setSelectedImageIndices(newIndices);
+  }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
 
   // Стили и блокировка скролла
   useEffect(() => {
@@ -1867,6 +1760,7 @@ export default function ProductDetail() {
     styleElement.innerHTML = styles;
     document.head.appendChild(styleElement);
 
+    // Дополнительно блокируем скролл на body/html
     const originalBodyStyle = document.body.style.overflow;
     const originalHtmlStyle = document.documentElement.style.overflow;
     
@@ -1879,6 +1773,11 @@ export default function ProductDetail() {
       document.documentElement.style.overflow = originalHtmlStyle;
     };
   }, []);
+
+  // // Ранний возврат для невалидной категории
+  // if (!categoryExists) {
+  //   return <div className="text-center mt-10 p-4">Категория не найдена</div>;
+  // }
 
   if (!currentProduct) {
     return <div className="text-center mt-10 p-4">Продукт не найден</div>;
@@ -1955,8 +1854,6 @@ export default function ProductDetail() {
               preventClicks={false}
               preventClicksPropagation={false}
               touchStartPreventDefault={false}
-              allowTouchMove={true}
-              touchReleaseOnEdges={true}
             >
               {productCatalog.map((product, index) => (
                 <SwiperSlide key={product.id} style={{ height: '100%' }}>
@@ -1980,20 +1877,19 @@ export default function ProductDetail() {
               className="w-full mt-6"
               modules={[Thumbs]}
               direction="horizontal"
-              onSwiper={handleThumbsInit}
+              onSwiper={(swiper) => setSwiperInstances(prev => ({ ...prev, thumbs: swiper }))}
               slidesPerView={5}
               spaceBetween={10}
               watchSlidesProgress={true}
               slideToClickedSlide={true}
               initialSlide={activeProductIndex}
-              speed={SWIPER_CONFIG.SPEED * 0.8}
+              speed={SWIPER_CONFIG.SPEED}
               preventClicks={false}
               preventClicksPropagation={false}
               observer={true}
               observeParents={true}
               resistance={false}
               resistanceRatio={0}
-              allowTouchMove={true}
             >
               {productCatalog.map((product, index) => (
                 <SwiperSlide key={product.id}>
@@ -2070,6 +1966,27 @@ export default function ProductDetail() {
                 <span className="font-futura text-[#717171] text-lg">→</span>
               </a>
             ))}
+
+            {/* Связанные продукты */}
+            {/* {relatedProducts.length > 0 && (
+              <div className="mt-6">
+                <h3 className="font-futura text-[#717171] font-bold mb-3">
+                  Связанные продукты
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {relatedProducts.map(relatedProduct => (
+                    <button
+                      key={relatedProduct.id}
+                      onClick={() => handleRelatedProductClick(relatedProduct.id)}
+                      className="px-3 py-1 border border-gray-300 rounded hover:border-black transition-colors text-sm"
+                      disabled={animationState.inProgress}
+                    >
+                      {relatedProduct.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )} */}
           </div>
         </div>
       </div>
