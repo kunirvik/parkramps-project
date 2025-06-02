@@ -1483,6 +1483,13 @@ export default function ProductDetail() {
     slideChanging: false
   });
 
+  // Состояние для синхронизации свайперов
+  const [syncState, setSyncState] = useState({
+    isMainSwiperControlling: false,
+    isThumbsSwiperControlling: false,
+    lastSyncTime: 0
+  });
+
   // Refs
   const refs = {
     container: useRef(null),
@@ -1530,6 +1537,41 @@ export default function ProductDetail() {
   const updateAnimationState = useCallback((updates) => {
     setAnimationState(prev => ({ ...prev, ...updates }));
   }, []);
+
+  const updateSyncState = useCallback((updates) => {
+    setSyncState(prev => ({ ...prev, ...updates, lastSyncTime: Date.now() }));
+  }, []);
+
+  const syncSwiper = useCallback((sourceSwiper, targetSwiper, index, immediate = false) => {
+    if (!targetSwiper || !sourceSwiper) return;
+    
+    const speed = immediate ? 0 : SWIPER_CONFIG.SPEED / 2;
+    const currentTime = Date.now();
+    
+    // Предотвращаем циклическую синхронизацию
+    if (currentTime - syncState.lastSyncTime < 50) return;
+    
+    targetSwiper.slideTo(index, speed);
+    
+    // Обновляем визуальное состояние миниатюр
+    if (targetSwiper === swiperInstances.thumbs) {
+      const thumbSlides = targetSwiper.slides;
+      if (thumbSlides) {
+        thumbSlides.forEach((slide, i) => {
+          const img = slide.querySelector('img');
+          if (img) {
+            if (i === index) {
+              img.classList.remove('grayscale', 'opacity-60');
+              img.classList.add('opacity-100', 'scale-105', 'border-black');
+            } else {
+              img.classList.add('grayscale', 'opacity-60');
+              img.classList.remove('opacity-100', 'scale-105', 'border-black');
+            }
+          }
+        });
+      }
+    }
+  }, [syncState.lastSyncTime, swiperInstances.thumbs]);
 
   // Анимации
   const animateInfo = useCallback((direction = 'in') => {
@@ -1638,27 +1680,46 @@ export default function ProductDetail() {
     
     if (newIndex === activeProductIndex || animationState.inProgress) return;
 
+    // Определяем источник изменения
+    const isFromMainSwiper = swiper === swiperInstances.main;
+    const isFromThumbsSwiper = swiper === swiperInstances.thumbs;
+
+    // Предотвращаем рекурсивные вызовы
+    if (isFromMainSwiper && syncState.isThumbsSwiperControlling) return;
+    if (isFromThumbsSwiper && syncState.isMainSwiperControlling) return;
+
+    // Устанавливаем флаг контроля
+    if (isFromMainSwiper) {
+      updateSyncState({ isMainSwiperControlling: true, isThumbsSwiperControlling: false });
+    } else if (isFromThumbsSwiper) {
+      updateSyncState({ isThumbsSwiperControlling: true, isMainSwiperControlling: false });
+    }
+
     updateAnimationState({ slideChanging: true, inProgress: true });
 
-    // Анимируем скрытие информации
+    // Синхронизируем свайперы
+    if (isFromMainSwiper && swiperInstances.thumbs) {
+      syncSwiper(swiperInstances.main, swiperInstances.thumbs, newIndex);
+    } else if (isFromThumbsSwiper && swiperInstances.main) {
+      syncSwiper(swiperInstances.thumbs, swiperInstances.main, newIndex);
+    }
+
+    // Анимируем скрытие информации только при смене продукта
     await animateInfo('out');
 
     // Обновляем состояние
     setActiveProductIndex(newIndex);
     updateUrl(productCatalog[newIndex].id, selectedImageIndices[newIndex]);
 
-    // Синхронизируем thumbs swiper
-    if (swiperInstances.thumbs) {
-      swiperInstances.thumbs.slideTo(newIndex);
-    }
-
     // Анимируем появление новой информации
     setTimeout(async () => {
       await animateInfo('in');
       updateAnimationState({ slideChanging: false, inProgress: false });
+      updateSyncState({ isMainSwiperControlling: false, isThumbsSwiperControlling: false });
     }, 50);
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
-      swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
+      swiperInstances, updateUrl, animateInfo, updateAnimationState, 
+      syncState, updateSyncState, syncSwiper]);
 
   const handleImageSelect = useCallback((index) => {
     if (animationState.inProgress) return;
