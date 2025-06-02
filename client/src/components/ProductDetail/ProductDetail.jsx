@@ -1497,22 +1497,22 @@ export default function ProductDetail() {
     productCatalog[activeProductIndex], [activeProductIndex]
   );
 
-  const relatedProducts = useMemo(() => 
-    currentProduct?.relatedProducts
-      ?.map(id => productCatalog.find(p => p.id === id))
-      .filter(Boolean) || [], 
-    [currentProduct]
-  );
+  // const relatedProducts = useMemo(() => 
+  //   currentProduct?.relatedProducts
+  //     ?.map(id => productCatalog.find(p => p.id === id))
+  //     .filter(Boolean) || [], 
+  //   [currentProduct]
+  // );
 
   const currentImages = useMemo(() => 
     currentProduct ? [currentProduct.image, ...currentProduct.altImages] : [], 
     [currentProduct]
   );
 
-  // Проверка валидности категории
-  const categoryExists = useMemo(() => 
-    productCatalog.some(cat => cat.category === category), [category]
-  );
+  // // Проверка валидности категории
+  // const categoryExists = useMemo(() => 
+  //   productCatalog.some(cat => cat.category === category), [category]
+  // );
 
   // Утилиты
   const updateUrl = useCallback((productId, viewIndex = 0) => {
@@ -1774,10 +1774,10 @@ export default function ProductDetail() {
     };
   }, []);
 
-  // Ранний возврат для невалидной категории
-  if (!categoryExists) {
-    return <div className="text-center mt-10 p-4">Категория не найдена</div>;
-  }
+  // // Ранний возврат для невалидной категории
+  // if (!categoryExists) {
+  //   return <div className="text-center mt-10 p-4">Категория не найдена</div>;
+  // }
 
   if (!currentProduct) {
     return <div className="text-center mt-10 p-4">Продукт не найден</div>;
@@ -1968,7 +1968,7 @@ export default function ProductDetail() {
             ))}
 
             {/* Связанные продукты */}
-            {relatedProducts.length > 0 && (
+            {/* {relatedProducts.length > 0 && (
               <div className="mt-6">
                 <h3 className="font-futura text-[#717171] font-bold mb-3">
                   Связанные продукты
@@ -1986,7 +1986,7 @@ export default function ProductDetail() {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
