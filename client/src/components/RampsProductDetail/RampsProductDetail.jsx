@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState,  useCallback, useMemo } from "react";
 import { useLocation, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import gsap from "gsap";
 import { Swiper, SwiperSlide } from "swiper/react";
