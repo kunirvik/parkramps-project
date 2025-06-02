@@ -7,6 +7,7 @@ import SocialButtons from "../SocialButtons/SocialButtons";
 import { Pagination, Mousewheel, Thumbs } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination"; 
+
 const productCatalogDiys = [ {id: 1,
     name: "box1",
     image: "/images/diy/kicker.png",

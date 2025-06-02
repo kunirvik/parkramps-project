@@ -15,7 +15,7 @@ const products = [{
     id: 2,
       category: "ramps",
     name: "рампы",
-    image: "/images//ramps/minir180h60w200d40alt.png",
+    image: "/images/diy/kicker.png",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }, 
@@ -32,7 +32,7 @@ const products = [{
     id: 4,
      category: "diy",
     name: "сделай сам diy",
-    image: "/images/diy/kicker.png",
+   image: "/images//ramps/minir180h60w200d40alt.png",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }

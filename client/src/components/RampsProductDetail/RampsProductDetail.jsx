@@ -10,7 +10,7 @@ import "swiper/css";
 import "swiper/css/pagination"; 
 const productCatalogRamps= [ {id: 1,
     name: "Ramp160",
-    image: "/images/ramps/minir180h60w200d40alt.png",
+    image: "/images/diy/kicker.png",
     altImages: ["/images/ramps/minir180h60w200d40.png", "/images/ramps/minir180h60w200d40frontalt.png",  "/images/ramps/minir180h60w200d40top.png",  "/images/ramps/minir180h60w200d40front.png"],
     sampleImages: ["/images/sample1.jpg", "/images/sample2.jpg", "/images/sample3.jpg" ],
     designer: "Studio 65",
