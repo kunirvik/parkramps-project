@@ -133,7 +133,7 @@ const preloadImage = (src) => {
         navigate(`/product/skateparks/1?view=0`, { state: { imageData } });
         break;
       case "diy":
-        navigate(`/product/diys/1?view=0`, { state: { imageData } });
+        navigate(`/product/diy/1?view=0`, { state: { imageData } });
         break;
       default:
         console.warn("Неизвестная категория:", product.category);
