@@ -147,10 +147,10 @@ export default function RampsProductDetail() {
     [currentProduct]
   );
 
-  // // Проверка валидности категории
-  // const categoryExists = useMemo(() => 
-  //   productCatalogRamps.some(cat => cat.category === category), [category]
-  // );
+  // Проверка валидности категории
+  const categoryExists = useMemo(() => 
+    productCatalogRamps.some(cat => cat.category === category), [category]
+  );
 
   // Утилиты
   const updateUrl = useCallback((productId, viewIndex = 0) => {
