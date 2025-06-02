@@ -1464,7 +1464,6 @@ export default function ProductDetail() {
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
 
-  const [activeImageIndex, setActiveImageIndex] = useState(slideIndexParam);
   // Основные состояния
   const [activeProductIndex, setActiveProductIndex] = useState(() => 
     Math.max(0, productCatalog.findIndex(p => p.id === Number(id)))
@@ -1477,13 +1476,6 @@ export default function ProductDetail() {
     thumbs: null
   });
 
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
-  const [swiperLoaded, setSwiperLoaded] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const swiperRef = useRef(null);
-const thumbsSwiperRef = useRef(null);
-const lastActiveProductRef = useRef(activeProductIndex);
   // Состояния анимации
   const [animationState, setAnimationState] = useState({
     complete: !imageData,
@@ -1653,16 +1645,12 @@ const lastActiveProductRef = useRef(activeProductIndex);
 
     // Обновляем состояние
     setActiveProductIndex(newIndex);
-    lastActiveProductRef.current = newIndex;
-
     updateUrl(productCatalog[newIndex].id, selectedImageIndices[newIndex]);
 
     // Синхронизируем thumbs swiper
     if (swiperInstances.thumbs) {
       swiperInstances.thumbs.slideTo(newIndex);
     }
-
-    
 
     // Анимируем появление новой информации
     setTimeout(async () => {
@@ -1689,53 +1677,51 @@ const lastActiveProductRef = useRef(activeProductIndex);
     swiperInstances.main.slideTo(index);
   }, [animationState.inProgress, activeProductIndex, swiperInstances.main]);
 
-  // const handleRelatedProductClick = useCallback(async (relatedProductId) => {
-  //   const relatedIndex = productCatalog.findIndex(p => p.id === relatedProductId);
+  const handleRelatedProductClick = useCallback(async (relatedProductId) => {
+    const relatedIndex = productCatalog.findIndex(p => p.id === relatedProductId);
     
-  //   if (relatedIndex === -1 || relatedIndex === activeProductIndex || 
-  //       animationState.inProgress) return;
+    if (relatedIndex === -1 || relatedIndex === activeProductIndex || 
+        animationState.inProgress) return;
 
-  //   updateAnimationState({ slideChanging: true, inProgress: true });
+    updateAnimationState({ slideChanging: true, inProgress: true });
 
-  //   // Скрываем текущую информацию
-  //   await animateInfo('out');
+    // Скрываем текущую информацию
+    await animateInfo('out');
 
-  //   // Обновляем состояние
-  //   setActiveProductIndex(relatedIndex);
+    // Обновляем состояние
+    setActiveProductIndex(relatedIndex);
 
-  //   // Синхронизируем swiper'ы без анимации
-  //   if (swiperInstances.main) {
-  //     swiperInstances.main.slideTo(relatedIndex, 0);
-  //   }
-  //   if (swiperInstances.thumbs) {
-  //     swiperInstances.thumbs.slideTo(relatedIndex, 0);
-  //   }
+    // Синхронизируем swiper'ы без анимации
+    if (swiperInstances.main) {
+      swiperInstances.main.slideTo(relatedIndex, 0);
+    }
+    if (swiperInstances.thumbs) {
+      swiperInstances.thumbs.slideTo(relatedIndex, 0);
+    }
 
-  //   // Обновляем URL
-  //   setTimeout(() => {
-  //     updateUrl(relatedProductId, selectedImageIndices[relatedIndex] || 0);
-  //   }, 50);
+    // Обновляем URL
+    setTimeout(() => {
+      updateUrl(relatedProductId, selectedImageIndices[relatedIndex] || 0);
+    }, 50);
 
-  //   // Показываем новую информацию
-  //   setTimeout(async () => {
-  //     await animateInfo('in');
-  //     updateAnimationState({ slideChanging: false, inProgress: false });
-  //   }, 100);
-  // }, [activeProductIndex, animationState.inProgress, swiperInstances, 
-  //     selectedImageIndices, updateUrl, animateInfo, updateAnimationState]);
+    // Показываем новую информацию
+    setTimeout(async () => {
+      await animateInfo('in');
+      updateAnimationState({ slideChanging: false, inProgress: false });
+    }, 100);
+  }, [activeProductIndex, animationState.inProgress, swiperInstances, 
+      selectedImageIndices, updateUrl, animateInfo, updateAnimationState]);
 
-  // // Effects
-  // useEffect(() => {
-  //   if (!swiperInstances.main || animationState.inProgress) return;
+  // Effects
+  useEffect(() => {
+    if (!swiperInstances.main || animationState.inProgress) return;
 
-  //   const newIndices = [...selectedImageIndices];
-  //   newIndices[activeProductIndex] = slideIndexParam;
-  //   setSelectedImageIndices(newIndices);
-  // }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
+    const newIndices = [...selectedImageIndices];
+    newIndices[activeProductIndex] = slideIndexParam;
+    setSelectedImageIndices(newIndices);
+  }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
 
   // Стили и блокировка скролла
-
-
   useEffect(() => {
     const styles = `
       html, body { 
@@ -1773,45 +1759,6 @@ const lastActiveProductRef = useRef(activeProductIndex);
     const styleElement = document.createElement('style');
     styleElement.innerHTML = styles;
     document.head.appendChild(styleElement);
-
-
-    // ============ СИНХРОНИЗАЦИЯ МИНИАТЮР С ОСНОВНЫМ СВАЙПЕРОМ ============
-useEffect(() => {
-  if (thumbsSwiperRef.current && swiperLoaded && !isAnimating) {
-    // Явно синхронизируем позицию миниатюр с активным слайдом
-    thumbsSwiperRef.current.slideTo(activeProductIndex, ANIMATION_DURATION * 1000);
-    
-    // Активируем выделение миниатюры
-    const thumbSlides = thumbsSwiperRef.current.slides;
-    if (thumbSlides) {
-      thumbSlides.forEach((slide, i) => {
-        if (i === activeProductIndex) {
-          slide.classList.add('swiper-slide-thumb-active');
-        } else {
-          slide.classList.remove('swiper-slide-thumb-active');
-        }
-      });
-    }
-  }
-}, [activeProductIndex, swiperLoaded]);
-
-useEffect(() => {
-  if (swiperRef.current && swiperLoaded && !isAnimating) {
-    // Обновляем только индекс изображения, без перерисовки всего компонента
-    setActiveImageIndex(slideIndexParam);
-    
-    // Синхронизируем выбранные миниатюры с параметром из URL
-    const newIndices = [...selectedImageIndices];
-    newIndices[activeProductIndex] = slideIndexParam;
-    setSelectedImageIndices(newIndices);
-  }
-}, [slideIndexParam, swiperLoaded]);
-
-
-
-
-
-
 
     // Дополнительно блокируем скролл на body/html
     const originalBodyStyle = document.body.style.overflow;
