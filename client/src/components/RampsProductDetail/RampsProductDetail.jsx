@@ -282,10 +282,10 @@ export default function RampsProductDetail() {
     }
 
     // Анимируем появление новой информации
-    setTimeout(async () => {
+    // setTimeout(async () => {
       await animateInfo('in');
       updateAnimationState({ slideChanging: false, inProgress: false });
-    }, 50);
+    // }, 50);
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
       swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
@@ -378,26 +378,21 @@ export default function RampsProductDetail() {
 
 
   useEffect(() => {
-  if (!swiperInstances.main || animationState.inProgress) return;
-
   const swiper = swiperInstances.main;
-  const index = swiper.activeIndex;
+  if (!swiper || animationState.inProgress) return;
 
-  if (index !== activeProductIndex) {
-    updateAnimationState({ slideChanging: true, inProgress: true });
+  const newIndex = swiper.activeIndex;
+  if (newIndex !== activeProductIndex) {
+    setActiveProductIndex(newIndex);
+    updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
 
-    // Обновляем активный продукт и URL
-    setActiveProductIndex(index);
-    updateUrl(productCatalogRamps[index].id, selectedImageIndices[index]);
-
-    // Обновление происходит быстрее, без задержки
-    animateInfo('out').then(() => {
-      animateInfo('in').then(() => {
-        updateAnimationState({ slideChanging: false, inProgress: false });
-      });
-    });
+    if (swiperInstances.thumbs) {
+      swiperInstances.thumbs.slideTo(newIndex);
+    }
   }
 }, [swiperInstances.main?.activeIndex]);
+
+
 
 
   return (
