@@ -351,10 +351,10 @@ export default function DiyProductDetail() {
     }
 
     // Анимируем появление новой информации
-    setTimeout(async () => {
+    // setTimeout(async () => {
       await animateInfo('in');
       updateAnimationState({ slideChanging: false, inProgress: false });
-    }, 50);
+    // }, 50);
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
       swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
@@ -375,40 +375,40 @@ export default function DiyProductDetail() {
     swiperInstances.main.slideTo(index);
   }, [animationState.inProgress, activeProductIndex, swiperInstances.main]);
 
-  const handleRelatedProductClick = useCallback(async (relatedProductId) => {
-    const relatedIndex = productCatalogDiys.findIndex(p => p.id === relatedProductId);
+  // const handleRelatedProductClick = useCallback(async (relatedProductId) => {
+  //   const relatedIndex = productCatalogDiys.findIndex(p => p.id === relatedProductId);
     
-    if (relatedIndex === -1 || relatedIndex === activeProductIndex || 
-        animationState.inProgress) return;
+  //   if (relatedIndex === -1 || relatedIndex === activeProductIndex || 
+  //       animationState.inProgress) return;
 
-    updateAnimationState({ slideChanging: true, inProgress: true });
+  //   updateAnimationState({ slideChanging: true, inProgress: true });
 
-    // Скрываем текущую информацию
-    await animateInfo('out');
+  //   // Скрываем текущую информацию
+  //   await animateInfo('out');
 
-    // Обновляем состояние
-    setActiveProductIndex(relatedIndex);
+  //   // Обновляем состояние
+  //   setActiveProductIndex(relatedIndex);
 
-    // Синхронизируем swiper'ы без анимации
-    if (swiperInstances.main) {
-      swiperInstances.main.slideTo(relatedIndex, 0);
-    }
-    if (swiperInstances.thumbs) {
-      swiperInstances.thumbs.slideTo(relatedIndex, 0);
-    }
+  //   // Синхронизируем swiper'ы без анимации
+  //   if (swiperInstances.main) {
+  //     swiperInstances.main.slideTo(relatedIndex, 0);
+  //   }
+  //   if (swiperInstances.thumbs) {
+  //     swiperInstances.thumbs.slideTo(relatedIndex, 0);
+  //   }
 
-    // Обновляем URL
-    setTimeout(() => {
-      updateUrl(relatedProductId, selectedImageIndices[relatedIndex] || 0);
-    }, 50);
+  //   // Обновляем URL
+  //   setTimeout(() => {
+  //     updateUrl(relatedProductId, selectedImageIndices[relatedIndex] || 0);
+  //   }, 50);
 
-    // Показываем новую информацию
-    setTimeout(async () => {
-      await animateInfo('in');
-      updateAnimationState({ slideChanging: false, inProgress: false });
-    }, 100);
-  }, [activeProductIndex, animationState.inProgress, swiperInstances, 
-      selectedImageIndices, updateUrl, animateInfo, updateAnimationState]);
+  //   // Показываем новую информацию
+  //   setTimeout(async () => {
+  //     await animateInfo('in');
+  //     updateAnimationState({ slideChanging: false, inProgress: false });
+  //   }, 100);
+  // }, [activeProductIndex, animationState.inProgress, swiperInstances, 
+  //     selectedImageIndices, updateUrl, animateInfo, updateAnimationState]);
 
   // Effects
   useEffect(() => {
@@ -472,6 +472,21 @@ export default function DiyProductDetail() {
     };
   }, []);
 
+  useEffect(() => {
+    const swiper = swiperInstances.main;
+    if (!swiper || animationState.inProgress) return;
+  
+    const newIndex = swiper.activeIndex;
+    if (newIndex !== activeProductIndex) {
+      setActiveProductIndex(newIndex);
+      updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+  
+      if (swiperInstances.thumbs) {
+        swiperInstances.thumbs.slideTo(newIndex);
+      }
+    }
+  }, [swiperInstances.main?.activeIndex]);
+  
   // // Ранний возврат для невалидной категории
   // if (!categoryExists) {
   //   return <div className="text-center mt-10 p-4">Категория не найдена</div>;

@@ -1653,10 +1653,10 @@ export default function ProductDetail() {
     }
 
     // Анимируем появление новой информации
-    setTimeout(async () => {
+    // setTimeout(async () => {
       await animateInfo('in');
       updateAnimationState({ slideChanging: false, inProgress: false });
-    }, 50);
+    // }, 50);
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
       swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
@@ -1782,6 +1782,21 @@ export default function ProductDetail() {
   if (!currentProduct) {
     return <div className="text-center mt-10 p-4">Продукт не найден</div>;
   }
+  useEffect(() => {
+    const swiper = swiperInstances.main;
+    if (!swiper || animationState.inProgress) return;
+  
+    const newIndex = swiper.activeIndex;
+    if (newIndex !== activeProductIndex) {
+      setActiveProductIndex(newIndex);
+      updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+  
+      if (swiperInstances.thumbs) {
+        swiperInstances.thumbs.slideTo(newIndex);
+      }
+    }
+  }, [swiperInstances.main?.activeIndex]);
+  
 
   return (
     <>
