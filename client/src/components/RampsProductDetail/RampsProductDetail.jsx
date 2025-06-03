@@ -148,7 +148,7 @@ export default function RampsProductDetail() {
     if (refs.urlUpdateBlocked.current) return;
     
     refs.urlUpdateBlocked.current = true;
-    const newUrl = `/product/sets/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/ramps/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     setTimeout(() => {

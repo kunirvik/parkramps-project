@@ -158,7 +158,7 @@ export default function SkateparksProductDetail() {
     if (refs.urlUpdateBlocked.current) return;
     
     refs.urlUpdateBlocked.current = true;
-    const newUrl = `/product/sets/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/skateparks/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     setTimeout(() => {

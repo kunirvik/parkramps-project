@@ -217,7 +217,7 @@ export default function DiyProductDetail() {
     if (refs.urlUpdateBlocked.current) return;
     
     refs.urlUpdateBlocked.current = true;
-    const newUrl = `/product/sets/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/diy/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     setTimeout(() => {
