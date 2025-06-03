@@ -376,6 +376,30 @@ export default function RampsProductDetail() {
     return <div className="text-center mt-10 p-4">Продукт не найден</div>;
   }
 
+
+  useEffect(() => {
+  if (!swiperInstances.main || animationState.inProgress) return;
+
+  const swiper = swiperInstances.main;
+  const index = swiper.activeIndex;
+
+  if (index !== activeProductIndex) {
+    updateAnimationState({ slideChanging: true, inProgress: true });
+
+    // Обновляем активный продукт и URL
+    setActiveProductIndex(index);
+    updateUrl(productCatalogRamps[index].id, selectedImageIndices[index]);
+
+    // Обновление происходит быстрее, без задержки
+    animateInfo('out').then(() => {
+      animateInfo('in').then(() => {
+        updateAnimationState({ slideChanging: false, inProgress: false });
+      });
+    });
+  }
+}, [swiperInstances.main?.activeIndex]);
+
+
   return (
     <>
       <SocialButtons
