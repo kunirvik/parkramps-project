@@ -425,7 +425,7 @@ export default function SkateparksProductDetail() {
     const newIndex = swiper.activeIndex;
     if (newIndex !== activeProductIndex) {
       setActiveProductIndex(newIndex);
-      updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+      updateUrl(productCatalogSkateparks[newIndex].id, selectedImageIndices[newIndex]);
   
       if (swiperInstances.thumbs) {
         swiperInstances.thumbs.slideTo(newIndex);

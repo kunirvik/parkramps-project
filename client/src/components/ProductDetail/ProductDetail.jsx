@@ -1789,7 +1789,7 @@ export default function ProductDetail() {
     const newIndex = swiper.activeIndex;
     if (newIndex !== activeProductIndex) {
       setActiveProductIndex(newIndex);
-      updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+      updateUrl(productCatalog[newIndex].id, selectedImageIndices[newIndex]);
   
       if (swiperInstances.thumbs) {
         swiperInstances.thumbs.slideTo(newIndex);
