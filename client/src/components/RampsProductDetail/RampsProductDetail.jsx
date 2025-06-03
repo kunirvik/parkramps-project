@@ -8,7 +8,7 @@ import { Pagination, Mousewheel, Thumbs } from "swiper/modules";
 // import productCatalogRamps from "../data/productCatalogRamps";
 import "swiper/css";
 import "swiper/css/pagination"; 
-const productCatalogRamps= [ {id: 1,
+const productCatalogRamps= [ {id: 2,
     name: "Ramp160",
     image: "/images//ramps/minir180h60w200d40alt.png",
     altImages: ["/images/ramps/minir180h60w200d40.png", "/images/ramps/minir180h60w200d40frontalt.png",  "/images/ramps/minir180h60w200d40top.png",  "/images/ramps/minir180h60w200d40front.png"],
@@ -25,7 +25,7 @@ const productCatalogRamps= [ {id: 1,
     relatedProducts: [2, 3, 4] // IDs of related products
   },
   {
-    id: 2,
+    id: 1,
     name: "Рампы",
     image: "/images/ramps/ramp95garagemain.png",
     altImages: ["/images/ramps/ramp95garagetop.png", "/images/ramps/ramp95garage.png"],
