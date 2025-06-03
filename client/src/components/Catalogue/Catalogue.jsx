@@ -14,7 +14,7 @@ const products = [{
   {
     id: 2,
       category: "ramps",  
-      image: "/images/ramps/minir180h60w200d40alt.png",
+      image: "/images/diy/kicker.png",
     name: "рампы",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
@@ -32,8 +32,8 @@ const products = [{
     id: 4,
      category: "diy",
     name: "сделай сам diy",
- 
-    image: "/images/diy/kicker.png",
+   image: "/images/ramps/minir180h60w200d40alt.png",
+  
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }
@@ -128,13 +128,13 @@ const preloadImage = (src) => {
         navigate(`/product/sets/1?view=0`, { state: { imageData } });
         break;
       case "ramps":
-        navigate(`/product/ramps/1?view=0`, { state: { imageData } });
+         navigate(`/product/diy/1?view=0`, { state: { imageData } });
         break;
       case "skateparks":
         navigate(`/product/skateparks/1?view=0`, { state: { imageData } });
         break;
       case "diy":
-        navigate(`/product/diy/1?view=0`, { state: { imageData } });
+       navigate(`/product/ramps/1?view=0`, { state: { imageData } });
         break;
       default:
         console.warn("Неизвестная категория:", product.category);
