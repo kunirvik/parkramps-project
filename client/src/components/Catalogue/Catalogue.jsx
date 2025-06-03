@@ -32,7 +32,7 @@ const products = [{
     id: 4,
      category: "diy",
     name: "сделай сам diy",
-   image: "/images/diy/ramp95garagemain.png",
+   image: "/images/ramps/ramp95garagemain.png",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }
