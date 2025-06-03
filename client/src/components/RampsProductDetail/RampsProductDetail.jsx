@@ -96,7 +96,7 @@ const SWIPER_CONFIG = {
 export default function RampsProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id, category } = useParams();
+  const { id} = useParams();
   const [searchParams] = useSearchParams();
   
   const imageData = location.state?.imageData;
@@ -135,22 +135,13 @@ export default function RampsProductDetail() {
     productCatalogRamps[activeProductIndex], [activeProductIndex]
   );
 
-  // const relatedProducts = useMemo(() => 
-  //   currentProduct?.relatedProducts
-  //     ?.map(id => productCatalogRamps.find(p => p.id === id))
-  //     .filter(Boolean) || [], 
-  //   [currentProduct]
-  // );
+
 
   const currentImages = useMemo(() => 
     currentProduct ? [currentProduct.image, ...currentProduct.altImages] : [], 
     [currentProduct]
   );
 
-  // Проверка валидности категории
-  const categoryExists = useMemo(() => 
-    productCatalogRamps.some(cat => cat.category === category), [category]
-  );
 
   // Утилиты
   const updateUrl = useCallback((productId, viewIndex = 0) => {
@@ -315,40 +306,7 @@ export default function RampsProductDetail() {
     swiperInstances.main.slideTo(index);
   }, [animationState.inProgress, activeProductIndex, swiperInstances.main]);
 
-  const handleRelatedProductClick = useCallback(async (relatedProductId) => {
-    const relatedIndex = productCatalogRamps.findIndex(p => p.id === relatedProductId);
-    
-    if (relatedIndex === -1 || relatedIndex === activeProductIndex || 
-        animationState.inProgress) return;
-
-    updateAnimationState({ slideChanging: true, inProgress: true });
-
-    // Скрываем текущую информацию
-    await animateInfo('out');
-
-    // Обновляем состояние
-    setActiveProductIndex(relatedIndex);
-
-    // Синхронизируем swiper'ы без анимации
-    if (swiperInstances.main) {
-      swiperInstances.main.slideTo(relatedIndex, 0);
-    }
-    if (swiperInstances.thumbs) {
-      swiperInstances.thumbs.slideTo(relatedIndex, 0);
-    }
-
-    // Обновляем URL
-    setTimeout(() => {
-      updateUrl(relatedProductId, selectedImageIndices[relatedIndex] || 0);
-    }, 50);
-
-    // Показываем новую информацию
-    setTimeout(async () => {
-      await animateInfo('in');
-      updateAnimationState({ slideChanging: false, inProgress: false });
-    }, 100);
-  }, [activeProductIndex, animationState.inProgress, swiperInstances, 
-      selectedImageIndices, updateUrl, animateInfo, updateAnimationState]);
+  
 
   // Effects
   useEffect(() => {
@@ -412,10 +370,7 @@ export default function RampsProductDetail() {
     };
   }, []);
 
-  // // Ранний возврат для невалидной категории
-  // if (!categoryExists) {
-  //   return <div className="text-center mt-10 p-4">Категория не найдена</div>;
-  // }
+
 
   if (!currentProduct) {
     return <div className="text-center mt-10 p-4">Продукт не найден</div>;
@@ -605,26 +560,7 @@ export default function RampsProductDetail() {
               </a>
             ))}
 
-            {/* Связанные продукты */}
-            {/* {relatedProducts.length > 0 && (
-              <div className="mt-6">
-                <h3 className="font-futura text-[#717171] font-bold mb-3">
-                  Связанные продукты
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {relatedProducts.map(relatedProduct => (
-                    <button
-                      key={relatedProduct.id}
-                      onClick={() => handleRelatedProductClick(relatedProduct.id)}
-                      className="px-3 py-1 border border-gray-300 rounded hover:border-black transition-colors text-sm"
-                      disabled={animationState.inProgress}
-                    >
-                      {relatedProduct.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )} */}
+           
           </div>
         </div>
       </div>
