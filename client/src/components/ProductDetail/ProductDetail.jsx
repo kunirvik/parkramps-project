@@ -1721,58 +1721,69 @@ export default function ProductDetail() {
     setSelectedImageIndices(newIndices);
   }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
 
-  // Стили и блокировка скролла
-  useEffect(() => {
-    const styles = `
-      html, body { 
-        overflow: hidden !important; 
-        height: 100% !important;
-        width: 100% !important;
-      }
-      .swiper-wrapper { 
-        transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
-      }
-      .swiper-slide { 
-        transition: transform ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                    opacity ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
-      }
-      .swiper-slide-active { z-index: 2; }
-      .swiper-no-transition .swiper-wrapper { transition: none !important; }
-      .swiper-slide-thumb-active {
-        opacity: 1 !important;
-        transform: scale(1.05) !important;
-        border: 2px solid black !important;
-        border-radius: 0.5rem !important;
-      }
-      .transition-image-container {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        overflow: hidden !important;
-        pointer-events: none !important;
-        z-index: 9999 !important;
-      }
-    `;
+useEffect(() => {
+  const styleElement = document.createElement('style');
+  document.head.appendChild(styleElement);
 
-    const styleElement = document.createElement('style');
-    styleElement.innerHTML = styles;
-    document.head.appendChild(styleElement);
+  const updateStyles = () => {
+    if (window.innerWidth >= 1024) {
+      // Блокируем скролл на десктопе
+      styleElement.innerHTML = `
+        html, body {
+          overflow: hidden !important;
+          height: 100% !important;
+          width: 100% !important;
+        }
+        .swiper-wrapper {
+          transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        }
+        .swiper-slide {
+          transition: transform ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                      opacity ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        }
+        .swiper-slide-active { z-index: 2; }
+        .swiper-no-transition .swiper-wrapper { transition: none !important; }
+        .swiper-slide-thumb-active {
+          opacity: 1 !important;
+          transform: scale(1.05) !important;
+          border: 2px solid black !important;
+          border-radius: 0.5rem !important;
+        }
+        .transition-image-container {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          overflow: hidden !important;
+          pointer-events: none !important;
+          z-index: 9999 !important;
+        }
+      `;
+    } else {
+      // Разрешаем вертикальный скролл на мобильных устройствах
+      styleElement.innerHTML = `
+        html, body {
+          overflow-x: hidden !important;
+          overflow-y: auto !important;
+          height: auto !important;
+          width: 100% !important;
+          -webkit-overflow-scrolling: touch;
+        }
+      `;
+    }
+  };
 
-    // Дополнительно блокируем скролл на body/html
-    const originalBodyStyle = document.body.style.overflow;
-    const originalHtmlStyle = document.documentElement.style.overflow;
-    
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
+  // Начальная установка и слушатель ресайза
+  updateStyles();
+  window.addEventListener('resize', updateStyles);
 
-    return () => {
-      document.head.removeChild(styleElement);
-      document.body.style.overflow = originalBodyStyle;
-      document.documentElement.style.overflow = originalHtmlStyle;
-    };
-  }, []);
+  return () => {
+    window.removeEventListener('resize', updateStyles);
+    document.head.removeChild(styleElement);
+  };
+}, []);
+
 
   // // Ранний возврат для невалидной категории
   // if (!categoryExists) {
