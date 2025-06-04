@@ -421,6 +421,7 @@ export default function DiyProductDetail() {
 
   // Стили и блокировка скролла
   useEffect(() => {
+    if (window.innerWidth >= 1024) {
     const styles = `
       html, body { 
         overflow: hidden !important; 
@@ -469,7 +470,7 @@ export default function DiyProductDetail() {
       document.head.removeChild(styleElement);
       document.body.style.overflow = originalBodyStyle;
       document.documentElement.style.overflow = originalHtmlStyle;
-    };
+    };}
   }, []);
 
   useEffect(() => {
@@ -479,7 +480,7 @@ export default function DiyProductDetail() {
     const newIndex = swiper.activeIndex;
     if (newIndex !== activeProductIndex) {
       setActiveProductIndex(newIndex);
-      updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+      updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
   
       if (swiperInstances.thumbs) {
         swiperInstances.thumbs.slideTo(newIndex);

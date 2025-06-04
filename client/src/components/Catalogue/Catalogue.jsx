@@ -46,6 +46,8 @@ export default function Catalogue() {
   const productsRef = useRef(new Map());
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const tooltipRef = useRef(null);
+
 
   const handleExit = () => {
     console.log("handleExit вызван!");
@@ -77,14 +79,32 @@ const preloadImage = (src) => {
   }, []);
 
   // Track mouse position for tooltip
-  const handleMouseMove = (e, productId) => {
-    setTooltip({
-      show: true,
-      x: e.clientX,
-      y: e.clientY,
-      productId
-    });
-  };
+const handleMouseMove = (e, productId) => {
+  const tooltipWidth = tooltipRef.current?.offsetWidth || 0;
+  const tooltipHeight = tooltipRef.current?.offsetHeight || 0;
+  const padding = 10;
+
+  let x = e.clientX + padding;
+  let y = e.clientY;
+
+  // Проверка выхода за правый край
+  if (x + tooltipWidth > window.innerWidth) {
+    x = e.clientX - tooltipWidth - padding;
+  }
+
+  // Проверка выхода за нижний край
+  if (y + tooltipHeight > window.innerHeight) {
+    y = window.innerHeight - tooltipHeight - padding;
+  }
+
+  setTooltip({
+    show: true,
+    x,
+    y,
+    productId
+  });
+};
+
 
   const handleMouseLeave = () => {
     setTooltip({ ...tooltip, show: false });
@@ -222,6 +242,7 @@ const preloadImage = (src) => {
       {/* Tooltip that follows cursor */}
       {tooltip.show && (
         <div 
+          ref={tooltipRef}
           className="absolute  font-futura font-light z-10 bg-black text-white px-10 py-2  shadow-lg pointer-events-none transition-opacity opacity-90"
           style={{ 
             left: `${tooltip.x + 10}px`, 
