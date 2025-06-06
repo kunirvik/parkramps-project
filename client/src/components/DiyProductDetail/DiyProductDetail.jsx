@@ -5,6 +5,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import LoadingScreen from "../LoadingScreen/LodingScreen";
 import SocialButtons from "../SocialButtons/SocialButtons";
 import { Pagination, Mousewheel, Thumbs } from "swiper/modules";
+import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
+
 import "swiper/css";
 import "swiper/css/pagination"; 
 
@@ -202,6 +204,11 @@ export default function DiyProductDetail() {
   //   [currentProduct]
   // );
 
+
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+
+
+  
   const currentImages = useMemo(() => 
     currentProduct ? [currentProduct.image, ...currentProduct.altImages] : [], 
     [currentProduct]
@@ -410,8 +417,7 @@ export default function DiyProductDetail() {
   // }, [activeProductIndex, animationState.inProgress, swiperInstances, 
   //     selectedImageIndices, updateUrl, animateInfo, updateAnimationState]);
 
-  // Effects
-  useEffect(() => {
+useEffect(() => {
     if (!swiperInstances.main || animationState.inProgress) return;
 
     const newIndices = [...selectedImageIndices];
@@ -420,11 +426,14 @@ export default function DiyProductDetail() {
   }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
 
   // Стили и блокировка скролла
-  useEffect(() => {
-    if (window.innerWidth >= 1024) {
+useEffect(() => {
+  const styleElement = document.createElement("style");
+  document.head.appendChild(styleElement);
+
+  const applyStyles = (isDesktop) => {
     const styles = `
       html, body { 
-        overflow: hidden !important; 
+        overflow: ${isDesktop ? "hidden" : "auto"} !important; 
         height: 100% !important;
         width: 100% !important;
       }
@@ -455,23 +464,61 @@ export default function DiyProductDetail() {
       }
     `;
 
-    const styleElement = document.createElement('style');
     styleElement.innerHTML = styles;
-    document.head.appendChild(styleElement);
+  };
 
-    // Дополнительно блокируем скролл на body/html
-    const originalBodyStyle = document.body.style.overflow;
-    const originalHtmlStyle = document.documentElement.style.overflow;
-    
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
+  const handleResize = () => {
+    const isDesktop = window.innerWidth >= 1024;
+    applyStyles(isDesktop);
+  };
 
-    return () => {
-      document.head.removeChild(styleElement);
-      document.body.style.overflow = originalBodyStyle;
-      document.documentElement.style.overflow = originalHtmlStyle;
-    };}
-  }, []);
+  // Установить начальное состояние
+  handleResize();
+
+  // Подписка на ресайз
+  window.addEventListener("resize", handleResize);
+
+  return () => {
+    window.removeEventListener("resize", handleResize);
+    document.head.removeChild(styleElement);
+  };
+}, []);
+
+
+
+  useEffect(() => {
+  let prevIsDesktop = window.innerWidth >= 1024;
+
+  const handleResize = () => {
+    const isDesktop = window.innerWidth >= 1024;
+
+    if (isDesktop !== prevIsDesktop) {
+      window.location.reload();
+    }
+
+    prevIsDesktop = isDesktop;
+  };
+
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+
+
+  useEffect(() => {
+    const swiper = swiperInstances.main;
+    if (!swiper || animationState.inProgress) return;
+  
+    const newIndex = swiper.activeIndex;
+    if (newIndex !== activeProductIndex) {
+      setActiveProductIndex(newIndex);
+      updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
+  
+      if (swiperInstances.thumbs) {
+        swiperInstances.thumbs.slideTo(newIndex);
+      }
+    }
+  }, [swiperInstances.main?.activeIndex]);
+
 
   useEffect(() => {
     const swiper = swiperInstances.main;
@@ -668,7 +715,7 @@ export default function DiyProductDetail() {
             </div>
 
             {/* Детали продукта */}
-            {currentProduct.details?.map((detail, index) => (
+            {/* {currentProduct.details?.map((detail, index) => (
               <a
                 key={index}
                 href={detail.link}
@@ -679,7 +726,28 @@ export default function DiyProductDetail() {
                 </span>
                 <span className="font-futura text-[#717171] text-lg">→</span>
               </a>
-            ))}
+            ))} */}
+
+            {currentProduct.details?.map((detail, index) => {
+  const isCatalog = detail.title.toLowerCase().includes("каталог");
+  return (
+    <button
+      key={index}
+      onClick={() => {
+        if (isCatalog) setIsGalleryOpen(true);
+        else window.location.href = detail.link;
+      }}
+      className="w-full text-left flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+    >
+      <span className="font-futura text-[#717171] font-medium">
+        {detail.title}
+      </span>
+      <span className="font-futura text-[#717171] text-lg">→</span>
+    </button>
+  );
+})}
+
+
 
             {/* Связанные продукты */}
             {/* {relatedProducts.length > 0 && (
@@ -702,7 +770,11 @@ export default function DiyProductDetail() {
               </div>
             )} */}
           </div>
-        </div>
+        </div><FullscreenGallery 
+  images={currentImages} 
+  isOpen={isGalleryOpen} 
+  onClose={() => setIsGalleryOpen(false)} 
+/>
       </div>
     </>
   );
