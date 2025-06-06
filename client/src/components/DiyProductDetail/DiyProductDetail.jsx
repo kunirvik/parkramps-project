@@ -1,4 +1,4 @@
- import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useLocation, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import gsap from "gsap";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -9,9 +9,6 @@ import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
 import productCatalogDiys from "../data/productCatalogDiys";
 import "swiper/css";
 import "swiper/css/pagination"; 
-
-
-
 
 // Константы
 const ANIMATION_CONFIG = {
@@ -26,6 +23,8 @@ const SWIPER_CONFIG = {
   RESISTANCE_RATIO: 0.85
 };
 
+const LOADING_SCREEN_DURATION = 1500; // 1.5 секунды
+
 export default function DiyProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,6 +33,14 @@ export default function DiyProductDetail() {
   
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
+
+  // Определяем, нужен ли loading screen
+  const shouldShowLoading = useMemo(() => {
+    // Показываем loading screen если:
+    // 1. Нет imageData (значит переход не с каталога с анимацией)
+    // 2. Или если это прямой переход/перезагрузка
+    return !imageData;
+  }, [imageData]);
 
   // Основные состояния
   const [activeProductIndex, setActiveProductIndex] = useState(() => 
@@ -47,11 +54,16 @@ export default function DiyProductDetail() {
     thumbs: null
   });
 
-  // Состояния анимации
+  // Состояния анимации и загрузки
   const [animationState, setAnimationState] = useState({
     complete: !imageData,
     inProgress: false,
     slideChanging: false
+  });
+
+  const [loadingState, setLoadingState] = useState({
+    isLoading: shouldShowLoading,
+    isCompleted: false
   });
 
   // Refs
@@ -68,17 +80,57 @@ export default function DiyProductDetail() {
     productCatalogDiys[activeProductIndex], [activeProductIndex]
   );
 
-
-
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-
-const [isLoading, setIsLoading] = useState(true);
 
   const currentImages = useMemo(() => 
     currentProduct ? [currentProduct.image, ...currentProduct.altImages] : [], 
     [currentProduct]
   );
 
+  // Обработка завершения loading screen
+  const handleLoadingComplete = useCallback(() => {
+    setLoadingState(prev => ({ ...prev, isCompleted: true }));
+    
+    // Небольшая задержка перед началом показа контента
+    setTimeout(() => {
+      setLoadingState(prev => ({ ...prev, isLoading: false }));
+      
+      // Анимируем появление контента
+      if (refs.container.current && refs.info.current) {
+        gsap.fromTo(refs.container.current, 
+          { opacity: 0, y: 30 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: ANIMATION_CONFIG.DURATION,
+            ease: ANIMATION_CONFIG.EASE 
+          }
+        );
+        
+        gsap.fromTo(refs.info.current,
+          { opacity: 0, y: 20 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: ANIMATION_CONFIG.DURATION,
+            ease: ANIMATION_CONFIG.EASE,
+            delay: 0.2
+          }
+        );
+      }
+    }, 200);
+  }, []);
+
+  // Эффект для автоматического завершения loading screen
+  useEffect(() => {
+    if (!shouldShowLoading) return;
+
+    const timer = setTimeout(() => {
+      handleLoadingComplete();
+    }, LOADING_SCREEN_DURATION);
+
+    return () => clearTimeout(timer);
+  }, [shouldShowLoading, handleLoadingComplete]);
 
   // Утилиты
   const updateUrl = useCallback((productId, viewIndex = 0) => {
@@ -192,12 +244,17 @@ const [isLoading, setIsLoading] = useState(true);
     setSwiperInstances(prev => ({ ...prev, main: swiper }));
     
     if (!imageData) {
-      gsap.set(refs.info.current, { opacity: 1, y: 0 });
+      // Если нет анимации перехода, но есть loading screen
+      if (shouldShowLoading && !loadingState.isCompleted) {
+        gsap.set(refs.info.current, { opacity: 0, y: 0 });
+      } else {
+        gsap.set(refs.info.current, { opacity: 1, y: 0 });
+      }
       return;
     }
 
     requestAnimationFrame(startTransitionAnimation);
-  }, [imageData, startTransitionAnimation]);
+  }, [imageData, startTransitionAnimation, shouldShowLoading, loadingState.isCompleted]);
 
   const handleSlideChange = useCallback(async (swiper) => {
     const newIndex = swiper.activeIndex;
@@ -219,10 +276,8 @@ const [isLoading, setIsLoading] = useState(true);
     }
 
     // Анимируем появление новой информации
-    // setTimeout(async () => {
-      await animateInfo('in');
-      updateAnimationState({ slideChanging: false, inProgress: false });
-    // }, 50);
+    await animateInfo('in');
+    updateAnimationState({ slideChanging: false, inProgress: false });
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
       swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
@@ -243,8 +298,7 @@ const [isLoading, setIsLoading] = useState(true);
     swiperInstances.main.slideTo(index);
   }, [animationState.inProgress, activeProductIndex, swiperInstances.main]);
 
- 
-useEffect(() => {
+  useEffect(() => {
     if (!swiperInstances.main || animationState.inProgress) return;
 
     const newIndices = [...selectedImageIndices];
@@ -253,65 +307,63 @@ useEffect(() => {
   }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
 
   // Стили и блокировка скролла
-useEffect(() => {
-  const styleElement = document.createElement("style");
-  document.head.appendChild(styleElement);
+  useEffect(() => {
+    const styleElement = document.createElement("style");
+    document.head.appendChild(styleElement);
 
-  const applyStyles = (isDesktop) => {
-    const styles = `
-      html, body { 
-        overflow: ${isDesktop ? "hidden" : "auto"} !important; 
-        height: 100% !important;
-        width: 100% !important;
-      }
-      .swiper-wrapper { 
-        transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
-      }
-      .swiper-slide { 
-        transition: transform ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                    opacity ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
-      }
-      .swiper-slide-active { z-index: 2; }
-      .swiper-no-transition .swiper-wrapper { transition: none !important; }
-      .swiper-slide-thumb-active {
-        opacity: 1 !important;
-        transform: scale(1.05) !important;
-        border: 2px solid black !important;
-        border-radius: 0.5rem !important;
-      }
-      .transition-image-container {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        overflow: hidden !important;
-        pointer-events: none !important;
-        z-index: 9999 !important;
-      }
-    `;
+    const applyStyles = (isDesktop) => {
+      const styles = `
+        html, body { 
+          overflow: ${isDesktop ? "hidden" : "auto"} !important; 
+          height: 100% !important;
+          width: 100% !important;
+        }
+        .swiper-wrapper { 
+          transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
+        }
+        .swiper-slide { 
+          transition: transform ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                      opacity ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
+        }
+        .swiper-slide-active { z-index: 2; }
+        .swiper-no-transition .swiper-wrapper { transition: none !important; }
+        .swiper-slide-thumb-active {
+          opacity: 1 !important;
+          transform: scale(1.05) !important;
+          border: 2px solid black !important;
+          border-radius: 0.5rem !important;
+        }
+        .transition-image-container {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          overflow: hidden !important;
+          pointer-events: none !important;
+          z-index: 9999 !important;
+        }
+      `;
 
-    styleElement.innerHTML = styles;
-  };
+      styleElement.innerHTML = styles;
+    };
 
-  const handleResize = () => {
-    const isDesktop = window.innerWidth >= 1024;
-    applyStyles(isDesktop);
-  };
+    const handleResize = () => {
+      const isDesktop = window.innerWidth >= 1024;
+      applyStyles(isDesktop);
+    };
 
-  // Установить начальное состояние
-  handleResize();
+    // Установить начальное состояние
+    handleResize();
 
-  // Подписка на ресайз
-  window.addEventListener("resize", handleResize);
+    // Подписка на ресайз
+    window.addEventListener("resize", handleResize);
 
-  return () => {
-    window.removeEventListener("resize", handleResize);
-    document.head.removeChild(styleElement);
-  };
-}, []);
-
-
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   useEffect(() => {
     const swiper = swiperInstances.main;
@@ -327,30 +379,14 @@ useEffect(() => {
       }
     }
   }, [swiperInstances.main?.activeIndex]);
-
-
-
-  
-
-  useEffect(() => {
-    const swiper = swiperInstances.main;
-    if (!swiper || animationState.inProgress) return;
-  
-    const newIndex = swiper.activeIndex;
-    if (newIndex !== activeProductIndex) {
-      setActiveProductIndex(newIndex);
-      updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
-  
-      if (swiperInstances.thumbs) {
-        swiperInstances.thumbs.slideTo(newIndex);
-      }
-    }
-  }, [swiperInstances.main?.activeIndex]);
-  
-
 
   if (!currentProduct) {
     return <div className="text-center mt-10 p-4">Продукт не найден</div>;
+  }
+
+  // Показываем LoadingScreen если нужно
+  if (loadingState.isLoading) {
+    return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
   return (
@@ -361,7 +397,13 @@ useEffect(() => {
         buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
       />
       
-      <div ref={refs.container} className="flex flex-col items-center w-full mt-[60px] mx-auto px-4">
+      <div 
+        ref={refs.container} 
+        className="flex flex-col items-center w-full mt-[60px] mx-auto px-4"
+        style={{ 
+          opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1 
+        }}
+      >
         <button 
           onClick={() => navigate(-1)} 
           className="self-start mb-6 text-gray-200 hover:text-gray-800 transition-colors"
@@ -484,10 +526,10 @@ useEffect(() => {
             ref={refs.info}
             className="w-full lg:w-1/4 flex flex-col justify-center mt-4 lg:mt-0"
             style={{ 
-              opacity: animationState.slideChanging || !animationState.complete ? 0 : 1,
-              transform: animationState.slideChanging || !animationState.complete 
+              opacity: animationState.slideChanging || (!animationState.complete && imageData) ? 0 : 1,
+              transform: animationState.slideChanging || (!animationState.complete && imageData)
                 ? 'translateY(20px)' : 'translateY(0)',
-              visibility: animationState.slideChanging || !animationState.complete 
+              visibility: animationState.slideChanging || (!animationState.complete && imageData)
                 ? 'hidden' : 'visible'
             }}
           >
@@ -523,31 +565,32 @@ useEffect(() => {
               ))}
             </div>
 
-
             {currentProduct.details?.map((detail, index) => {
-  const isCatalog = detail.title.toLowerCase().includes("каталог");
-  return (
-    <button
-      key={index}
-      onClick={() => {
-        if (isCatalog) setIsGalleryOpen(true);
-        else window.location.href = detail.link;
-      }}
-      className="w-full text-left flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
-    >
-      <span className="font-futura text-[#717171] font-medium">
-        {detail.title}
-      </span>
-      <span className="font-futura text-[#717171] text-lg">→</span>
-    </button>
-  );
-})}
+              const isCatalog = detail.title.toLowerCase().includes("каталог");
+              return (
+                <button
+                  key={index}
+                  onClick={() => {
+                    if (isCatalog) setIsGalleryOpen(true);
+                    else window.location.href = detail.link;
+                  }}
+                  className="w-full text-left flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+                >
+                  <span className="font-futura text-[#717171] font-medium">
+                    {detail.title}
+                  </span>
+                  <span className="font-futura text-[#717171] text-lg">→</span>
+                </button>
+              );
+            })}
           </div>
-        </div><FullscreenGallery 
-  images={currentImages} 
-  isOpen={isGalleryOpen} 
-  onClose={() => setIsGalleryOpen(false)} 
-/>
+        </div>
+        
+        <FullscreenGallery 
+          images={currentImages} 
+          isOpen={isGalleryOpen} 
+          onClose={() => setIsGalleryOpen(false)} 
+        />
       </div>
     </>
   );
