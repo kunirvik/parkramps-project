@@ -441,45 +441,7 @@ export default function DiyProductDetail() {
             }}
           >
       
-
-       <div className="block md:hidden absolute right-0 top-0 h-full w-20 z-10">
-            <Swiper
-            
-              modules={[Thumbs]}
-              direction="vertical"
-              onSwiper={(swiper) => setSwiperInstances(prev => ({ ...prev, thumbs: swiper }))}
-              className="block md:hidden  w-20 h-104 mt-4 "
-              slidesPerView={5}
-              spaceBetween={10}
-              watchSlidesProgress={true}
-              slideToClickedSlide={true}
-              initialSlide={activeProductIndex}
-              speed={SWIPER_CONFIG.SPEED}
-              preventClicks={false}
-              preventClicksPropagation={false}
-              observer={true}
-              observeParents={true}
-              resistance={false}
-              resistanceRatio={0}
-
-            >
-              {productCatalogDiys.map((product, index) => (
-                <SwiperSlide key={product.id}>
-                  <img
-                    src={product.image}
-                    onClick={() => handleThumbnailClick(index)}
-                    className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
-                      index === activeProductIndex 
-                        ? 'opacity-100 scale-105 border-black' 
-                        : 'grayscale border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                    alt={product.name}
-                    draggable="false"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div>   <div className="w-full"><div className="md:w-full w-[75%]">
+ <div className="w-full"><div className="md:w-full w-[75%]">
             {/* Основной слайдер */}
             <Swiper
               className="custom-swiper  mb-4 "
@@ -525,6 +487,44 @@ export default function DiyProductDetail() {
                 </SwiperSlide>
               ))}
             </Swiper></div>
+       <div className="block md:hidden absolute right-0 top-0 h-full w-20 z-10">
+            <Swiper
+            
+              modules={[Thumbs]}
+              direction="vertical"
+              onSwiper={(swiper) => setSwiperInstances(prev => ({ ...prev, thumbs: swiper }))}
+              className="block md:hidden  w-20 h-104 mt-4 "
+              slidesPerView={5}
+              spaceBetween={10}
+              watchSlidesProgress={true}
+              slideToClickedSlide={true}
+              initialSlide={activeProductIndex}
+              speed={SWIPER_CONFIG.SPEED}
+              preventClicks={false}
+              preventClicksPropagation={false}
+              observer={true}
+              observeParents={true}
+              resistance={false}
+              resistanceRatio={0}
+
+            >
+              {productCatalogDiys.map((product, index) => (
+                <SwiperSlide key={product.id}>
+                  <img
+                    src={product.image}
+                    onClick={() => handleThumbnailClick(index)}
+                    className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
+                      index === activeProductIndex 
+                        ? 'opacity-100 scale-105 border-black' 
+                        : 'grayscale border-transparent opacity-60 hover:opacity-100'
+                    }`}
+                    alt={product.name}
+                    draggable="false"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>  
             {/* Свайпер миниатюр товаров */}
             <div className="hidden md:block w-full mt-6">
             <Swiper
