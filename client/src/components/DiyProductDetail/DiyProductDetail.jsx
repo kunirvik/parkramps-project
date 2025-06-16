@@ -411,6 +411,19 @@ export default function DiyProductDetail() {
           ← Back
         </button>
 
+        {/* Заголовок для мобильной версии - показываем только на мобильных */}
+        <div className="block lg:hidden w-full mb-6">
+          <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
+            {currentProduct.name}
+          </h1>
+          <p className="font-futura text-[#717171] font-medium">
+            {currentProduct.description}
+          </p>
+          <p className="font-futura text-[#717171] font-medium mt-2">
+            Дизайн: {currentProduct.designer}, {currentProduct.year}
+          </p>
+        </div>
+
         <div className="w-full flex flex-col lg:flex-row gap-8 relative">
           {/* Переходное изображение */}
           {!animationState.complete && imageData && (
@@ -577,15 +590,18 @@ export default function DiyProductDetail() {
                 ? 'hidden' : 'visible'
             }}
           >
-            <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
-              {currentProduct.name}
-            </h1>
-            <p className="font-futura text-[#717171] font-medium">
-              {currentProduct.description}
-            </p>
-            <p className="font-futura text-[#717171] font-medium mt-2">
-              Дизайн: {currentProduct.designer}, {currentProduct.year}
-            </p>
+            {/* Заголовок для десктопной версии - скрываем на мобильных */}
+            <div className="hidden lg:block">
+              <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
+                {currentProduct.name}
+              </h1>
+              <p className="font-futura text-[#717171] font-medium">
+                {currentProduct.description}
+              </p>
+              <p className="font-futura text-[#717171] font-medium mt-2">
+                Дизайн: {currentProduct.designer}, {currentProduct.year}
+              </p>
+            </div>
             
             {/* Миниатюры изображений текущего продукта */}
             <div className="mt-8 flex flex-wrap justify-start gap-4">

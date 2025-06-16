@@ -36,6 +36,9 @@ export default function MenuPark() {
       >
         <source src="/tlprshrt.mp4" type="video/mp4" />
       </video> */}
+
+      <img className="sm:rotate-0  sm:object-contain  sm:overflow-hidden absolute top-0 left-0 w-full h-full object-cover transform rotate-90  "
+       src="/project.png"></img>
       
       {/* Анимированный текст */}
       <div className="relative z-10 flex flex-col items-center overflow-visible">
@@ -45,7 +48,7 @@ export default function MenuPark() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.5 }}
-          className={`text-[150px]  font-futura bg-clip-text tracking-[-10px] mb-6 cursor-pointer ${index === words.length - 1 ? " font-bold text-transparent bg-black/50" : "font-medium  text-transparent  bg-white/50"}`}
+          className={`sm:text-[150px] text-[100px]  font-futura bg-clip-text tracking-[-10px] mb-6 cursor-pointer ${index === words.length - 1 ? " font-bold text-transparent bg-pink-300" : "font-medium  text-transparent  bg-white/50"}`}
           onMouseMove={handleMouseMove}
           style={{ padding: "0 20px" }} 
           onMouseLeave={handleMouseLeave}
@@ -79,7 +82,7 @@ export default function MenuPark() {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="px-6 py-3 bg-black/20 backdrop-blur-md rounded-lg text-lg font-futura font-light shadow-lg hover:bg-blue-200 cursor-pointer"
+          className="px-6 py-3 bg-white/20 backdrop-blur-md rounded-lg text-lg font-futura font-light shadow-lg hover:bg-pink-300 cursor-pointer"
           onClick={() => window.location.href = "/catalogue"}
         >
           shop
