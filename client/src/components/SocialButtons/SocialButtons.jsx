@@ -45,10 +45,16 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
 
   return (
     <>
-      {/* Черная полоска */}
-      <div className="fixed top-0 left-0 w-full h-10 bg-black flex items-center justify-between px-4 shadow-md z-50">
+      {/* Черная полоска */} {/* Зеленая полоса сразу под черной */}
+      <button
+        onClick={() => window.location.href = "/projectpage"}
+        className="fixed top-0 left-0 w-full h-[17px] bg-green-700 flex  items-center  text-lg font-futura font-light justify-center z-40"
+      >
+        присоеденяйся к развитию экстрима в Украине
+      </button>
+      <div className="fixed top-4 left-0 w-full h-10 bg-black flex items-center justify-between px-4 shadow-md z-50">
         <div className="flex items-center">
-          <img src="/logo.png" alt="Logo" className="h-10 w-auto opacity-50 drop-shadow-lg" />
+          <img src="/logo.png" alt="Logo" className="sm:h-10  sm:w-auto  opacity-50 drop-shadow-lg" />
         </div>
         <div className="flex space-x-4">
           {buttons.map((button, index) => (
@@ -57,7 +63,7 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
               href={button.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 backdrop-blur-xl shadow-lg flex items-center justify-center w-[35.5px] h-[35.5px] transition-all hover:bg-white/30"
+              className="p-1.5 backdrop-blur-xl  shadow-lg flex items-center justify-center w-[35.5px] h-[35.5px] transition-all hover:bg-white/30"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
@@ -70,13 +76,7 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
         </div>
       </div>
 
-      {/* Зеленая полоса сразу под черной */}
-      <button
-        onClick={() => window.location.href = "/projectpage"}
-        className="fixed top-10 left-0 w-full h-[17px] bg-green-700 flex items-center justify-center z-40"
-      >
-        присоеденяйся к развитию экстрима в Украине
-      </button>
+     
     </>
   );
 }

@@ -52,20 +52,33 @@ body{
     
 }
 
-/* 
-.custom-swiper {
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease;
+
+.custom-swiper-pagination {
+background-color: rgb(255, 98, 0);
+ background: #ff00fb;
+  color: #b3ff00;
 }
-  */
+ 
 
-
-.custom-swiper .swiper-pagination-bullet {
-  background-color: #d1d5db; /* например, серый */
+/* .custom-swiper-pagination {
+  background-color: #d1d5db; 
   opacity: 1;
 }
 
-.custom-swiper .swiper-pagination-bullet-active {
-  background-color: #d81dcc; /* синий */
+.custom-swiper-pagination-active {
+  background-color: #d81dcc; 
 }
+
+/* .swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background: #d1d5db; 
+  opacity: 0.5;
+  border-radius: 9999px;
+  transition: all 0.3s;
+} */
+/* .swiper-pagination-bullet-active {
+  background: #000;
+  opacity: 1;
+  transform: scale(1.2);
+} */

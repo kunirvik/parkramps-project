@@ -7,9 +7,7 @@ const productCatalogDiys = [ {id: 1,
     description: "Комплексные решения для скейтпарков.",
     details: [
       { title: "Материалы", link: "#materials" },
-      { title: "Технические характеристики", link: "#tech-specs" },
-      { title: "Доставка", link: "#delivery" },
-      { title: "Установка", link: "#installation" }
+     { title: "Каталог фигур", link: "#catalog" },
     ],
     relatedProducts: [2, 3, 4, 5] // IDs of related products
   },
@@ -23,9 +21,7 @@ const productCatalogDiys = [ {id: 1,
     description: "Профессиональные рампы различных размеров.",
     details: [
       { title: "Материалы", link: "#materials" },
-      { title: "Размеры", link: "#dimensions" },
-      { title: "Установка", link: "#installation" },
-      { title: "Гарантия", link: "#warranty" }
+       { title: "Каталог фигур", link: "#catalog" },
     ],
     relatedProducts: [1, 3, 4, 5] // IDs of related products
   },
@@ -40,8 +36,7 @@ const productCatalogDiys = [ {id: 1,
     details: [
       { title: "Каталог фигур", link: "#catalog" },
       { title: "Варианты комплектации", link: "#sets" },
-      { title: "Технические характеристики", link: "#tech-specs" },
-      { title: "Доставка", link: "#delivery" }
+      
     ],
     relatedProducts: [1, 2, 4, 5] // IDs of related products
   },  
@@ -54,10 +49,9 @@ const productCatalogDiys = [ {id: 1,
     year: 2023,
     description: "Комплекты для самостоятельного строительства элементов.",
     details: [
-      { title: "Инструкции", link: "#instructions" },
+        { title: "Каталог фигур", link: "#catalog" },
       { title: "Материалы", link: "#materials" },
-      { title: "Инструменты", link: "#tools" },
-      { title: "Советы", link: "#tips" }
+      
     ],
     relatedProducts: [1, 2, 3, 5] // IDs of related products
   }, 
@@ -70,10 +64,9 @@ const productCatalogDiys = [ {id: 1,
     year: 2023,
     description: "Комплекты для самостоятельного строительства элементов.",
     details: [
-      { title: "Инструкции", link: "#instructions" },
+        { title: "Каталог фигур", link: "#catalog" },
       { title: "Материалы", link: "#materials" },
-      { title: "Инструменты", link: "#tools" },
-      { title: "Советы", link: "#tips" }
+
     ],
     relatedProducts: [1, 2, 3, 4] // IDs of related products
   },
@@ -86,10 +79,9 @@ const productCatalogDiys = [ {id: 1,
     year: 2023,
     description: "Комплекты для самостоятельного строительства элементов.",
     details: [
-      { title: "Инструкции", link: "#instructions" },
+        { title: "Каталог фигур", link: "#catalog" },
       { title: "Материалы", link: "#materials" },
-      { title: "Инструменты", link: "#tools" },
-      { title: "Советы", link: "#tips" }
+   
     ],
     relatedProducts: [1, 2, 3, 4] // IDs of related products
   },
@@ -103,10 +95,9 @@ const productCatalogDiys = [ {id: 1,
     year: 2023,
     description: "Комплекты для самостоятельного строительства элементов.",
     details: [
-      { title: "Инструкции", link: "#instructions" },
+         { title: "Каталог фигур", link: "#catalog" },
       { title: "Материалы", link: "#materials" },
-      { title: "Инструменты", link: "#tools" },
-      { title: "Советы", link: "#tips" }
+  
     ],
     relatedProducts: [1, 2, 3, 4] // IDs of related products
   },
@@ -119,10 +110,9 @@ const productCatalogDiys = [ {id: 1,
     year: 2023,
     description: "Комплекты для самостоятельного строительства элементов.",
     details: [
-      { title: "Инструкции", link: "#instructions" },
+         { title: "Каталог фигур", link: "#catalog" },
       { title: "Материалы", link: "#materials" },
-      { title: "Инструменты", link: "#tools" },
-      { title: "Советы", link: "#tips" }
+
     ],
     relatedProducts: [1, 2, 3, 4] // IDs of related products
   },

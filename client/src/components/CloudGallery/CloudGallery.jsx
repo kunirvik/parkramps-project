@@ -194,6 +194,11 @@
  
 //   );
 // };
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
 import Masonry from "react-responsive-masonry";
 import css from "../CloudGallery/CloudGallery.module.css";
 // Импортируем необходимые хуки из React
@@ -212,6 +217,22 @@ const CloudGallery = ({ images }) => {
     y: 0,           // Начальная Y-координата (используется только для первоначального рендеринга)
     productId: null // ID продукта, о котором показывается информация
   });
+
+  const [fullscreenIndex, setFullscreenIndex] = useState(null);
+const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
+
+const openFullscreen = (index) => {
+  if (isMobile) {
+    setFullscreenIndex(index);
+  }
+};
+
+const closeFullscreen = () => {
+  setFullscreenIndex(null);
+};
+
+
+
   
   // Реф для прямого доступа к DOM-элементу тултипа
   // Используется для манипуляции DOM напрямую, минуя систему рендеринга React
@@ -311,7 +332,7 @@ const CloudGallery = ({ images }) => {
   }, [tooltip.show, tooltip.productId]); // Зависимости эффекта - только показ тултипа и ID продукта
   // Важно: мы НЕ включаем x и y координаты, избегая повторных запусков эффекта при движении мыши
 
-  return (
+  return (<>
     // Компонент для создания галереи в стиле "masonry" (мозаика)
     <Masonry gutter="16px" columnsCount={3}>
       {/* Итерация по массиву изображений */}
@@ -323,6 +344,8 @@ const CloudGallery = ({ images }) => {
             width: "100%", 
             display: "block"
           }}
+          onClick={() => openFullscreen(index)}
+
           // Обработчики событий мыши для показа/скрытия тултипа
           onMouseMove={(e) => {
             // Формируем текст для тултипа из данных медиа-элемента
@@ -385,6 +408,64 @@ const CloudGallery = ({ images }) => {
         </div>
       )}
     </Masonry>
+   {fullscreenIndex !== null && (
+  <div
+    onClick={closeFullscreen}
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      backgroundColor: "rgba(0, 0, 0, 0.95)",
+      zIndex: 9999,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <Swiper
+      initialSlide={fullscreenIndex}
+      spaceBetween={20}
+      slidesPerView={1}
+      style={{ width: "100%", height: "100%" }}
+    >
+      {images.map((media, i) => (
+        <SwiperSlide key={media.public_id}>
+          {media.resource_type === "image" ? (
+            <img
+              src={media.secure_url}
+              alt={media.context?.alt || "No description"}
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                margin: "auto",
+                display: "block",
+                borderRadius: "8px"
+              }}
+            />
+          ) : (
+            <video
+              src={media.secure_url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                margin: "auto",
+                display: "block",
+                borderRadius: "8px"
+              }}
+            />
+          )}
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  </div>
+)}
+ </>
   );
 };
 
