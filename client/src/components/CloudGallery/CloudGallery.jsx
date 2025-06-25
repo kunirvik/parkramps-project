@@ -336,7 +336,7 @@ const closeFullscreen = () => {
     // Компонент для создания галереи в стиле "masonry" (мозаика)
     <Masonry gutter="16px" columnsCount={3}>
       {/* Итерация по массиву изображений */}
-      {images.map((media) => (
+      {images.map((media, index ) => (
         <div
           key={media.public_id}
           className={css.galleryitem}
@@ -406,9 +406,8 @@ const closeFullscreen = () => {
           {/* Отображаем информацию о продукте в тултипе */}
           {tooltip.productId}
         </div>
-      )}
-    </Masonry>
-   {fullscreenIndex !== null && (
+      )} 
+        {fullscreenIndex !== null && (
   <div
     onClick={closeFullscreen}
     style={{
@@ -465,6 +464,8 @@ const closeFullscreen = () => {
     </Swiper>
   </div>
 )}
+    </Masonry>
+
  </>
   );
 };

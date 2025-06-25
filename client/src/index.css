@@ -59,7 +59,21 @@ background-color: rgb(255, 98, 0);
   color: #b3ff00;
 }
  
+/* Цвет обычной точки */
+.custom-swiper-pagination .swiper-pagination-bullet {
+  width: 12px;
+  height: 12px;
+  background: #888; /* обычный серый */
+  opacity: 0.5;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+} 
 
+.custom-swiper-pagination .swiper-pagination-bullet-active {
+  background: #ff00fb; /* ярко-розовый */
+  opacity: 1;
+  transform: scale(1.2);
+}
 /* .custom-swiper-pagination {
   background-color: #d1d5db; 
   opacity: 1;
