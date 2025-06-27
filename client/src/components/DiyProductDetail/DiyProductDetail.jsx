@@ -390,16 +390,16 @@ export default function DiyProductDetail() {
   }
 
   return (
-   <>
+   <><div className="flex flex-col min-h-screen">
   <SocialButtons
     buttonLabel="shop"
     onButtonClick={() => navigate("/catalogue")}
     buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
   />
-
+ 
   <div
     ref={refs.container}
-    className="w-full h-[100vh] mt-[70px] mx-auto px-4"
+    className="w-full flex-grow  mt-[70px] mx-auto px-4"
     style={{
       opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
     }}
@@ -582,7 +582,7 @@ export default function DiyProductDetail() {
         </div>
 
         {/* Миниатюры текущего товара */}
-        <div className="mt-8 flex flex-wrap justify-start gap-4">
+        <div className=" flex flex-wrap justify-start gap-4">
           {currentImages.map((img, index) => (
             <button
               key={index}
@@ -623,10 +623,10 @@ export default function DiyProductDetail() {
           );
         })}
       </div>
-     </div>
+     </div></div>
 
     {/* ✅ Новая нижняя полоса миниатюр — после всего контента */}
-    <div className="hidden  md:block mt-20   w-[100%] top-0 ">
+    <div className="hidden  md:block    w-[100%]  ">
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"

@@ -208,7 +208,8 @@ const CloudGallery = ({ images }) => {
   // Состояние для хранения ориентации изображений (портретная/ландшафтная)
   // Используется useState, так как это не вызывает циклов обновления
   const [imageSizes, setImageSizes] = useState({});
-  
+  const startYRef = useRef(0); // для отслеживания начала свайпа
+
   // Состояние для основной информации тултипа
   // Включает только необходимую информацию, которая не меняется часто
   const [tooltip, setTooltip] = useState({ 
@@ -333,7 +334,7 @@ const closeFullscreen = () => {
   // Важно: мы НЕ включаем x и y координаты, избегая повторных запусков эффекта при движении мыши
 
   return (<>
-    // Компонент для создания галереи в стиле "masonry" (мозаика)
+   
     <Masonry gutter="16px" columnsCount={3}>
       {/* Итерация по массиву изображений */}
       {images.map((media, index ) => (
@@ -348,12 +349,16 @@ const closeFullscreen = () => {
 
           // Обработчики событий мыши для показа/скрытия тултипа
           onMouseMove={(e) => {
-            // Формируем текст для тултипа из данных медиа-элемента
-            const caption = media.context?.caption || "No caption";
-            const alt = media.context?.alt || "No description";
-            handleMouseMove(e, `${caption} — ${alt}`);
-          }}
-          onMouseLeave={handleMouseLeave}
+  if (!isMobile) {
+    const caption = media.context?.caption || "No caption";
+    const alt = media.context?.alt || "No description";
+    handleMouseMove(e, `${caption} — ${alt}`);
+  }
+}}
+onMouseLeave={() => {
+  if (!isMobile) handleMouseLeave();
+}}
+
         >
           {/* Условный рендеринг: показываем изображение или видео в зависимости от типа */}
           {media.resource_type === "image" ? (
@@ -407,9 +412,14 @@ const closeFullscreen = () => {
           {tooltip.productId}
         </div>
       )} 
-        {fullscreenIndex !== null && (
+{fullscreenIndex !== null && (
   <div
-    onClick={closeFullscreen}
+    onTouchStart={(e) => (startYRef.current = e.touches[0].clientY)}
+    onTouchMove={(e) => {
+      const currentY = e.touches[0].clientY;
+      const deltaY = currentY - startYRef.current;
+      if (deltaY > 100) closeFullscreen(); // свайп вниз
+    }}
     style={{
       position: "fixed",
       top: 0,
@@ -421,15 +431,19 @@ const closeFullscreen = () => {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
+      touchAction: "none", // отключает системные свайпы браузера
     }}
   >
     <Swiper
       initialSlide={fullscreenIndex}
       spaceBetween={20}
       slidesPerView={1}
+      direction="horizontal"
+      allowTouchMove={true}
+      touchRatio={1}
       style={{ width: "100%", height: "100%" }}
     >
-      {images.map((media, i) => (
+      {images.map((media) => (
         <SwiperSlide key={media.public_id}>
           {media.resource_type === "image" ? (
             <img
@@ -464,6 +478,8 @@ const closeFullscreen = () => {
     </Swiper>
   </div>
 )}
+
+
     </Masonry>
 
  </>

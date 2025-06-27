@@ -54,9 +54,9 @@ body{
 
 
 .custom-swiper-pagination {
-background-color: rgb(255, 98, 0);
- background: #ff00fb;
-  color: #b3ff00;
+
+ background: #ff00fb00;
+
 }
  
 /* Цвет обычной точки */
