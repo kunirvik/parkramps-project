@@ -232,6 +232,17 @@ const closeFullscreen = () => {
 };
 
 
+useEffect(() => {
+  if (fullscreenIndex !== null) {
+    document.body.style.overflow = "hidden"; // запрет прокрутки
+  } else {
+    document.body.style.overflow = ""; // восстановление прокрутки
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+  };
+}, [fullscreenIndex]);
 
   
   // Реф для прямого доступа к DOM-элементу тултипа
@@ -411,20 +422,22 @@ const closeFullscreen = () => {
       )} 
       {fullscreenIndex !== null && (
   <div
-    style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      backgroundColor: "rgba(0, 0, 0, 0.95)",
-      zIndex: 9999,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "16px",
-    }}
-  >
+  style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100vw",
+    height: "100vh",
+    backgroundColor: "rgba(0, 0, 0, 0.95)",
+    zIndex: 9999,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    touchAction: "none", // 🔒 запрет свайпов и зума на мобильных
+    overflow: "hidden",  // 🔒 запрет внутреннего скролла
+  }}
+>
+
     <button
       onClick={closeFullscreen}
       style={{
@@ -443,16 +456,18 @@ const closeFullscreen = () => {
     </button>
 
     {images[fullscreenIndex]?.resource_type === "image" ? (
-      <img
-        src={images[fullscreenIndex].secure_url}
-        alt={images[fullscreenIndex].context?.alt || "No description"}
-        style={{
-          maxWidth: "100%",
-          maxHeight: "100%",
-          borderRadius: "8px",
-          objectFit: "contain"
-        }}
-      />
+    <img
+  src={images[fullscreenIndex].secure_url}
+  alt={images[fullscreenIndex].context?.alt || "No description"}
+  style={{
+    maxWidth: "100vw",
+    maxHeight: "100vh",
+    objectFit: "contain",
+    userSelect: "none",     // 🔒 запрет выделения
+    pointerEvents: "none",  // 🔒 запрет перетаскивания
+  }}
+/>
+
     ) : (
       <video
         src={images[fullscreenIndex].secure_url}
