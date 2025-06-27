@@ -208,8 +208,7 @@ const CloudGallery = ({ images }) => {
   // Состояние для хранения ориентации изображений (портретная/ландшафтная)
   // Используется useState, так как это не вызывает циклов обновления
   const [imageSizes, setImageSizes] = useState({});
-  const startYRef = useRef(0); // для отслеживания начала свайпа
-
+  
   // Состояние для основной информации тултипа
   // Включает только необходимую информацию, которая не меняется часто
   const [tooltip, setTooltip] = useState({ 
@@ -258,6 +257,7 @@ const closeFullscreen = () => {
   // Обработчик движения мыши - мемоизирован с useCallback
   // useCallback предотвращает создание новой функции при каждом рендере
   const handleMouseMove = useCallback((e, productId) => {
+     if (isMobile) return; 
     // Обновляем реф с текущей позицией мыши
     // Важно: это не вызывает перерендер компонента
     mousePositionRef.current = { x: e.pageX, y: e.pageY };
@@ -281,6 +281,7 @@ const closeFullscreen = () => {
 
   // Обработчик ухода мыши с элемента - также мемоизирован
   const handleMouseLeave = useCallback(() => {
+    
     // Скрываем тултип, сохраняя остальные свойства без изменений
     setTooltip(prev => ({ ...prev, show: false }));
   }, []);
@@ -334,7 +335,7 @@ const closeFullscreen = () => {
   // Важно: мы НЕ включаем x и y координаты, избегая повторных запусков эффекта при движении мыши
 
   return (<>
-   
+    
     <Masonry gutter="16px" columnsCount={3}>
       {/* Итерация по массиву изображений */}
       {images.map((media, index ) => (
@@ -349,16 +350,12 @@ const closeFullscreen = () => {
 
           // Обработчики событий мыши для показа/скрытия тултипа
           onMouseMove={(e) => {
-  if (!isMobile) {
-    const caption = media.context?.caption || "No caption";
-    const alt = media.context?.alt || "No description";
-    handleMouseMove(e, `${caption} — ${alt}`);
-  }
-}}
-onMouseLeave={() => {
-  if (!isMobile) handleMouseLeave();
-}}
-
+            // Формируем текст для тултипа из данных медиа-элемента
+            const caption = media.context?.caption || "No caption";
+            const alt = media.context?.alt || "No description";
+            handleMouseMove(e, `${caption} — ${alt}`);
+          }}
+          onMouseLeave={handleMouseLeave}
         >
           {/* Условный рендеринг: показываем изображение или видео в зависимости от типа */}
           {media.resource_type === "image" ? (
@@ -388,7 +385,7 @@ onMouseLeave={() => {
       ))}
       
       {/* Тултип - рендерится только если tooltip.show === true */}
-      {tooltip.show && (
+      {tooltip.show &&  !isMobile && (
         <div
           // Привязываем DOM-элемент к рефу для прямого управления
           ref={tooltipRef}
@@ -412,14 +409,8 @@ onMouseLeave={() => {
           {tooltip.productId}
         </div>
       )} 
-{fullscreenIndex !== null && (
+      {fullscreenIndex !== null && (
   <div
-    onTouchStart={(e) => (startYRef.current = e.touches[0].clientY)}
-    onTouchMove={(e) => {
-      const currentY = e.touches[0].clientY;
-      const deltaY = currentY - startYRef.current;
-      if (deltaY > 100) closeFullscreen(); // свайп вниз
-    }}
     style={{
       position: "fixed",
       top: 0,
@@ -431,54 +422,54 @@ onMouseLeave={() => {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      touchAction: "none", // отключает системные свайпы браузера
+      padding: "16px",
     }}
   >
-    <Swiper
-      initialSlide={fullscreenIndex}
-      spaceBetween={20}
-      slidesPerView={1}
-      direction="horizontal"
-      allowTouchMove={true}
-      touchRatio={1}
-      style={{ width: "100%", height: "100%" }}
+    <button
+      onClick={closeFullscreen}
+      style={{
+        position: "absolute",
+        top: 20,
+        right: 20,
+        background: "transparent",
+        border: "none",
+        color: "white",
+        fontSize: "28px",
+        cursor: "pointer",
+        zIndex: 10000,
+      }}
     >
-      {images.map((media) => (
-        <SwiperSlide key={media.public_id}>
-          {media.resource_type === "image" ? (
-            <img
-              src={media.secure_url}
-              alt={media.context?.alt || "No description"}
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                margin: "auto",
-                display: "block",
-                borderRadius: "8px"
-              }}
-            />
-          ) : (
-            <video
-              src={media.secure_url}
-              autoPlay
-              loop
-              muted
-              playsInline
-              style={{
-                maxWidth: "100%",
-                maxHeight: "100%",
-                margin: "auto",
-                display: "block",
-                borderRadius: "8px"
-              }}
-            />
-          )}
-        </SwiperSlide>
-      ))}
-    </Swiper>
+      ✕
+    </button>
+
+    {images[fullscreenIndex]?.resource_type === "image" ? (
+      <img
+        src={images[fullscreenIndex].secure_url}
+        alt={images[fullscreenIndex].context?.alt || "No description"}
+        style={{
+          maxWidth: "100%",
+          maxHeight: "100%",
+          borderRadius: "8px",
+          objectFit: "contain"
+        }}
+      />
+    ) : (
+      <video
+        src={images[fullscreenIndex].secure_url}
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          maxWidth: "100%",
+          maxHeight: "100%",
+          borderRadius: "8px",
+          objectFit: "contain"
+        }}
+      />
+    )}
   </div>
 )}
-
 
     </Masonry>
 
