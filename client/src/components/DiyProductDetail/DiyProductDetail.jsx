@@ -413,12 +413,12 @@ export default function DiyProductDetail() {
         ← Back
       </button>
 
-      {/* Правая часть — описание-табличка */}
+      {/* Правая часть — описание-табличка
       <div className="fixed hidden lg:block max-w-[690px] text-[24px] font-futura text-[#717171] font-medium border-b border-gray-200 right-5 px-4 py-2 ml-auto">
         <p className="font-futura tracking-tighter leading-none">
           фигуры которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы
         </p>
-      </div>
+      </div> */}
     </div>
 
     {/* Мобильный заголовок */}
@@ -474,11 +474,7 @@ export default function DiyProductDetail() {
               direction="horizontal"
               centeredSlides={true}
               thumbs={{ swiper: swiperInstances.thumbs }}
-              slidesPerView={1}
-              breakpoints={{
-                640: { slidesPerView: 1.2 },
-                1024: { slidesPerView: 2 },
-              }}
+          
               spaceBetween={20}
               initialSlide={activeProductIndex}
               speed={SWIPER_CONFIG.SPEED}

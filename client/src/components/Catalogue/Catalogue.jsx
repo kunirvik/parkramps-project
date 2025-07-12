@@ -15,7 +15,7 @@ const products = [{
     id: 2,
       category: "ramps",  
       image: "/images/diy/kicker.png",
-    name: "рампы",
+    name: " фигуры которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }, 
@@ -249,7 +249,7 @@ const handleMouseMove = (e, productId) => {
   {tooltip.show && (
     <div
       ref={tooltipRef}
-      className="absolute font-futura font-light z-10 bg-black text-white px-6 sm:px-10 py-2 shadow-lg pointer-events-none transition-opacity opacity-90 text-sm sm:text-base"
+      className="absolute font-futura font-light z-10 bg-black w-[200px] text-white px-6 sm:px-10 py-2 shadow-lg pointer-events-none transition-opacity opacity-90 text-sm sm:text-base"
       style={{
         left: `${tooltip.x + 10}px`,
         top: `${tooltip.y + 10}px`,
