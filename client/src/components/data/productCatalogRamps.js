@@ -1,4 +1,21 @@
-const productCatalogRamps= [ {id: 1,
+const productCatalogRamps= [  {
+    id: 1,
+    name: "Рампы",
+    image: "/images/ramps/ramp95garagemain.png",
+    altImages: ["/images/ramps/ramp95garagetop.png", "/images/ramps/ramp95garage.png"],
+    sampleImages: ["/images/sample1.jpg", "/images/sample2.jpg", "/images/sample3.jpg" ],
+    designer: "РампСтрой",
+    year: 2024,
+    description: "Профессиональные рампы различных размеров.",
+    details: [
+      { title: "Материалы", link: "#materials" },
+      { title: "Размеры", link: "#dimensions" },
+      { title: "Установка", link: "#installation" },
+      { title: "Гарантия", link: "#warranty" }
+    ],
+    relatedProducts: [1, 3, 4] // IDs of related products
+  }, 
+  {id: 2,
     name: "Ramp160",
     image: "/images/ramps/minir180h60w200d40alt.png",
     altImages: ["/images/ramps/minir180h60w200d40.png", "/images/ramps/minir180h60w200d40frontalt.png",  "/images/ramps/minir180h60w200d40top.png",  "/images/ramps/minir180h60w200d40front.png"],
@@ -14,23 +31,7 @@ const productCatalogRamps= [ {id: 1,
     ],
     relatedProducts: [2, 3, 4] // IDs of related products
   },
-  {
-    id: 2,
-    name: "Рампы",
-    image: "/images/ramps/ramp95garagemain.png",
-    altImages: ["/images/ramps/ramp95garagetop.png", "/images/ramps/ramp95garage.png"],
-    sampleImages: ["/images/sample1.jpg", "/images/sample2.jpg", "/images/sample3.jpg" ],
-    designer: "РампСтрой",
-    year: 2024,
-    description: "Профессиональные рампы различных размеров.",
-    details: [
-      { title: "Материалы", link: "#materials" },
-      { title: "Размеры", link: "#dimensions" },
-      { title: "Установка", link: "#installation" },
-      { title: "Гарантия", link: "#warranty" }
-    ],
-    relatedProducts: [1, 3, 4] // IDs of related products
-  },
+
   {
     id: 3,
     name: "Ramp2",

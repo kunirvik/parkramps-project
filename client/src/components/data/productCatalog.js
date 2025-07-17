@@ -1,9 +1,7 @@
-
-
-  const productCatalog = [ {id: 1,
+const productCatalog = [ {id: 1,
     name: "box1",
-    image: "/images/sets/box1.png",
-    altImages: ["/images/sets/box1.png", "/images/sets/box4.png"],
+    image: "/images/sets/box.png",
+    altImages: ["/images/sets/box1.png", ],
     designer: "Studio 65",
     year: 2023,
     description: "Комплексные решения для скейтпарков.",
@@ -17,9 +15,9 @@
   },
   {
     id: 2,
-    name: "box2",
-   image: "/images/sets/box8.png",
-    altImages: ["/images/sets/box8.png", "/images/sets/box8.png"],
+    name: "jerseybarrier",
+   image: "/images/sets/jerseybarrier.png",
+    altImages: ["/images/sets/jerseybarriertop.png", "/images/sets/jerseybarrierfront.png"],
     designer: "РампСтрой",
     year: 2024,
     description: "Профессиональные рампы различных размеров.",
@@ -49,9 +47,9 @@
   },  
   {
     id: 4,
-    name: "box4",
-     image: "/images/sets/box6.png",
-    altImages: ["/images/sets/box6.png", "/images/sets/box6.png"],
+    name: "manny",
+     image: "/images/sets/manny.png",
+    altImages: ["/images/sets/manny2.png"],
     designer: "DIY Workshop",
     year: 2023,
     description: "Комплекты для самостоятельного строительства элементов.",
@@ -65,9 +63,9 @@
   }, 
   {
     id: 5,
-    name: "box5",
-     image: "/images/sets/box6.png",
-    altImages: ["/images/sets/box6.png", "/images/sets/box6.png"],
+    name: "quater r215h80w125d40",
+     image: "/images/sets/quaterr215h80w125d40.png",
+    altImages: ["/images/sets/quaterr215h80w125d40left.png", "/images/sets/quaterr215h80w125d40top.png"],
     designer: "DIY Workshop",
     year: 2023,
     description: "Комплекты для самостоятельного строительства элементов.",
@@ -78,6 +76,55 @@
       { title: "Советы", link: "#tips" }
     ],
     relatedProducts: [1, 2, 3, 4] // IDs of related products
-  }]  ;
-  export default 
-  productCatalog;
+  },
+{
+    id: 6,
+    name: "quater r215h80w125d40",
+     image: "/images/sets/quaterr250h125w187d125.png",
+    altImages: ["/images/sets/quaterr250h125w187d125right.png", "/images/sets/quaterr250h125w187d125top.png"],
+    designer: "DIY Workshop",
+    year: 2023,
+    description: "Комплекты для самостоятельного строительства элементов.",
+    details: [
+      { title: "Инструкции", link: "#instructions" },
+      { title: "Материалы", link: "#materials" },
+      { title: "Инструменты", link: "#tools" },
+      { title: "Советы", link: "#tips" }
+    ],
+    relatedProducts: [1, 2, 3, 4] // IDs of related products
+  },
+
+  {
+    id: 7,
+    name: "quater r215h80w125d40",
+     image: "/images/sets/quaterr250h160w375d125.png",
+    altImages: ["/images/sets/quaterr250h160w375d125left.png", "/images/sets/quaterr250h160w375d125top.png"],
+    designer: "DIY Workshop",
+    year: 2023,
+    description: "Комплекты для самостоятельного строительства элементов.",
+    details: [
+      { title: "Инструкции", link: "#instructions" },
+      { title: "Материалы", link: "#materials" },
+      { title: "Инструменты", link: "#tools" },
+      { title: "Советы", link: "#tips" }
+    ],
+    relatedProducts: [1, 2, 3, 4] // IDs of related products
+  },
+   {
+    id: 8,
+    name: "quater r215h80w125d40",
+     image: "/images/sets/set.png",
+    altImages: ["/images/sets/set2.png", "/images/sets/set3.png"],
+    designer: "DIY Workshop",
+    year: 2023,
+    description: "Комплекты для самостоятельного строительства элементов.",
+    details: [
+      { title: "Инструкции", link: "#instructions" },
+      { title: "Материалы", link: "#materials" },
+      { title: "Инструменты", link: "#tools" },
+      { title: "Советы", link: "#tips" }
+    ],
+    relatedProducts: [1, 2, 3, 4] // IDs of related products
+  },
+]  ;
+  export default productCatalog;
