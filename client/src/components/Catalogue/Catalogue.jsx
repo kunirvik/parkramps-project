@@ -249,7 +249,7 @@ const handleMouseMove = (e, productId) => {
   {tooltip.show && (
     <div
       ref={tooltipRef}
-      className="absolute font-futura font-light z-10 bg-black w-[200px] text-white px-6 sm:px-10 py-2 shadow-lg pointer-events-none transition-opacity opacity-90 text-sm sm:text-base"
+      className="absolute font-futura font-light z-10 bg-white w-[400px] h-[200px] text-black px-6 sm:px-10 py-2 shadow-lg pointer-events-none transition-opacity opacity-90 text-sm sm:text-base"
       style={{
         left: `${tooltip.x + 10}px`,
         top: `${tooltip.y + 10}px`,
