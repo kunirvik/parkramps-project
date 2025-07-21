@@ -89,7 +89,7 @@ fetch(`${API}api/gallery${tagsQuery}`)
         buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
       />
 
-<div className="min-h-screen  mt-10 font-futura  p-6">
+<div className="min-h-screen  mt-10 font-futura ">
 
         {exitTransition(
           (styles, item) =>
