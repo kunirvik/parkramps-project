@@ -1067,7 +1067,7 @@ const CloudGallery = ({ images }) => {
         <div
           onClick={handleFullscreenClick}
           style={{
-            position: "fixed",
+            position: "sticky",
             top: 0,
             left: 0,
             width: "100vw",
@@ -1118,12 +1118,16 @@ const CloudGallery = ({ images }) => {
           {/* Контейнер для медиа */}
           <div
             style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "100%",
-              height: "100%",
-              padding: isMobile ? "20px" : "40px"
+              padding: 0,
+              margin: 0
             }}
             onClick={handleFullscreenClick}
           >
@@ -1132,12 +1136,14 @@ const CloudGallery = ({ images }) => {
                 src={images[fullscreenIndex].secure_url}
                 alt={images[fullscreenIndex].context?.alt || "No description"}
                 style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
+                  width: "100vw",
+                  height: "100vh",
                   objectFit: "contain",
                   userSelect: "none",
                   pointerEvents: "none",
-                  borderRadius: isMobile ? "4px" : "8px"
+                  display: "block",
+                  margin: 0,
+                  padding: 0
                 }}
                 onClick={handleFullscreenClick}
               />
@@ -1148,12 +1154,14 @@ const CloudGallery = ({ images }) => {
                 loop
                 muted
                 playsInline
-                controls={!isMobile}
+                controls={false}
                 style={{
-                  maxWidth: "100%",
-                  maxHeight: "100%",
+                  width: "100vw",
+                  height: "100vh",
                   objectFit: "contain",
-                  borderRadius: isMobile ? "4px" : "8px"
+                  display: "block",
+                  margin: 0,
+                  padding: 0
                 }}
                 onClick={handleFullscreenClick}
               />
