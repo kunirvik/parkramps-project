@@ -506,8 +506,32 @@ export default function DiyProductDetail() {
             </Swiper>
              <div className="custom-swiper-pagination mt-4 flex justify-center text-[#ff00fb] mgap-2" />
           </div>
+ {/* Миниатюры текущего товара */}
+        <div className="block md:hidden absolute right-0 top-0 h-full w-20 z-10">
+          {currentImages.map((img, index) => (
+            <button
+              key={index}
+              onClick={() => handleImageSelect(index)}
+              className={`border rounded-lg p-1 transition hover:scale-105 ${
+                selectedImageIndices[activeProductIndex] === index
+                  ? "border-black"
+                  : "border-transparent"
+              }`}
+              disabled={animationState.inProgress}
+            >
+              <img
+                src={img}
+                alt={`${currentProduct.name} Mini ${index + 1}`}
+                className="w-16 h-16 object-contain rounded"
+                draggable="false"
+              />
+            </button>
+          ))}
+        </div>
 
-          {/* Вертикальные миниатюры на мобилках */}
+
+        
+          {/* Вертикальные миниатюры на мобилках
           <div className="block md:hidden absolute right-0 top-0 h-full w-20 z-10">
             <Swiper
               modules={[Thumbs]}
@@ -545,7 +569,7 @@ export default function DiyProductDetail() {
                 </SwiperSlide>
               ))}
             </Swiper>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -578,7 +602,7 @@ export default function DiyProductDetail() {
         </div>
 
         {/* Миниатюры текущего товара */}
-        <div className=" flex flex-wrap justify-start gap-4">
+        <div className="hidden md:block flex flex-wrap justify-start gap-4">
           {currentImages.map((img, index) => (
             <button
               key={index}
@@ -622,7 +646,7 @@ export default function DiyProductDetail() {
      </div></div>
 
     {/* ✅ Новая нижняя полоса миниатюр — после всего контента */}
-    <div className="hidden  md:block    w-[100%]  ">
+    <div className=" md:block   w-[100%]  ">
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
