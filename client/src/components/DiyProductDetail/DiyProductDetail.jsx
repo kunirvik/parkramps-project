@@ -430,9 +430,53 @@ export default function DiyProductDetail() {
         {currentProduct.description}
       </p>
     </div>
-
+{/* ✅ Новая нижняя полоса миниатюр — после всего контента */}
+    <div className=" block md:hidden w-[100%]  ">
+      <Swiper
+        modules={[Thumbs]}
+        direction="horizontal"
+        onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
+     
+          breakpoints={{
+    320: { slidesPerView: 3 },
+    480: { slidesPerView: 4 },
+    640: { slidesPerView: 5 },
+    768: { slidesPerView: 6 },
+    1024: { slidesPerView: 7 },
+    1280: { slidesPerView: 8 },
+  }}
+    slidesPerView="auto"
+        spaceBetween={10}
+        watchSlidesProgress={true}
+        slideToClickedSlide={true}
+        initialSlide={activeProductIndex}
+        speed={SWIPER_CONFIG.SPEED}
+        preventClicks={false}
+        preventClicksPropagation={false}
+        observer={true}
+        observeParents={true}
+        resistance={false}
+        resistanceRatio={0}
+      >
+        {productCatalogDiys.map((product, index) => (
+          <SwiperSlide key={product.id}>
+            <img
+              src={product.image}
+              onClick={() => handleThumbnailClick(index)}
+              className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
+                index === activeProductIndex
+                  ? "opacity-100 scale-105 border-black"
+                  : "grayscale border-transparent opacity-60 hover:opacity-100"
+              }`}
+              alt={product.name}
+              draggable="false"
+            />
+          </SwiperSlide>
+        ))}
+      </Swiper>
+   </div>
     {/* Основной контент */}
-    <div className="w-full  lg:h-[50%]  flex flex-col lg:flex-row lg:content-center gap-8  relative">
+    <div className="w-full  lg:h-[50%]  flex flex-col lg:flex-row lg:content-center  relative">
       {/* Переходное изображение */}
       {!animationState.complete && imageData && (
         <div className="transition-image-container">
@@ -462,6 +506,7 @@ export default function DiyProductDetail() {
         }}
       >
         <div className="w-full content-center">
+          
           <div className="md:w-full w-[75%]">
             <Swiper
               className="custom-swiper"
@@ -646,7 +691,7 @@ export default function DiyProductDetail() {
      </div></div>
 
     {/* ✅ Новая нижняя полоса миниатюр — после всего контента */}
-    <div className=" md:block   w-[100%]  ">
+    <div className="hidden md:block w-[100%]  ">
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
