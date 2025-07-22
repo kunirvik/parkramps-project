@@ -420,18 +420,7 @@ export default function DiyProductDetail() {
         </p>
       </div> */}
     </div>
-
-    {/* Мобильный заголовок */}
-    <div className="block lg:hidden w-full mb-6">
-      <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
-        {currentProduct.name}
-      </h1>
-      <p className="font-futura text-[#717171] font-medium">
-        {currentProduct.description}
-      </p>
-    </div>
-{/* ✅ Новая нижняя полоса миниатюр — после всего контента */}
-    <div className=" block md:hidden w-[100%]  ">
+<div className=" block md:hidden w-[100%]  ">
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
@@ -475,6 +464,17 @@ export default function DiyProductDetail() {
         ))}
       </Swiper>
    </div>
+    {/* Мобильный заголовок */}
+    <div className="block lg:hidden w-full mb-6">
+      {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
+        {currentProduct.name}
+      </h1> */}
+      <p className="font-futura text-[#717171] font-medium">
+        {currentProduct.description}
+      </p>
+    </div>
+
+    
     {/* Основной контент */}
     <div className="w-full  lg:h-[50%]  flex flex-col lg:flex-row lg:content-center  relative">
       {/* Переходное изображение */}
