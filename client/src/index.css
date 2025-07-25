@@ -61,8 +61,8 @@ body{
  
 /* Цвет обычной точки */
 .custom-swiper-pagination .swiper-pagination-bullet {
-  width: 12px;
-  height: 12px;
+  width: 5px;
+  height: 5px;
   background: #888; /* обычный серый */
   opacity: 0.5;
   border-radius: 50%;

@@ -420,7 +420,7 @@ export default function DiyProductDetail() {
         </p>
       </div> */}
     </div>
-<div className=" block md:hidden w-[100%]  ">
+<div className=" block md:hidden w-[100%] mt-7 ">
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
@@ -465,12 +465,12 @@ export default function DiyProductDetail() {
       </Swiper>
    </div>
     {/* Мобильный заголовок */}
-    <div className="block lg:hidden w-full mb-6">
+    <div className="block lg:hidden w-full mt-4">
       {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
-        {currentProduct.name}
+          {currentProduct.description}
       </h1> */}
       <p className="font-futura text-[#717171] font-medium">
-        {currentProduct.description}
+      {currentProduct.name}
       </p>
     </div>
 
@@ -495,84 +495,83 @@ export default function DiyProductDetail() {
           />
         </div>
       )}
-
-      {/* Swiper галерея */}
-      <div
-        ref={refs.swiperContainer}
-        className="w-full lg:w-[75%] lg:h-[50%] mt-20 lg:content-center"
-        style={{
-          visibility: !imageData || animationState.complete ? "visible" : "hidden",
-          opacity: !imageData || animationState.complete ? 1 : 0,
-        }}
+{/* Swiper галерея + Миниатюры (мобильная версия) */}
+<div
+  ref={refs.swiperContainer}
+  className="w-full lg:w-[75%] lg:h-[50%] mt-0 lg:mt-20 lg:content-center"
+  style={{
+    visibility: !imageData || animationState.complete ? "visible" : "hidden",
+    opacity: !imageData || animationState.complete ? 1 : 0,
+  }}
+>
+  <div className="w-full flex flex-row items-start justify-between gap-2">
+    {/* Основная галерея */}
+    <div className="w-[calc(100%-80px)]">
+      <Swiper
+        className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
+        modules={[Pagination, Mousewheel, Thumbs]}
+        pagination={{ clickable: true, el: ".custom-swiper-pagination" }}
+        mousewheel={true}
+        direction="horizontal"
+        centeredSlides={true}
+        thumbs={{ swiper: swiperInstances.thumbs }}
+        spaceBetween={20}
+        initialSlide={activeProductIndex}
+        speed={SWIPER_CONFIG.SPEED}
+        threshold={SWIPER_CONFIG.THRESHOLD}
+        resistance={true}
+        resistanceRatio={SWIPER_CONFIG.RESISTANCE_RATIO}
+        onInit={handleSwiperInit}
+        onSlideChange={handleSlideChange}
+        preventClicks={false}
+        preventClicksPropagation={false}
+        touchStartPreventDefault={false}
       >
-        <div className="w-full content-center">
-          
-          <div className="md:w-full w-[75%]">
-            <Swiper
-              className="custom-swiper"
-              style={{ height: "350px" }}
-              modules={[Pagination, Mousewheel, Thumbs]}
-              pagination={{ clickable: true,
-                 el: ".custom-swiper-pagination",
-               }}
-              mousewheel={true}
-              direction="horizontal"
-              centeredSlides={true}
-              thumbs={{ swiper: swiperInstances.thumbs }}
-          
-              spaceBetween={20}
-              initialSlide={activeProductIndex}
-              speed={SWIPER_CONFIG.SPEED}
-              threshold={SWIPER_CONFIG.THRESHOLD}
-              resistance={true}
-              resistanceRatio={SWIPER_CONFIG.RESISTANCE_RATIO}
-              onInit={handleSwiperInit}
-              onSlideChange={handleSlideChange}
-              preventClicks={false}
-              preventClicksPropagation={false}
-              touchStartPreventDefault={false}
-            >
-              {productCatalogDiys.map((product, index) => (
-                <SwiperSlide key={product.id} style={{ height: "100%" }}>
-                  <div className="w-full h-full flex items-center justify-center">
-                    <img
-                      src={
-                        selectedImageIndices[index] === 0
-                          ? product.image
-                          : product.altImages[selectedImageIndices[index] - 1]
-                      }
-                      alt={product.name}
-                      className="max-h-full w-auto object-contain"
-                      draggable="false"
-                    />
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-             <div className="custom-swiper-pagination mt-4 flex justify-center text-[#ff00fb] mgap-2" />
-          </div>
- {/* Миниатюры текущего товара */}
-        <div className="block md:hidden absolute right-0 top-0 h-full w-20 z-10">
-          {currentImages.map((img, index) => (
-            <button
-              key={index}
-              onClick={() => handleImageSelect(index)}
-              className={`border rounded-lg p-1 transition hover:scale-105 ${
-                selectedImageIndices[activeProductIndex] === index
-                  ? "border-black"
-                  : "border-transparent"
-              }`}
-              disabled={animationState.inProgress}
-            >
+        {productCatalogDiys.map((product, index) => (
+          <SwiperSlide key={product.id} style={{ height: "100%" }}>
+            <div className="w-full h-full flex items-center justify-center">
               <img
-                src={img}
-                alt={`${currentProduct.name} Mini ${index + 1}`}
-                className="w-16 h-16 object-contain rounded"
+                src={
+                  selectedImageIndices[index] === 0
+                    ? product.image
+                    : product.altImages[selectedImageIndices[index] - 1]
+                }
+                alt={product.name}
+                className="max-h-full w-auto object-contain"
                 draggable="false"
               />
-            </button>
-          ))}
-        </div>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+
+      <div className="custom-swiper-pagination mt-4 sm:mt-0 flex justify-center text-[#ff00fb]" />
+    </div>
+
+    {/* Миниатюры — справа от галереи */}
+    <div className="block  md:hidden w-20 space-y-2">
+      {currentImages.map((img, index) => (
+        <button
+          key={index}
+          onClick={() => handleImageSelect(index)}
+          className={`border rounded-lg p-1 transition hover:scale-105 ${
+            selectedImageIndices[activeProductIndex] === index
+              ? "border-black"
+              : "border-transparent"
+          }`}
+          disabled={animationState.inProgress}
+        >
+          <img
+            src={img}
+            alt={`${currentProduct.name} Mini ${index + 1}`}
+            className="w-16 h-16 object-contain rounded"
+            draggable="false"
+          />
+        </button>
+      ))}
+    </div>
+  </div>
+</div>
 
 
         
@@ -615,8 +614,7 @@ export default function DiyProductDetail() {
               ))}
             </Swiper>
           </div> */}
-        </div>
-      </div>
+    
 
       {/* Описание и миниатюры текущего продукта */}
       <div
