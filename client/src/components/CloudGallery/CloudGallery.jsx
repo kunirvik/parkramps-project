@@ -897,12 +897,12 @@ const CloudGallery = ({ images }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  
 const openFullscreen = (index) => {
   if (!isMobile) return;
 
-  // Сохраняем текущий scrollY
-  setScrollYBeforeFullscreen(window.scrollY);
-
+  const scrollY = window.scrollY;
+  setScrollYBeforeFullscreen(scrollY);
   setFullscreenIndex(index);
 };
 
@@ -919,50 +919,19 @@ const openFullscreen = (index) => {
     }
   };
 
-
-  useEffect(() => {
+useEffect(() => {
   if (fullscreenIndex !== null && isMobile) {
-    const scrollY = window.scrollY;
-
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.left = "0";
-    document.body.style.right = "0";
+    // Просто убираем скролл, но не фиксируем положение
     document.body.style.overflow = "hidden";
   } else {
-    const y = scrollYBeforeFullscreen;
-
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.left = "";
-    document.body.style.right = "";
     document.body.style.overflow = "";
-
-    // Восстанавливаем скролл
-    window.scrollTo(0, y);
   }
 
   return () => {
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.left = "";
-    document.body.style.right = "";
     document.body.style.overflow = "";
   };
 }, [fullscreenIndex, isMobile]);
 
-
-  // useEffect(() => {
-  //   if (fullscreenIndex !== null) {
-  //     document.body.style.overflow = "hidden";
-  //   } else {
-  //     document.body.style.overflow = "";
-  //   }
-
-  //   return () => {
-  //     document.body.style.overflow = "";
-  //   };
-  // }, [fullscreenIndex]);
 
   const tooltipRef = useRef(null);
   const mousePositionRef = useRef({ x: 0, y: 0 });
@@ -1111,8 +1080,8 @@ const openFullscreen = (index) => {
         <div
           onClick={handleFullscreenClick}
           style={{
-            position: "fixed",
-            top: 0,
+            position: "absolute",
+  top: `${scrollYBeforeFullscreen}px`,
             left: 0,
             width: "100vw",
             height: "100vh",
