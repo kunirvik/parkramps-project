@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from "../LoadingScreen/LodingScreen";
 import SocialButtons from "../SocialButtons/SocialButtons";
+import { gsap } from "gsap";
+
 const products = [{
     id: 1,
      category: "skateparks",
@@ -48,7 +50,6 @@ export default function Catalogue() {
   const [isLoading, setIsLoading] = useState(true);
   const tooltipRef = useRef(null);
 
-
   const handleExit = () => {
     console.log("handleExit вызван!");
     setIsFadingOut(true);
@@ -83,6 +84,7 @@ const handleMouseMove = (e, productId) => {
   const tooltipWidth = tooltipRef.current?.offsetWidth || 0;
   const tooltipHeight = tooltipRef.current?.offsetHeight || 0;
   const padding = 10;
+  
 
   let x = e.clientX + padding;
   let y = e.clientY;
@@ -162,6 +164,29 @@ const handleMouseMove = (e, productId) => {
   }, 400);
 };
 
+useEffect(() => {
+  if (tooltip.show && tooltipRef.current) {
+    gsap.fromTo(
+      tooltipRef.current,
+      {
+        opacity: 0,
+        scaleX: 0.7,
+        scaleY: 0.5,
+        transformOrigin: "top left",
+      },
+      {
+        opacity: 0.95,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 0.6, // медленнее
+        ease: "power3.out",
+      }
+    );
+  }
+}, [tooltip.show]);
+
+
+
   useEffect(() => {
     // Запускаем анимацию исчезновения перед снятием лоадинга
     const timer = setTimeout(() => setIsFadingOut(true), 1500);
@@ -202,8 +227,7 @@ const handleMouseMove = (e, productId) => {
               : "scale-0 pointer-events-none"
             : "scale-100"}`}
         onClick={(e) => handleClick(product, e)}
-        onMouseMove={(e) => handleMouseMove(e, product.id)}
-        onMouseLeave={handleMouseLeave}
+       
       >
         {/* Animated border lines */}
         <div className={`absolute inset-0 pointer-events-none`}>
@@ -235,30 +259,32 @@ const handleMouseMove = (e, productId) => {
         </div>
         
         <div className="flex flex-col items-center w-full h-full">
-          <img
+          <img 
+         
             src={product.image}
             alt={product.name}
             className="w-full h-full object-contain transition-all duration-300"
+             onMouseMove={(e) => handleMouseMove(e, product.id)}
+        onMouseLeave={handleMouseLeave}
           />
         </div>
       </div>
     ))}
   </div>
   
-  {/* Tooltip that follows cursor */}
-  {tooltip.show && (
-    <div
-      ref={tooltipRef}
-      className="absolute font-futura font-light z-10 bg-white w-[400px] h-[200px] text-black px-6 sm:px-10 py-2 shadow-lg pointer-events-none transition-opacity opacity-90 text-sm sm:text-base"
-      style={{
-        left: `${tooltip.x + 10}px`,
-        top: `${tooltip.y + 10}px`,
-        transform: 'translate(0, -50%)'
-      }}
-    >
-      {products.find(p => p.id === tooltip.productId)?.name}
-    </div>
-  )}
+{tooltip.show && (
+  <div
+    ref={tooltipRef}
+    style={{
+      left: `${tooltip.x}px`,
+      top: `${tooltip.y}px`,
+    }}
+    className="absolute transform -translate-y-1/2 font-futura font-light z-10 bg-white w-[400px] h-[200px] text-black px-6 sm:px-10 py-2 shadow-lg pointer-events-none text-sm sm:text-base"
+  >
+    {products.find(p => p.id === tooltip.productId)?.name}
+  </div>
+)}
+
   
   {/* Дата по центру внизу */}
   <div className="flex justify-center items-center py-4 sm:py-6 bg-black">

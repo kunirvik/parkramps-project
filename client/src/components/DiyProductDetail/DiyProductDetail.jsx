@@ -87,6 +87,11 @@ export default function DiyProductDetail() {
     [currentProduct]
   );
 
+  const currentImagesFullscreen = useMemo(() => 
+  currentProduct ? currentProduct.sample : [], 
+  [currentProduct]
+);
+
   // Обработка завершения loading screen
   const handleLoadingComplete = useCallback(() => {
     setLoadingState(prev => ({ ...prev, isCompleted: true }));
@@ -736,7 +741,7 @@ export default function DiyProductDetail() {
 
     {/* Fullscreen gallery */}
     <FullscreenGallery
-      images={currentImages}
+      images={currentImagesFullscreen}
       isOpen={isGalleryOpen}
       onClose={() => setIsGalleryOpen(false)}
     />
