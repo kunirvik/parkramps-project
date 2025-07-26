@@ -863,10 +863,15 @@ import css from "../CloudGallery/CloudGallery.module.css";
 // Импортируем необходимые хуки из React
 import { useState, useEffect, useRef, useCallback } from "react";
 
+
+
 const CloudGallery = ({ images }) => {
   // Состояние для хранения ориентации изображений (портретная/ландшафтная)
   const [imageSizes, setImageSizes] = useState({});
-  
+
+
+  const [scrollYBeforeFullscreen, setScrollYBeforeFullscreen] = useState(0);
+
   // Состояние для основной информации тултипа
   const [tooltip, setTooltip] = useState({ 
     show: false,
@@ -893,9 +898,14 @@ const CloudGallery = ({ images }) => {
   }, []);
 
 const openFullscreen = (index) => {
-  if (!isMobile) return; // Запрещаем открытие фуллскрина на десктопе
+  if (!isMobile) return;
+
+  // Сохраняем текущий scrollY
+  setScrollYBeforeFullscreen(window.scrollY);
+
   setFullscreenIndex(index);
 };
+
 
   const closeFullscreen = () => {
     setFullscreenIndex(null);
@@ -908,6 +918,39 @@ const openFullscreen = (index) => {
       closeFullscreen();
     }
   };
+
+
+  useEffect(() => {
+  if (fullscreenIndex !== null && isMobile) {
+    const scrollY = window.scrollY;
+
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
+  } else {
+    const y = scrollYBeforeFullscreen;
+
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.overflow = "";
+
+    // Восстанавливаем скролл
+    window.scrollTo(0, y);
+  }
+
+  return () => {
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
+    document.body.style.overflow = "";
+  };
+}, [fullscreenIndex, isMobile]);
+
 
   // useEffect(() => {
   //   if (fullscreenIndex !== null) {
