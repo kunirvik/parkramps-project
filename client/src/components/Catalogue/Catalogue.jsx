@@ -50,6 +50,11 @@ export default function Catalogue() {
   const [isLoading, setIsLoading] = useState(true);
   const tooltipRef = useRef(null);
 
+  const [mobileTooltip, setMobileTooltip] = useState({ show: false, productId: null });
+const isMobile = typeof window !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+
+
   const handleExit = () => {
     console.log("handleExit вызван!");
     setIsFadingOut(true);
@@ -112,51 +117,57 @@ const handleMouseMove = (e, productId) => {
     setTooltip({ ...tooltip, show: false });
   };
 
-  const handleClick = async (product, e) => {
+const handleClick = async (product, e) => {
+  // На мобильных сначала показываем описание, только потом переход
+  if (isMobile) {
+    if (mobileTooltip.productId !== product.id || !mobileTooltip.show) {
+      setMobileTooltip({ show: true, productId: product.id });
 
-   
-    // Hide tooltip immediately on click
-    setTooltip({ ...tooltip, show: false });
-    
-    // Get the clicked image element
-    const imgElement = e.currentTarget.querySelector('img');
-    const imgRect = imgElement.getBoundingClientRect();
-    
-    const imageData = {
-      id: product.id,
-      src: product.image,
-      rect: {
-        top: imgRect.top,
-        left: imgRect.left,
-        width: imgRect.width,
-        height: imgRect.height,
-      },
-    }; 
-    
-    try {
+      // Автоматически скрыть через 3 секунды
+      setTimeout(() => {
+        setMobileTooltip({ show: false, productId: null });
+      }, 3000);
+      return;
+    }
+  }
+
+  // Hide десктопный тултип
+  setTooltip({ ...tooltip, show: false });
+
+  const imgElement = e.currentTarget.querySelector('img');
+  const imgRect = imgElement.getBoundingClientRect();
+  const imageData = {
+    id: product.id,
+    src: product.image,
+    rect: {
+      top: imgRect.top,
+      left: imgRect.left,
+      width: imgRect.width,
+      height: imgRect.height,
+    },
+  };
+
+  try {
     await preloadImage(product.image);
   } catch (error) {
     console.warn('Не удалось предзагрузить изображение:', error);
   }
-    const firstProductInCategory = products
-    .filter(p => p.category === product.category)
-    .reduce((minProduct, current) => current.id < minProduct.id ? current : minProduct, product);
-    setSelectedProduct(product.id);
- setTimeout(() => {
-    // Навигация по категории
+
+  setSelectedProduct(product.id);
+
+  setTimeout(() => {
     switch (product.category) {
       case "sets":
         navigate(`/product/sets/1?view=0`, { state: { imageData } });
         break;
       case "ramps":
-         navigate(`/product/diy/1?view=0`, { state: { imageData } });
+        navigate(`/product/diy/1?view=0`, { state: { imageData } });
         break;
       case "skateparks":
         navigate(`/product/skateparks/1?view=0`, { state: { imageData } });
         break;
       case "diy":
-       navigate(`/product/ramps/1?view=0`, { state: { imageData } });
-        
+        navigate(`/product/ramps/1?view=0`, { state: { imageData } });
         break;
       default:
         console.warn("Неизвестная категория:", product.category);
@@ -292,4 +303,11 @@ useEffect(() => {
       2015-2025
     </span>
   </div>
+
+  {isMobile && mobileTooltip.show && (
+  <div className="fixed bottom-0 left-0 right-0 z-50 bg-white text-black px-6 py-4 shadow-lg text-sm sm:text-base font-futura font-light transition-all duration-500">
+    {products.find(p => p.id === mobileTooltip.productId)?.name}
+  </div>
+)}
+
 </div></>)}
