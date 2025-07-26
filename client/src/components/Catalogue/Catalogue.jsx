@@ -50,9 +50,8 @@ export default function Catalogue() {
   const [isLoading, setIsLoading] = useState(true);
   const tooltipRef = useRef(null);
 
-  const [mobileTooltip, setMobileTooltip] = useState({ show: false, productId: null });
-const isMobile = typeof window !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
+  const [mobileTooltipProductId, setMobileTooltipProductId] = useState(null);
+const isMobile = typeof window !== "undefined" && window.innerWidth <= 768;
 
 
   const handleExit = () => {
@@ -118,24 +117,22 @@ const handleMouseMove = (e, productId) => {
   };
 
 const handleClick = async (product, e) => {
-  // На мобильных сначала показываем описание, только потом переход
   if (isMobile) {
-    if (mobileTooltip.productId !== product.id || !mobileTooltip.show) {
-      setMobileTooltip({ show: true, productId: product.id });
-
-      // Автоматически скрыть через 3 секунды
-      setTimeout(() => {
-        setMobileTooltip({ show: false, productId: null });
-      }, 3000);
+    if (mobileTooltipProductId !== product.id) {
+      // Первый тап — показать подсказку
+      setMobileTooltipProductId(product.id);
       return;
+    } else {
+      // Второй тап — скрыть подсказку и перейти
+      setMobileTooltipProductId(null);
     }
   }
 
-  // Hide десктопный тултип
   setTooltip({ ...tooltip, show: false });
 
   const imgElement = e.currentTarget.querySelector('img');
   const imgRect = imgElement.getBoundingClientRect();
+
   const imageData = {
     id: product.id,
     src: product.image,
@@ -150,7 +147,7 @@ const handleClick = async (product, e) => {
   try {
     await preloadImage(product.image);
   } catch (error) {
-    console.warn('Не удалось предзагрузить изображение:', error);
+    console.warn("Не удалось предзагрузить изображение:", error);
   }
 
   setSelectedProduct(product.id);
@@ -175,6 +172,8 @@ const handleClick = async (product, e) => {
   }, 400);
 };
 
+
+
 useEffect(() => {
   if (tooltip.show && tooltipRef.current) {
     gsap.fromTo(
@@ -196,6 +195,16 @@ useEffect(() => {
   }
 }, [tooltip.show]);
 
+
+useEffect(() => {
+  if (mobileTooltipProductId) {
+    const timer = setTimeout(() => {
+      setMobileTooltipProductId(null);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }
+}, [mobileTooltipProductId]);
 
 
   useEffect(() => {
@@ -269,16 +278,26 @@ useEffect(() => {
           ></div>
         </div>
         
-        <div className="flex flex-col items-center w-full h-full">
-          <img 
-         
-            src={product.image}
-            alt={product.name}
-            className="w-full h-full object-contain transition-all duration-300"
-             onMouseMove={(e) => handleMouseMove(e, product.id)}
-        onMouseLeave={handleMouseLeave}
-          />
-        </div>
+  <div className="flex flex-col items-center w-full h-full relative">
+  <img
+    src={product.image}
+    alt={product.name}
+    className="w-full h-full object-contain transition-all duration-300"
+    onMouseMove={!isMobile ? (e) => handleMouseMove(e, product.id) : undefined}
+    onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+  />
+
+  {/* Подсказка внутри карточки — только для мобилок */}
+  {isMobile && mobileTooltipProductId === product.id && (
+    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 
+                  bg-white/90 text-black text-base sm:text-lg 
+                  px-4 py-2 rounded-xl shadow-xl animate-fadeIn 
+                  font-light leading-snug w-[90%] max-w-xs text-center z-20">
+      {product.name}
+    </div>
+  )}
+</div>
+
       </div>
     ))}
   </div>
@@ -303,11 +322,4 @@ useEffect(() => {
       2015-2025
     </span>
   </div>
-
-  {isMobile && mobileTooltip.show && (
-  <div className="fixed bottom-0 left-0 right-0 z-50 bg-white text-black px-6 py-4 shadow-lg text-sm sm:text-base font-futura font-light transition-all duration-500">
-    {products.find(p => p.id === mobileTooltip.productId)?.name}
-  </div>
-)}
-
 </div></>)}
