@@ -550,7 +550,7 @@ export default function DiyProductDetail() {
         ))}
       </Swiper>
 
-      <div className="custom-swiper-pagination mt-4 sm:mt-0 flex justify-center text-[#ff00fb]" />
+      <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
     </div>
 
     {/* Миниатюры — справа от галереи */}

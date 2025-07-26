@@ -892,9 +892,10 @@ const CloudGallery = ({ images }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const openFullscreen = (index) => {
-    setFullscreenIndex(index);
-  };
+const openFullscreen = (index) => {
+  if (!isMobile) return; // Запрещаем открытие фуллскрина на десктопе
+  setFullscreenIndex(index);
+};
 
   const closeFullscreen = () => {
     setFullscreenIndex(null);
@@ -919,19 +920,6 @@ const CloudGallery = ({ images }) => {
   //     document.body.style.overflow = "";
   //   };
   // }, [fullscreenIndex]);
-
-  useEffect(() => {
-  const originalOverflow = document.body.style.overflow;
-  if (fullscreenIndex !== null) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = originalOverflow;
-  }
-  return () => {
-    document.body.style.overflow = originalOverflow;
-  };
-}, [fullscreenIndex]);
-
 
   const tooltipRef = useRef(null);
   const mousePositionRef = useRef({ x: 0, y: 0 });
@@ -1075,88 +1063,131 @@ const CloudGallery = ({ images }) => {
         </div>
       )}
 
+      {/* Fullscreen Modal */}
       {fullscreenIndex !== null && (
-  <div
-    onClick={handleFullscreenClick}
-    style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      backgroundColor: "rgba(0, 0, 0, 0.95)",
-      zIndex: 9999,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      cursor: "pointer",
-      overflow: "auto", // ✅ позволяем скролл (на мобилках полезно)
-      touchAction: "none",
-    }}
-  >
-    {/* Контейнер изображения/видео */}
-    <div
-      style={{
-        maxWidth: "100%",
-        maxHeight: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 0,
-        margin: 0,
-      }}
-      onClick={handleFullscreenClick}
-    >
-      {images[fullscreenIndex]?.resource_type === "image" ? (
-        <img
-          src={images[fullscreenIndex].secure_url}
-          alt={images[fullscreenIndex].context?.alt || "No description"}
+        <div
+          onClick={handleFullscreenClick}
           style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-            objectFit: "contain",
-            userSelect: "none",
-            display: "block",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.95)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            touchAction: "none",
+            overflow: "hidden",
+            cursor: "pointer"
           }}
-        />
-      ) : (
-        <video
-          src={images[fullscreenIndex].secure_url}
-          autoPlay
-          loop
-          muted
-          playsInline
-          controls={isMobile}
-          style={{
-            maxWidth: "100%",
-            maxHeight: "100%",
-            objectFit: "contain",
-            display: "block",
-          }}
-        />
+        >
+          {/* Кнопка закрытия - только для десктопа */}
+          {!isMobile && (
+            <button
+              onClick={closeFullscreen}
+              style={{
+                position: "absolute",
+                top: 20,
+                right: 20,
+                background: "rgba(255, 255, 255, 0.2)",
+                border: "none",
+                color: "white",
+                fontSize: "28px",
+                cursor: "pointer",
+                zIndex: 10000,
+                borderRadius: "50%",
+                width: "40px",
+                height: "40px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "background-color 0.2s ease"
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = "rgba(255, 255, 255, 0.3)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = "rgba(255, 255, 255, 0.2)";
+              }}
+            >
+              ✕
+            </button>
+          )}
+
+          {/* Контейнер для медиа */}
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 0,
+              margin: 0
+            }}
+            onClick={handleFullscreenClick}
+          >
+            {images[fullscreenIndex]?.resource_type === "image" ? (
+              <img
+                src={images[fullscreenIndex].secure_url}
+                alt={images[fullscreenIndex].context?.alt || "No description"}
+                style={{
+                  width: "100vw",
+                  height: "100vh",
+                  objectFit: "contain",
+                  userSelect: "none",
+                  pointerEvents: "none",
+                  display: "block",
+                  margin: 0,
+                  padding: 0
+                }}
+                onClick={handleFullscreenClick}
+              />
+            ) : (
+              <video
+                src={images[fullscreenIndex].secure_url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls={false}
+                style={{
+                  width: "100vw",
+                  height: "100vh",
+                  objectFit: "contain",
+                  display: "block",
+                  margin: 0,
+                  padding: 0
+                }}
+                onClick={handleFullscreenClick}
+              />
+            )}
+          </div>
+
+          {/* Подсказка для мобильных устройств */}
+          {isMobile && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: 30,
+                left: "50%",
+                transform: "translateX(-50%)",
+                color: "rgba(255, 255, 255, 0.7)",
+                fontSize: "14px",
+                textAlign: "center",
+                pointerEvents: "none"
+              }}
+            >
+              Нажмите на изображение, чтобы закрыть
+            </div>
+          )}
+        </div>
       )}
-    </div>
-
-    {/* Подсказка на мобилках */}
-    {isMobile && (
-      <div
-        style={{
-          position: "absolute",
-          bottom: 30,
-          left: "50%",
-          transform: "translateX(-50%)",
-          color: "rgba(255, 255, 255, 0.7)",
-          fontSize: "14px",
-          textAlign: "center",
-          pointerEvents: "none",
-        }}
-      >
-        Нажмите на изображение, чтобы закрыть
-      </div>
-    )}
-  </div>
-)}
-
     </>
   );
 };
