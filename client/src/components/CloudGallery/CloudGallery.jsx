@@ -897,7 +897,7 @@ const CloudGallery = ({ images }) => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  
+
 const openFullscreen = (index) => {
   if (!isMobile) return;
 
@@ -1083,6 +1083,7 @@ useEffect(() => {
             position: "absolute",
   top: `${scrollYBeforeFullscreen}px`,
             left: 0,
+            bottom:"40px",
             width: "100vw",
             height: "100vh",
             backgroundColor: "rgba(0, 0, 0, 0.95)",
