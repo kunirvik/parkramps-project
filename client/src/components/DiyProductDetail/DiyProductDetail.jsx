@@ -10,20 +10,6 @@ import productCatalogDiys from "../data/productCatalogDiys";
 import "swiper/css";
 import "swiper/css/pagination"; 
 
-// Константы
-const ANIMATION_CONFIG = {
-  DURATION: 0.6,
-  EASE: "power2.out",
-  HALF_DURATION: 0.3
-};
-
-const SWIPER_CONFIG = {
-  SPEED: ANIMATION_CONFIG.DURATION * 1000,
-  THRESHOLD: 20,
-  RESISTANCE_RATIO: 0.85
-};
-
-const LOADING_SCREEN_DURATION = 1500; // 1.5 секунды
 
 // export default function DiyProductDetail() {
 //   const location = useLocation();
@@ -799,6 +785,22 @@ const LOADING_SCREEN_DURATION = 1500; // 1.5 секунды
 //   );
 // }
 
+// Константы
+// Оптимизированные константы для плавности
+const ANIMATION_CONFIG = {
+  DURATION: 0.8, // Увеличена для плавности
+  EASE: "power2.inOut", // Более плавное easing
+  HALF_DURATION: 0.4
+};
+
+const SWIPER_CONFIG = {
+  SPEED: ANIMATION_CONFIG.DURATION * 800, // Уменьшена скорость
+  THRESHOLD: 15, // Уменьшен порог
+  RESISTANCE_RATIO: 0.75
+};
+
+const LOADING_SCREEN_DURATION = 1500;
+
 export default function DiyProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -811,9 +813,6 @@ export default function DiyProductDetail() {
 
   // Определяем, нужен ли loading screen
   const shouldShowLoading = useMemo(() => {
-    // Показываем loading screen если:
-    // 1. Нет imageData (значит переход не с каталога с анимацией)
-    // 2. Или если это прямой переход/перезагрузка
     return !imageData;
   }, [imageData]);
 
@@ -827,7 +826,7 @@ export default function DiyProductDetail() {
   const [swiperInstances, setSwiperInstances] = useState({
     main: null,
     thumbs: null,
-    thumbsMobile: null // Добавляем отдельный instance для мобильных миниатюр
+    thumbsMobile: null
   });
 
   // Состояния анимации и загрузки
@@ -863,38 +862,41 @@ export default function DiyProductDetail() {
   );
 
   const currentImagesFullscreen = useMemo(() => 
-  currentProduct ? currentProduct.sample : [], 
-  [currentProduct]
-);
+    currentProduct ? currentProduct.sample : [], 
+    [currentProduct]
+  );
 
-  // Функция для синхронизации миниатюр
+  // Оптимизированная функция синхронизации миниатюр
   const syncThumbnails = useCallback((newIndex) => {
-    // Для desktop - не двигаем миниатюры, только подсвечиваем
-    // (thumbs swiper используется только для подсветки активного элемента)
-    
-    // Синхронизируем мобильные миниатюры - двигаем только если не последние элементы
-    if (swiperInstances.thumbsMobile) {
-      const totalSlides = productCatalogDiys.length;
-      const slidesPerView = window.innerWidth < 480 ? 3 : 
-                          window.innerWidth < 640 ? 4 : 
-                          window.innerWidth < 768 ? 5 : 6;
-      
-      // Центрируем только если индекс позволяет (не последние элементы)
-      if (newIndex < totalSlides - Math.floor(slidesPerView / 2)) {
-        swiperInstances.thumbsMobile.slideTo(newIndex);
+    // Используем requestAnimationFrame для синхронизации с циклом рендеринга
+    requestAnimationFrame(() => {
+      // Синхронизируем мобильные миниатюры с плавной анимацией
+      if (swiperInstances.thumbsMobile && !swiperInstances.thumbsMobile.destroyed) {
+        const totalSlides = productCatalogDiys.length;
+        const slidesPerView = window.innerWidth < 480 ? 3 : 
+                            window.innerWidth < 640 ? 4 : 
+                            window.innerWidth < 768 ? 5 : 6;
+        
+        // Центрируем с плавной анимацией
+        if (newIndex < totalSlides - Math.floor(slidesPerView / 2)) {
+          swiperInstances.thumbsMobile.slideTo(newIndex, ANIMATION_CONFIG.DURATION * 600);
+        }
       }
-    }
-  }, [swiperInstances.thumbsMobile]);
+
+      // Синхронизируем desktop миниатюры
+      if (swiperInstances.thumbs && !swiperInstances.thumbs.destroyed) {
+        swiperInstances.thumbs.slideTo(newIndex, ANIMATION_CONFIG.DURATION * 600);
+      }
+    });
+  }, [swiperInstances.thumbsMobile, swiperInstances.thumbs]);
 
   // Обработка завершения loading screen
   const handleLoadingComplete = useCallback(() => {
     setLoadingState(prev => ({ ...prev, isCompleted: true }));
     
-    // Небольшая задержка перед началом показа контента
     setTimeout(() => {
       setLoadingState(prev => ({ ...prev, isLoading: false }));
       
-      // Анимируем появление контента
       if (refs.container.current && refs.info.current) {
         gsap.fromTo(refs.container.current, 
           { opacity: 0, y: 30 },
@@ -968,6 +970,7 @@ export default function DiyProductDetail() {
     });
   }, []);
 
+  // Оптимизированная функция анимации перехода
   const startTransitionAnimation = useCallback(() => {
     if (!refs.transitionImage.current || !refs.swiperContainer.current || 
         !imageData || animationState.inProgress) {
@@ -980,61 +983,93 @@ export default function DiyProductDetail() {
     const { top, left, width, height } = imageData.rect;
     const transitionEl = refs.transitionImage.current;
     const swiperEl = refs.swiperContainer.current;
-    const firstSlideImage = swiperEl.querySelector('.swiper-slide-active img');
-
-    if (!firstSlideImage) {
-      console.warn("Активное изображение слайда не найдено");
-      updateAnimationState({ complete: true, inProgress: false });
-      return;
-    }
-
-    const finalRect = firstSlideImage.getBoundingClientRect();
     
-    if (finalRect.width === 0 || finalRect.height === 0) {
-      setTimeout(() => {
-        updateAnimationState({ inProgress: false });
-        startTransitionAnimation();
-      }, 100);
-      return;
-    }
+    // Ждем один фрейм для корректного рендеринга
+    requestAnimationFrame(() => {
+      const firstSlideImage = swiperEl.querySelector('.swiper-slide-active img');
 
-    // Скрываем swiper
-    gsap.set(swiperEl, { visibility: 'hidden', opacity: 0 });
-
-    // Устанавливаем начальное состояние в контейнере
-    gsap.set(transitionEl, {
-      position: "absolute",
-      top: top - window.scrollY,
-      left: left - window.scrollX,
-      width, height,
-      zIndex: 1000,
-      opacity: 1,
-      visibility: 'visible',
-      objectFit: "contain",
-      borderRadius: imageData.borderRadius || '0px',
-      pointerEvents: 'none'
-    });
-
-    // Анимируем переход
-    gsap.to(transitionEl, {
-      top: finalRect.top - window.scrollY,
-      left: finalRect.left - window.scrollX,
-      width: finalRect.width,
-      height: finalRect.height,
-      borderRadius: '12px',
-      duration: ANIMATION_CONFIG.DURATION,
-      ease: ANIMATION_CONFIG.EASE,
-      onComplete: async () => {
-        // Показываем swiper и скрываем переходное изображение
-        gsap.set(swiperEl, { visibility: 'visible', opacity: 1 });
-        gsap.set(transitionEl, { visibility: 'hidden', opacity: 0 });
-        
-        updateAnimationState({ complete: true });
-        
-        // Анимируем появление информации
-        await animateInfo('in');
-        updateAnimationState({ inProgress: false });
+      if (!firstSlideImage) {
+        console.warn("Активное изображение слайда не найдено");
+        updateAnimationState({ complete: true, inProgress: false });
+        return;
       }
+
+      const finalRect = firstSlideImage.getBoundingClientRect();
+      
+      if (finalRect.width === 0 || finalRect.height === 0) {
+        setTimeout(() => {
+          updateAnimationState({ inProgress: false });
+          startTransitionAnimation();
+        }, 150);
+        return;
+      }
+
+      // Плавно скрываем swiper
+      gsap.to(swiperEl, { 
+        opacity: 0, 
+        duration: 0.1,
+        onComplete: () => {
+          gsap.set(swiperEl, { visibility: 'hidden' });
+        }
+      });
+
+      // Устанавливаем начальное состояние с GPU-оптимизацией
+      gsap.set(transitionEl, {
+        position: "absolute",
+        top: top - window.scrollY,
+        left: left - window.scrollX,
+        width, height,
+        zIndex: 1000,
+        opacity: 1,
+        visibility: 'visible',
+        objectFit: "contain",
+        borderRadius: imageData.borderRadius || '0px',
+        pointerEvents: 'none',
+        transformOrigin: 'center center',
+        backfaceVisibility: 'hidden',
+        willChange: 'transform, opacity'
+      });
+
+      // Более плавная анимация перехода
+      gsap.to(transitionEl, {
+        top: finalRect.top - window.scrollY,
+        left: finalRect.left - window.scrollX,
+        width: finalRect.width,
+        height: finalRect.height,
+        borderRadius: '12px',
+        duration: ANIMATION_CONFIG.DURATION,
+        ease: ANIMATION_CONFIG.EASE,
+        onUpdate: () => {
+          // Принудительно перерисовываем для плавности
+          transitionEl.style.transform += '';
+        },
+        onComplete: async () => {
+          // Плавно показываем swiper
+          gsap.set(swiperEl, { visibility: 'visible', opacity: 0 });
+          gsap.to(swiperEl, { 
+            opacity: 1, 
+            duration: 0.3,
+            ease: "power2.out"
+          });
+          
+          // Плавно скрываем переходное изображение
+          gsap.to(transitionEl, { 
+            opacity: 0, 
+            duration: 0.2,
+            onComplete: () => {
+              gsap.set(transitionEl, { visibility: 'hidden' });
+            }
+          });
+          
+          updateAnimationState({ complete: true });
+          
+          // Анимируем появление информации с задержкой
+          setTimeout(async () => {
+            await animateInfo('in');
+            updateAnimationState({ inProgress: false });
+          }, 100);
+        }
+      });
     });
   }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
 
@@ -1043,7 +1078,6 @@ export default function DiyProductDetail() {
     setSwiperInstances(prev => ({ ...prev, main: swiper }));
     
     if (!imageData) {
-      // Если нет анимации перехода, но есть loading screen
       if (shouldShowLoading && !loadingState.isCompleted) {
         gsap.set(refs.info.current, { opacity: 0, y: 0 });
       } else {
@@ -1052,9 +1086,15 @@ export default function DiyProductDetail() {
       return;
     }
 
-    requestAnimationFrame(startTransitionAnimation);
+    // Двойной requestAnimationFrame для стабильности
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        startTransitionAnimation();
+      });
+    });
   }, [imageData, startTransitionAnimation, shouldShowLoading, loadingState.isCompleted]);
 
+  // Оптимизированный обработчик изменения слайда
   const handleSlideChange = useCallback(async (swiper) => {
     const newIndex = swiper.activeIndex;
     
@@ -1062,17 +1102,21 @@ export default function DiyProductDetail() {
 
     updateAnimationState({ slideChanging: true, inProgress: true });
 
-    // Анимируем скрытие информации
-    await animateInfo('out');
+    // Параллельное выполнение анимации и задержки
+    await Promise.all([
+      animateInfo('out'),
+      new Promise(resolve => setTimeout(resolve, 50))
+    ]);
 
-    // Обновляем состояние
+    // Батчевое обновление состояния
     setActiveProductIndex(newIndex);
     updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
 
-    // Синхронизируем миниатюры
-    syncThumbnails(newIndex);
+    // Синхронизируем миниатюры после обновления состояния
+    requestAnimationFrame(() => {
+      syncThumbnails(newIndex);
+    });
 
-    // Анимируем появление новой информации
     await animateInfo('in');
     updateAnimationState({ slideChanging: false, inProgress: false });
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
@@ -1085,17 +1129,17 @@ export default function DiyProductDetail() {
     swiperInstances.main.slideTo(index);
   }, [animationState.inProgress, activeProductIndex, swiperInstances.main]);
 
-  // Обработчик инициализации миниатюр для desktop
+  // Оптимизированные обработчики инициализации миниатюр
   const handleThumbsInit = useCallback((swiper) => {
     setSwiperInstances(prev => ({ ...prev, thumbs: swiper }));
-    // Для desktop не устанавливаем позицию - оставляем как есть
   }, []);
 
-  // Обработчик инициализации миниатюр для mobile
   const handleThumbsMobileInit = useCallback((swiper) => {
     setSwiperInstances(prev => ({ ...prev, thumbsMobile: swiper }));
-    // Устанавливаем начальную позицию
-    swiper.slideTo(activeProductIndex, 0);
+    // Плавная установка начальной позиции
+    requestAnimationFrame(() => {
+      swiper.slideTo(activeProductIndex, 0);
+    });
   }, [activeProductIndex]);
 
   useEffect(() => {
@@ -1106,7 +1150,7 @@ export default function DiyProductDetail() {
     setSelectedImageIndices(newIndices);
   }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
 
-  // Стили и блокировка скролла
+  // Улучшенные стили с GPU-ускорением
   useEffect(() => {
     const styleElement = document.createElement("style");
     document.head.appendChild(styleElement);
@@ -1114,24 +1158,31 @@ export default function DiyProductDetail() {
     const applyStyles = (isDesktop) => {
       const styles = `
         html, body { 
-        overflow: ${isDesktop ? "hidden" : "auto"} !important; 
+          overflow: ${isDesktop ? "hidden" : "auto"} !important; 
           height: 100% !important;
           width: 100% !important;
         }
         .swiper-wrapper { 
-          transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
+          transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+          will-change: transform !important;
         }
         .swiper-slide { 
           transition: transform ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
-                      opacity ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
+                      opacity ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+          will-change: transform, opacity !important;
+          backface-visibility: hidden !important;
         }
-        .swiper-slide-active { z-index: 2; }
+        .swiper-slide-active { 
+          z-index: 2; 
+          transform: translateZ(0) !important;
+        }
         .swiper-no-transition .swiper-wrapper { transition: none !important; }
         .swiper-slide-thumb-active {
           opacity: 1 !important;
-          transform: scale(1.05) !important;
+          transform: scale(1.05) translateZ(0) !important;
           border: 2px solid black !important;
           border-radius: 0.5rem !important;
+          transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
         }
         .transition-image-container {
           position: fixed !important;
@@ -1142,6 +1193,11 @@ export default function DiyProductDetail() {
           overflow: hidden !important;
           pointer-events: none !important;
           z-index: 9999 !important;
+          will-change: transform !important;
+        }
+        .swiper-slide img {
+          will-change: transform !important;
+          backface-visibility: hidden !important;
         }
       `;
 
@@ -1153,55 +1209,59 @@ export default function DiyProductDetail() {
       applyStyles(isDesktop);
     };
 
-    // Установить начальное состояние
     handleResize();
-
-    // Подписка на ресайз
     window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      document.head.removeChild(styleElement);
+      if (document.head.contains(styleElement)) {
+        document.head.removeChild(styleElement);
+      }
     };
   }, []);
 
- useEffect(() => {
-  const interval = setInterval(() => {
-    if (animationState.inProgress || isGalleryOpen) return;
+  // Оптимизированный автослайдер
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (animationState.inProgress || isGalleryOpen) return;
 
-    const now = Date.now();
-    const timeSinceLastInteraction = now - lastInteractionRef.current;
+      const now = Date.now();
+      const timeSinceLastInteraction = now - lastInteractionRef.current;
 
-    if (timeSinceLastInteraction < 7000) return; // пауза после клика 7 сек
+      if (timeSinceLastInteraction < 7000) return;
 
-    setSelectedImageIndices((prevIndices) => {
-      const newIndices = [...prevIndices];
-      const currentIndex = newIndices[activeProductIndex];
-      const product = productCatalogDiys[activeProductIndex];
-      const totalImages = 1 + (product.altImages?.length || 0);
+      // Используем requestAnimationFrame для плавности
+      requestAnimationFrame(() => {
+        setSelectedImageIndices((prevIndices) => {
+          const newIndices = [...prevIndices];
+          const currentIndex = newIndices[activeProductIndex];
+          const product = productCatalogDiys[activeProductIndex];
+          const totalImages = 1 + (product.altImages?.length || 0);
 
-      newIndices[activeProductIndex] = (currentIndex + 1) % totalImages;
+          newIndices[activeProductIndex] = (currentIndex + 1) % totalImages;
+          updateUrl(product.id, newIndices[activeProductIndex]);
 
-      updateUrl(product.id, newIndices[activeProductIndex]);
+          return newIndices;
+        });
+      });
+    }, 5000);
 
-      return newIndices;
-    });
-  }, 5000); // каждые 5 сек
+    return () => clearInterval(interval);
+  }, [activeProductIndex, animationState.inProgress, isGalleryOpen, updateUrl]);
 
-  return () => clearInterval(interval);
-}, [activeProductIndex, animationState.inProgress, isGalleryOpen, updateUrl]);
-
+  // Оптимизированная синхронизация состояния
   useEffect(() => {
     const swiper = swiperInstances.main;
     if (!swiper || animationState.inProgress) return;
   
     const newIndex = swiper.activeIndex;
     if (newIndex !== activeProductIndex) {
-      setActiveProductIndex(newIndex);
-      updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
-  
-      // Синхронизируем миниатюры
-      syncThumbnails(newIndex);
+      // Батчевое обновление состояния
+      requestAnimationFrame(() => {
+        setActiveProductIndex(newIndex);
+        updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
+        syncThumbnails(newIndex);
+      });
     }
   }, [swiperInstances.main?.activeIndex, syncThumbnails]);
 
@@ -1209,283 +1269,280 @@ export default function DiyProductDetail() {
     return <div className="text-center mt-10 p-4">Продукт не найден</div>;
   }
 
-  // Показываем LoadingScreen если нужно
   if (loadingState.isLoading) {
     return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
   
   return (
-   <><div className="flex flex-col min-h-screen">
-  <SocialButtons
-    buttonLabel="shop"
-    onButtonClick={() => navigate("/catalogue")}
-    buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
-  />
+    <>
+      <div className="flex flex-col min-h-screen">
+        <SocialButtons
+          buttonLabel="shop"
+          onButtonClick={() => navigate("/catalogue")}
+          buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
+        />
  
-  <div
-    ref={refs.container}
-    className="w-full flex-grow  mt-[70px] mx-auto px-4"
-    style={{
-      opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
-    }}
-  >
-    <div className="w-full flex items-start mb-4">
-      {/* Левая часть — Back */}
-      <button
-        onClick={() => navigate(-1)}
-        className="text-gray-200 hover:text-pink-800 transition-colors"
-      >
-        ← Back
-      </button>
-    </div>
-<div className=" block md:hidden w-[100%] mt-7 ">
-      <Swiper
-        modules={[Thumbs]}
-        direction="horizontal"
-        onSwiper={handleThumbsMobileInit}
-        breakpoints={{
-          320: { slidesPerView: 3 },
-          480: { slidesPerView: 4 },
-          640: { slidesPerView: 5 },
-          768: { slidesPerView: 6 },
-          1024: { slidesPerView: 7 },
-          1280: { slidesPerView: 8 },
-        }}
-        slidesPerView="auto"
-        spaceBetween={10}
-        watchSlidesProgress={true}
-        slideToClickedSlide={true}
-        initialSlide={activeProductIndex}
-        speed={SWIPER_CONFIG.SPEED}
-        preventClicks={false}
-        preventClicksPropagation={false}
-        observer={true}
-        observeParents={true}
-        resistance={false}
-        resistanceRatio={0}
-        // Убираем centeredSlides для desktop - миниатюры не двигаются
-      >
-        {productCatalogDiys.map((product, index) => (
-          <SwiperSlide key={product.id}>
-            <img
-              src={product.image}
-              onClick={() => handleThumbnailClick(index)}
-              className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
-                index === activeProductIndex
-                  ? "opacity-100 scale-105 border-black"
-                  : "grayscale border-transparent opacity-60 hover:opacity-100"
-              }`}
-              alt={product.name}
-              draggable="false"
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
-   </div>
-    {/* Мобильный заголовок */}
-    <div className="block lg:hidden w-full mt-4">
-      {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
-          {currentProduct.description}
-      </h1> */}
-      <p className="font-futura text-[#717171] font-medium">
-      {currentProduct.name}
-      </p>
-    </div>
-
-    
-    {/* Основной контент */}
-    <div className="w-full  lg:h-[50%]  flex flex-col lg:flex-row lg:content-center  relative">
-      {/* Переходное изображение */}
-      {!animationState.complete && imageData && (
-        <div className="transition-image-container">
-          <img
-            ref={refs.transitionImage}
-            src={currentProduct.image}
-            alt={currentProduct.name}
-            className="object-contain"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              visibility: "visible",
-              pointerEvents: "none",
-            }}
-          />
-        </div>
-      )}
-{/* Swiper галерея + Миниатюры (мобильная версия) */}
-<div
-  ref={refs.swiperContainer}
-  className="w-full lg:w-[75%] lg:h-[50%] mt-0 lg:mt-20 lg:content-center"
-  style={{
-    visibility: !imageData || animationState.complete ? "visible" : "hidden",
-    opacity: !imageData || animationState.complete ? 1 : 0,
-  }}
->
-  <div className="w-full flex flex-row items-start justify-between gap-2">
-    {/* Основная галерея */}
-    <div className="w-[100%]">
-      <Swiper
-        className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
-        modules={[Pagination, Mousewheel, Thumbs]}
-        pagination={{ clickable: true, el: ".custom-swiper-pagination" }}
-        mousewheel={true}
-        direction="horizontal"
-        centeredSlides={true}
-        thumbs={{ 
-          swiper: swiperInstances.thumbs && !swiperInstances.thumbs.destroyed ? swiperInstances.thumbs : null 
-        }}
-        spaceBetween={20}
-        initialSlide={activeProductIndex}
-        speed={SWIPER_CONFIG.SPEED}
-        threshold={SWIPER_CONFIG.THRESHOLD}
-        resistance={true}
-        resistanceRatio={SWIPER_CONFIG.RESISTANCE_RATIO}
-        onInit={handleSwiperInit}
-        onSlideChange={handleSlideChange}
-        preventClicks={false}
-        preventClicksPropagation={false}
-        touchStartPreventDefault={false}
-      >
-        {productCatalogDiys.map((product, index) => (
-          <SwiperSlide key={product.id} style={{ height: "100%" }}>
-            <div className="w-full h-full flex items-center justify-center">
-        <img
-  src={
-    selectedImageIndices[index] === 0
-      ? product.image
-      : product.altImages[selectedImageIndices[index] - 1]
-  }
-  alt={product.name}
-  className="max-h-full w-auto object-contain"
-  draggable="false"
-  onClick={() => {
-  if (animationState.inProgress) return;
-
-  lastInteractionRef.current = Date.now(); // <-- добавили
-  const totalRenders = 1 + (product.altImages?.length || 0);
-  const current = selectedImageIndices[index];
-  const next = (current + 1) % totalRenders;
-
-  const updatedIndices = [...selectedImageIndices];
-  updatedIndices[index] = next;
-  setSelectedImageIndices(updatedIndices);
-  updateUrl(product.id, next);
-}}
-/>
-            </div>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-
-      <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
-    </div>
-
-  </div>
-</div>
-      {/* Описание и миниатюры текущего продукта */}
-      <div
-        ref={refs.info}
-        className="w-full lg:w-[25%] lg:h-[25%] flex flex-col justify mt-8 lg:mt-20"
-        style={{
-          opacity:
-            animationState.slideChanging || (!animationState.complete && imageData)
-              ? 0
-              : 1,
-          transform:
-            animationState.slideChanging || (!animationState.complete && imageData)
-              ? "translateY(20px)"
-              : "translateY(0)",
-          visibility:
-            animationState.slideChanging || (!animationState.complete && imageData)
-              ? "hidden"
-              : "visible",
-        }}
-      >
-        <div className="hidden lg:block">
-          <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
-            {currentProduct.name}
-          </h1>
-          <p className="font-futura text-[#717171] font-medium">
-            {currentProduct.description}
-          </p>
-        </div>
-        {currentProduct.details?.map((detail, index) => {
-          const isCatalog = detail.title.toLowerCase().includes("каталог");
-          return (
+        <div
+          ref={refs.container}
+          className="w-full flex-grow mt-[70px] mx-auto px-4"
+          style={{
+            opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
+          }}
+        >
+          <div className="w-full flex items-start mb-4">
             <button
-              key={index}
-              onClick={() => {
-                if (isCatalog) setIsGalleryOpen(true);
-                else window.location.href = detail.link;
-              }}
-              className="w-full text-left flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+              onClick={() => navigate(-1)}
+              className="text-gray-200 hover:text-pink-800 transition-colors"
             >
-              <span className="font-futura text-[#717171] font-medium">
-                {detail.title}
-              </span>
-              <span className="font-futura text-[#717171] text-lg">→</span>
+              ← Back
             </button>
-          );
-        })}
+          </div>
+
+          {/* Мобильные миниатюры */}
+          <div className="block md:hidden w-[100%] mt-7">
+            <Swiper
+              modules={[Thumbs]}
+              direction="horizontal"
+              onSwiper={handleThumbsMobileInit}
+              breakpoints={{
+                320: { slidesPerView: 3 },
+                480: { slidesPerView: 4 },
+                640: { slidesPerView: 5 },
+                768: { slidesPerView: 6 },
+                1024: { slidesPerView: 7 },
+                1280: { slidesPerView: 8 },
+              }}
+              slidesPerView="auto"
+              spaceBetween={10}
+              watchSlidesProgress={true}
+              slideToClickedSlide={true}
+              initialSlide={activeProductIndex}
+              speed={SWIPER_CONFIG.SPEED}
+              preventClicks={false}
+              preventClicksPropagation={false}
+              observer={true}
+              observeParents={true}
+              resistance={false}
+              resistanceRatio={0}
+            >
+              {productCatalogDiys.map((product, index) => (
+                <SwiperSlide key={product.id}>
+                  <img
+                    src={product.image}
+                    onClick={() => handleThumbnailClick(index)}
+                    className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
+                      index === activeProductIndex
+                        ? "opacity-100 scale-105 border-black"
+                        : "grayscale border-transparent opacity-60 hover:opacity-100"
+                    }`}
+                    alt={product.name}
+                    draggable="false"
+                  />
+                </SwiperSlide>
+              ))}
+            </Swiper>
+          </div>
+
+          {/* Мобильный заголовок */}
+          <div className="block lg:hidden w-full mt-4">
+            <p className="font-futura text-[#717171] font-medium">
+              {currentProduct.name}
+            </p>
+          </div>
+
+          {/* Основной контент */}
+          <div className="w-full lg:h-[50%] flex flex-col lg:flex-row lg:content-center relative">
+            {/* Переходное изображение */}
+            {!animationState.complete && imageData && (
+              <div className="transition-image-container">
+                <img
+                  ref={refs.transitionImage}
+                  src={currentProduct.image}
+                  alt={currentProduct.name}
+                  className="object-contain"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    visibility: "visible",
+                    pointerEvents: "none",
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Swiper галерея */}
+            <div
+              ref={refs.swiperContainer}
+              className="w-full lg:w-[75%] lg:h-[50%] mt-0 lg:mt-20 lg:content-center"
+              style={{
+                visibility: !imageData || animationState.complete ? "visible" : "hidden",
+                opacity: !imageData || animationState.complete ? 1 : 0,
+              }}
+            >
+              <div className="w-full flex flex-row items-start justify-between gap-2">
+                <div className="w-[100%]">
+                  <Swiper
+                    className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
+                    modules={[Pagination, Mousewheel, Thumbs]}
+                    pagination={{ clickable: true, el: ".custom-swiper-pagination" }}
+                    mousewheel={true}
+                    direction="horizontal"
+                    centeredSlides={true}
+                    thumbs={{ 
+                      swiper: swiperInstances.thumbs && !swiperInstances.thumbs.destroyed ? swiperInstances.thumbs : null 
+                    }}
+                    spaceBetween={20}
+                    initialSlide={activeProductIndex}
+                    speed={SWIPER_CONFIG.SPEED}
+                    threshold={SWIPER_CONFIG.THRESHOLD}
+                    resistance={true}
+                    resistanceRatio={SWIPER_CONFIG.RESISTANCE_RATIO}
+                    onInit={handleSwiperInit}
+                    onSlideChange={handleSlideChange}
+                    preventClicks={false}
+                    preventClicksPropagation={false}
+                    touchStartPreventDefault={false}
+                  >
+                    {productCatalogDiys.map((product, index) => (
+                      <SwiperSlide key={product.id} style={{ height: "100%" }}>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <img
+                            src={
+                              selectedImageIndices[index] === 0
+                                ? product.image
+                                : product.altImages[selectedImageIndices[index] - 1]
+                            }
+                            alt={product.name}
+                            className="max-h-full w-auto object-contain"
+                            draggable="false"
+                            onClick={() => {
+                              if (animationState.inProgress) return;
+
+                              lastInteractionRef.current = Date.now();
+                              const totalRenders = 1 + (product.altImages?.length || 0);
+                              const current = selectedImageIndices[index];
+                              const next = (current + 1) % totalRenders;
+
+                              const updatedIndices = [...selectedImageIndices];
+                              updatedIndices[index] = next;
+                              setSelectedImageIndices(updatedIndices);
+                              updateUrl(product.id, next);
+                            }}
+                          />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+
+                  <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Описание и детали продукта */}
+            <div
+              ref={refs.info}
+              className="w-full lg:w-[25%] lg:h-[25%] flex flex-col justify mt-8 lg:mt-20"
+              style={{
+                opacity:
+                  animationState.slideChanging || (!animationState.complete && imageData)
+                    ? 0
+                    : 1,
+                transform:
+                  animationState.slideChanging || (!animationState.complete && imageData)
+                    ? "translateY(20px)"
+                    : "translateY(0)",
+                visibility:
+                  animationState.slideChanging || (!animationState.complete && imageData)
+                    ? "hidden"
+                    : "visible",
+              }}
+            >
+              <div className="hidden lg:block">
+                <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
+                  {currentProduct.name}
+                </h1>
+                <p className="font-futura text-[#717171] font-medium">
+                  {currentProduct.description}
+                </p>
+              </div>
+              {currentProduct.details?.map((detail, index) => {
+                const isCatalog = detail.title.toLowerCase().includes("каталог");
+                return (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      if (isCatalog) setIsGalleryOpen(true);
+                      else window.location.href = detail.link;
+                    }}
+                    className="w-full text-left flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+                  >
+                    <span className="font-futura text-[#717171] font-medium">
+                      {detail.title}
+                    </span>
+                    <span className="font-futura text-[#717171] text-lg">→</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop миниатюры */}
+        <div className="hidden md:block w-[100%]">
+          <Swiper
+            modules={[Thumbs]}
+            direction="horizontal"
+            onSwiper={handleThumbsInit}
+            breakpoints={{
+              320: { slidesPerView: 3 },
+              480: { slidesPerView: 4 },
+              640: { slidesPerView: 5 },
+              768: { slidesPerView: 6 },
+              1024: { slidesPerView: 7 },
+              1280: { slidesPerView: 8 },
+            }}
+            slidesPerView="auto"
+            spaceBetween={10}
+            watchSlidesProgress={true}
+            slideToClickedSlide={true}
+            initialSlide={activeProductIndex}
+            speed={SWIPER_CONFIG.SPEED}
+            preventClicks={false}
+            preventClicksPropagation={false}
+            observer={true}
+            observeParents={true}
+            resistance={false}
+            resistanceRatio={0}
+            centeredSlides={false}
+            centeredSlidesBounds={true}
+          >
+            {productCatalogDiys.map((product, index) => (
+              <SwiperSlide key={product.id}>
+                <img
+                  src={product.image}
+                  onClick={() => handleThumbnailClick(index)}
+                  className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
+                    index === activeProductIndex
+                      ? "opacity-100 scale-105 border-black"
+                      : "grayscale border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                  alt={product.name}
+                  draggable="false"
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
+
+        {/* Fullscreen gallery */}
+        <FullscreenGallery
+          images={currentImagesFullscreen}
+          isOpen={isGalleryOpen}
+          onClose={() => setIsGalleryOpen(false)}
+        />
       </div>
-     </div></div>
-
-    {/* ✅ Новая нижняя полоса миниатюр — после всего контента */}
-    <div className="hidden md:block w-[100%]  ">
-      <Swiper
-        modules={[Thumbs]}
-        direction="horizontal"
-        onSwiper={handleThumbsInit}
-        breakpoints={{
-          320: { slidesPerView: 3 },
-          480: { slidesPerView: 4 },
-          640: { slidesPerView: 5 },
-          768: { slidesPerView: 6 },
-          1024: { slidesPerView: 7 },
-          1280: { slidesPerView: 8 },
-        }}
-        slidesPerView="auto"
-        spaceBetween={10}
-        watchSlidesProgress={true}
-        slideToClickedSlide={true}
-        initialSlide={activeProductIndex}
-        speed={SWIPER_CONFIG.SPEED}
-        preventClicks={false}
-        preventClicksPropagation={false}
-        observer={true}
-        observeParents={true}
-        resistance={false}
-        resistanceRatio={0}
-        centeredSlides={false} // Центрируем только на мобильных, но не последние элементы
-        centeredSlidesBounds={true} // Предотвращаем пустое пространство в конце
-      >
-        {productCatalogDiys.map((product, index) => (
-          <SwiperSlide key={product.id}>
-            <img
-              src={product.image}
-              onClick={() => handleThumbnailClick(index)}
-              className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
-                index === activeProductIndex
-                  ? "opacity-100 scale-105 border-black"
-                  : "grayscale border-transparent opacity-60 hover:opacity-100"
-              }`}
-              alt={product.name}
-              draggable="false"
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
-   </div>
-
-    {/* Fullscreen gallery */}
-    <FullscreenGallery
-      images={currentImagesFullscreen}
-      isOpen={isGalleryOpen}
-      onClose={() => setIsGalleryOpen(false)}
-    />
-  </div>
-</>
-
+    </>
   );
 }
