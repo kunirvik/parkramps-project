@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 // import { PiEyesFill } from "react-icons/pi";
 import TooltipEyes from "../TooltipEyes/TooltipEyes"; // путь подстрой под себя
 
-const words = ["Welcome", "Explore", "Discover", "Parkramps"];
+const words = ["Skateparks",  "Ramps", "Parkramps"];
 
-export default function MenuPark() {
+export default function MenuPage() {
   const [index, setIndex] = useState(0);
   const [tooltip, setTooltip] = useState({ visible: false, x:0 , y: 0 });
   const tooltipRef = useRef(null);
@@ -24,6 +24,8 @@ export default function MenuPark() {
   const handleMouseLeave = () => {
     setTooltip({ visible: false, x: 0, y: 0 });
   };
+
+  
 
   return (
     <div className="relative w-full  bg-white-200  h-screen flex items-center justify-center overflow-visible ">
@@ -84,8 +86,7 @@ export default function MenuPark() {
           whileTap={{ scale: 0.9 }}
           className="px-6 py-3 bg-white/20 backdrop-blur-md rounded-lg text-lg font-futura font-light shadow-lg hover:bg-pink-300 cursor-pointer"
           onClick={() => window.location.href = "/catalogue"}
-        >
-          shop
+        >explore
         </motion.button>
       </div>
     </div>

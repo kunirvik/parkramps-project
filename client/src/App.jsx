@@ -7,6 +7,7 @@ import PhotoPage from "./components/PhotoPage/PhotoPage";
 import RampsProductDetail from "./components/RampsProductDetail/RampsProductDetail";
 import SkateparksProductDetail from "./components/SkateparksProductDetail/SkateparksProductDetail"
 import DiyProductDetail from "./components/DiyProductDetail/DiyProductDetail";
+// import NewsPage from "./components/NewsPage/NewsPage";
 import './App.css'
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
  <Route path="/product/diy/:id" element={<DiyProductDetail />} />
         {/* <Route path="/product/skateparks/:id" element={<SkateparksProductDetail />} />
          <Route path="/product/diy/:id" element={<DiyProductDetail />} /> */}
-  
+  {/* <Route path="/news" element={<NewsPage />} /> */}
 
         <Route  path="/photopage" element={<PhotoPage />} />
         

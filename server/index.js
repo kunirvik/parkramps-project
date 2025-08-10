@@ -12,6 +12,35 @@ app.use(cors(
 ));
 
 
+// app.use(bodyParser.json());
+
+// const FILE_PATH = "news.json";
+
+// // Чтение всех новостей
+// app.get("/api/news", (req, res) => {
+//   const data = JSON.parse(fs.readFileSync(FILE_PATH));
+//   res.json(data);
+// });
+
+// // Добавление новости
+// app.post("/api/news", (req, res) => {
+//   const { title, content, youtubeUrl } = req.body;
+//   const data = JSON.parse(fs.readFileSync(FILE_PATH));
+//   const newItem = {
+//     id: uuid(),
+//     title,
+//     content,
+//     youtubeUrl,
+//     createdAt: new Date()
+//   };
+//   data.push(newItem);
+//   fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
+//   res.status(201).json(newItem);
+// });
+
+
+
+
 
 
 // Конфигурация Cloudinary с использованием переменных окружения
@@ -47,7 +76,20 @@ app.get('/api/gallery', async (req, res) => {
   }
 });
 
+
+
+
+
+
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
   console.log(`Сервер запущен на порту ${PORT}`);
 });
+
+
+
+
+
+
+
+
