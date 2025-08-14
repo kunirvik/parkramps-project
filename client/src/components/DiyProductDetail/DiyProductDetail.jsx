@@ -391,7 +391,7 @@ export default function DiyProductDetail() {
 
       return newIndices;
     });
-  }, 5000); // каждые 5 сек
+  }, 4000); // каждые 5 сек
 
   return () => clearInterval(interval);
 }, [activeProductIndex, animationState.inProgress, isGalleryOpen, updateUrl]);
