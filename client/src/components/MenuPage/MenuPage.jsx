@@ -48,6 +48,14 @@ export default function MenuPage() {
     alt="Project"
     className="absolute top-0 left-0 w-full h-full object-cover"
   />
+  <div className="absolute inset-0 w-full h-[100vh] overflow-hidden lg:h-full">
+  <img
+    src="/project.png"
+    alt="Project"
+    className="w-full h-full object-contain lg:object-cover lg:rotate-90"
+  />
+</div>
+
 </picture>
 
 
