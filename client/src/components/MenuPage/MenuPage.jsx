@@ -50,7 +50,7 @@ export default function MenuPage() {
   />
   <div className="absolute inset-0 w-full h-[100vh] overflow-hidden lg:h-full">
   <img
-    src="/project.png"
+    src="/project2.png"
     alt="Project"
     className="w-full h-full object-contain lg:object-cover lg:rotate-90"
   />
@@ -62,19 +62,36 @@ export default function MenuPage() {
       
       {/* Анимированный текст */}
       <div className="relative z-10 flex flex-col items-center overflow-visible">
-        <motion.h1
-          key={index}
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.5 }}
-          className={`sm:text-[150px] text-[100px]  font-futura bg-clip-text tracking-[-10px] mb-6 cursor-pointer ${index === words.length - 1 ? " font-bold text-transparent bg-pink-300" : "font-medium  text-transparent  bg-white/50"}`}
-          onMouseMove={handleMouseMove}
-          style={{ padding: "0 20px" }} 
-          onMouseLeave={handleMouseLeave}
-        >
-          {words[index]}
-        </motion.h1>
+       <motion.h1
+  key={index}
+  initial={{ opacity: 0, y: -20 }}
+  animate={{ opacity: 1, y: 0 }}
+  exit={{ opacity: 0, y: 20 }}
+  transition={{ duration: 0.5 }}
+  className={`
+    text-center
+    break-words
+    whitespace-normal
+    font-futura
+    tracking-[-5px]
+    mb-6
+    cursor-pointer
+    overflow-hidden
+    bg-clip-text
+    ${index === words.length - 1 
+      ? "font-bold text-transparent bg-pink-300" 
+      : "font-medium text-transparent bg-white/50"}
+  `}
+  style={{
+    fontSize: "clamp(40px, 10vw, 150px)",
+    padding: "0 20px"
+  }}
+  onMouseMove={handleMouseMove}
+  onMouseLeave={handleMouseLeave}
+>
+  {words[index]}
+</motion.h1>
+
         {/* <span className="text-[250px] font-bold text-transparent bg-clip-text bg-white/30 ">skatepark</span>
          */}
 
