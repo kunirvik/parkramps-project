@@ -27,7 +27,7 @@ const LOADING_SCREEN_DURATION = 1500; // 1.5 секунды
 export default function DiyProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id, category } = useParams();
+  const { id} = useParams();
   const [searchParams] = useSearchParams();
   const lastInteractionRef = useRef(Date.now());
 
@@ -286,16 +286,6 @@ export default function DiyProductDetail() {
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
       swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
-  // const handleImageSelect = useCallback((index) => {
-  //   if (animationState.inProgress) return;
-
-  //   const newIndices = [...selectedImageIndices];
-  //   newIndices[activeProductIndex] = index;
-  //   setSelectedImageIndices(newIndices);
-  //   updateUrl(currentProduct.id, index);
-  // }, [animationState.inProgress, selectedImageIndices, activeProductIndex, 
-  //     currentProduct?.id, updateUrl]);
-
   const handleThumbnailClick = useCallback((index) => {
     if (animationState.inProgress || index === activeProductIndex || !swiperInstances.main) 
       return;
@@ -421,9 +411,6 @@ export default function DiyProductDetail() {
     return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
-
-
- 
   return (
    <><div className="flex flex-col min-h-screen">
   <SocialButtons
@@ -447,13 +434,6 @@ export default function DiyProductDetail() {
       >
         ← Back
       </button>
-
-      {/* Правая часть — описание-табличка
-      <div className="fixed hidden lg:block max-w-[690px] text-[24px] font-futura text-[#717171] font-medium border-b border-gray-200 right-5 px-4 py-2 ml-auto">
-        <p className="font-futura tracking-tighter leading-none">
-          фигуры которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы
-        </p>
-      </div> */}
     </div>
 <div className=" block md:hidden w-[100%] mt-7 ">
       <Swiper
@@ -501,9 +481,6 @@ export default function DiyProductDetail() {
    </div>
     {/* Мобильный заголовок */}
     <div className="block lg:hidden w-full mt-4">
-      {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
-          {currentProduct.description}
-      </h1> */}
       <p className="font-futura text-[#717171] font-medium">
       {currentProduct.name}
       </p>
@@ -600,74 +577,10 @@ export default function DiyProductDetail() {
       <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
     </div>
 
-    {/* Миниатюры — справа от галереи
-    <div className="block  md:hidden w-20 space-y-2">
-      {currentImages.map((img, index) => (
-        <button
-          key={index}
-          onClick={() => handleImageSelect(index)}
-          className={`border rounded-lg p-1 transition hover:scale-105 ${
-            selectedImageIndices[activeProductIndex] === index
-              ? "border-black"
-              : "border-transparent"
-          }`}
-          disabled={animationState.inProgress}
-        >
-          <img
-            src={img}
-            alt={`${currentProduct.name} Mini ${index + 1}`}
-            className="w-16 h-16 object-contain rounded"
-            draggable="false"
-          />
-        </button>
-      ))}
-    </div> */}
   </div>
 </div>
 
-
-        
-          {/* Вертикальные миниатюры на мобилках
-          <div className="block md:hidden absolute right-0 top-0 h-full w-20 z-10">
-            <Swiper
-              modules={[Thumbs]}
-              direction="vertical"
-              onSwiper={(swiper) =>
-                setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))
-              }
-              className="block md:hidden w-20 h-104 mt-4"
-              slidesPerView={5}
-              spaceBetween={10}
-              watchSlidesProgress={true}
-              slideToClickedSlide={true}
-              initialSlide={activeProductIndex}
-              speed={SWIPER_CONFIG.SPEED}
-              preventClicks={false}
-              preventClicksPropagation={false}
-              observer={true}
-              observeParents={true}
-              resistance={false}
-              resistanceRatio={0}
-            >
-              {productCatalogDiys.map((product, index) => (
-                <SwiperSlide key={product.id}>
-                  <img
-                    src={product.image}
-                    onClick={() => handleThumbnailClick(index)}
-                    className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
-                      index === activeProductIndex
-                        ? "opacity-100 scale-105 border-black"
-                        : "grayscale border-transparent opacity-60 hover:opacity-100"
-                    }`}
-                    alt={product.name}
-                    draggable="false"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div> */}
-    
-
+  
       {/* Описание и миниатюры текущего продукта */}
       <div
         ref={refs.info}
@@ -696,28 +609,6 @@ export default function DiyProductDetail() {
           </p>
         </div>
 
-        {/* Миниатюры текущего товара
-        <div className="hidden md:block flex flex-wrap justify-start gap-4">
-          {currentImages.map((img, index) => (
-            <button
-              key={index}
-              onClick={() => handleImageSelect(index)}
-              className={`border rounded-lg p-1 transition hover:scale-105 ${
-                selectedImageIndices[activeProductIndex] === index
-                  ? "border-black"
-                  : "border-transparent"
-              }`}
-              disabled={animationState.inProgress}
-            >
-              <img
-                src={img}
-                alt={`${currentProduct.name} Mini ${index + 1}`}
-                className="w-16 h-16 object-contain rounded"
-                draggable="false"
-              />
-            </button>
-          ))}
-        </div> */}
 
         {currentProduct.details?.map((detail, index) => {
           const isCatalog = detail.title.toLowerCase().includes("каталог");
