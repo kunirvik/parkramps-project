@@ -39,11 +39,16 @@ export default function MenuPage() {
         <source src="/tlprshrt.mp4" type="video/mp4" />
       </video> */}
 
-<img
-  className="object-contain absolute top-0 left-0 w-full h-full sm:rotate-0 rotate-90 sm:object-cover"
-  src="/project.png"
-  alt=""
-/>
+<picture>
+  {/* для телефонов и планшетов */}
+  <source srcSet="/project2.png" media="(max-width: 1024px)" />
+  {/* для десктопа */}
+  <img
+    src="/project.png"
+    alt="Project"
+    className="absolute top-0 left-0 w-full h-full object-cover"
+  />
+</picture>
 
 
       
