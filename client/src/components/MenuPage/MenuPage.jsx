@@ -39,8 +39,13 @@ export default function MenuPage() {
         <source src="/tlprshrt.mp4" type="video/mp4" />
       </video> */}
 
-      <img className="sm:rotate-0  sm:object-contain  sm:overflow-hidden absolute top-0 left-0 w-full h-full object-cover transform rotate-90  "
-       src="/project.png"></img>
+<img
+  className="object-contain absolute top-0 left-0 w-full h-full sm:rotate-0 rotate-90 sm:object-cover"
+  src="/project.png"
+  alt=""
+/>
+
+
       
       {/* Анимированный текст */}
       <div className="relative z-10 flex flex-col items-center overflow-visible">
