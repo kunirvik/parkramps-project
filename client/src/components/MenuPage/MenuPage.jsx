@@ -39,6 +39,17 @@ export default function MenuPage() {
         <source src="/tlprshrt.mp4" type="video/mp4" />
       </video> */}
 
+
+
+  {/* <div className="  absolute inset-0 w-full h-[100vh] overflow-hidden lg:w-full lg:h-full">
+  <img
+    src="/project2.png"
+    alt="Project"
+    className="w-full h-full object-contain lg:object-fill lg:rotate-90"
+  />
+</div>
+ */}
+
 <picture>
   {/* для телефонов и планшетов */}
   <source srcSet="/project2.png" media="(max-width: 1024px)" />
@@ -48,15 +59,8 @@ export default function MenuPage() {
     alt="Project"
     className="absolute top-0 left-0 w-full h-full object-cover"
   />
-  <div className="absolute inset-0 w-full h-[100vh] overflow-hidden lg:h-full">
-  <img
-    src="/project2.png"
-    alt="Project"
-    className="w-full h-full object-contain lg:object-cover lg:rotate-90"
-  />
-</div>
-
 </picture>
+
 
 
       
@@ -83,7 +87,7 @@ export default function MenuPage() {
       : "font-medium text-transparent bg-white/50"}
   `}
   style={{
-    fontSize: "clamp(40px, 10vw, 150px)",
+    fontSize: "clamp(60px, 10vw, 150px)",
     padding: "0 20px"
   }}
   onMouseMove={handleMouseMove}
