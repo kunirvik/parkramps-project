@@ -508,6 +508,7 @@ export default function DiyProductDetail() {
         </div>
       )}
 {/* Swiper галерея + Миниатюры (мобильная версия) */}
+{/* Swiper галерея */} 
 <div
   ref={refs.swiperContainer}
   className="w-full lg:w-[75%] lg:h-[50%] mt-0 lg:mt-20 lg:content-center"
@@ -526,7 +527,7 @@ export default function DiyProductDetail() {
         mousewheel={true}
         direction="horizontal"
         centeredSlides={true}
-        thumbs={{ swiper: swiperInstances.thumbs }}
+        thumbs={{ swiper: animationState.complete ? swiperInstances.thumbs : null }} 
         spaceBetween={20}
         initialSlide={activeProductIndex}
         speed={SWIPER_CONFIG.SPEED}
@@ -542,33 +543,29 @@ export default function DiyProductDetail() {
         {productCatalogDiys.map((product, index) => (
           <SwiperSlide key={product.id} style={{ height: "100%" }}>
             <div className="w-full h-full flex items-center justify-center">
-        <img
-  src={
-    selectedImageIndices[index] === 0
-      ? product.image
-      : product.altImages[selectedImageIndices[index] - 1]
-  }
-  alt={product.name}
-  className="max-h-full w-auto object-contain"
-  draggable="false"
-  onClick={() => {
-  if (animationState.inProgress) return;
+              <img
+                src={
+                  selectedImageIndices[index] === 0
+                    ? product.image
+                    : product.altImages[selectedImageIndices[index] - 1]
+                }
+                alt={product.name}
+                className="max-h-full w-auto object-contain"
+                draggable="false"
+                onClick={() => {
+                  if (animationState.inProgress) return;
 
-  lastInteractionRef.current = Date.now(); // <-- добавили
-  const totalRenders = 1 + (product.altImages?.length || 0);
-  const current = selectedImageIndices[index];
-  const next = (current + 1) % totalRenders;
+                  lastInteractionRef.current = Date.now();
+                  const totalRenders = 1 + (product.altImages?.length || 0);
+                  const current = selectedImageIndices[index];
+                  const next = (current + 1) % totalRenders;
 
-  const updatedIndices = [...selectedImageIndices];
-  updatedIndices[index] = next;
-  setSelectedImageIndices(updatedIndices);
-  updateUrl(product.id, next);
-}}
-
-
-/>
-
-
+                  const updatedIndices = [...selectedImageIndices];
+                  updatedIndices[index] = next;
+                  setSelectedImageIndices(updatedIndices);
+                  updateUrl(product.id, next);
+                }}
+              />
             </div>
           </SwiperSlide>
         ))}
@@ -576,9 +573,9 @@ export default function DiyProductDetail() {
 
       <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
     </div>
-
   </div>
 </div>
+
 
   
       {/* Описание и миниатюры текущего продукта */}
@@ -631,51 +628,51 @@ export default function DiyProductDetail() {
       </div>
      </div></div>
 
-    {/* ✅ Новая нижняя полоса миниатюр — после всего контента */}
-    <div className="hidden md:block w-[100%]  ">
-      <Swiper
-        modules={[Thumbs]}
-        direction="horizontal"
-        onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
-     
-          breakpoints={{
-    320: { slidesPerView: 8 },
-    480: { slidesPerView: 8 },
-    640: { slidesPerView: 8 },
-    768: { slidesPerView: 8 },
-    1024: { slidesPerView: 8 },
-    1280: { slidesPerView: 8 },
-  }}
-    slidesPerView="auto"
-        spaceBetween={10}
-        watchSlidesProgress={true}
-        slideToClickedSlide={true}
-        initialSlide={activeProductIndex}
-        speed={SWIPER_CONFIG.SPEED}
-        preventClicks={false}
-        preventClicksPropagation={false}
-        observer={true}
-        observeParents={true}
-        resistance={false}
-        resistanceRatio={0}
-      >
-        {productCatalogDiys.map((product, index) => (
-          <SwiperSlide key={product.id}>
-            <img
-              src={product.image}
-              onClick={() => handleThumbnailClick(index)}
-              className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
-                index === activeProductIndex
-                  ? "opacity-100 scale-105 border-black"
-                  : "grayscale border-transparent opacity-60 hover:opacity-100"
-              }`}
-              alt={product.name}
-              draggable="false"
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
-   </div>
+   {animationState.complete && (
+  <div className="hidden md:block w-[100%] animate-fadeInUp">
+    <Swiper
+      modules={[Thumbs]}
+      direction="horizontal"
+      onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
+      breakpoints={{
+        320: { slidesPerView: 8 },
+        480: { slidesPerView: 8 },
+        640: { slidesPerView: 8 },
+        768: { slidesPerView: 8 },
+        1024: { slidesPerView: 8 },
+        1280: { slidesPerView: 8 },
+      }}
+      slidesPerView="auto"
+      spaceBetween={10}
+      watchSlidesProgress={true}
+      slideToClickedSlide={true}
+      initialSlide={activeProductIndex}
+      speed={SWIPER_CONFIG.SPEED}
+      preventClicks={false}
+      preventClicksPropagation={false}
+      observer={true}
+      observeParents={true}
+      resistance={false}
+      resistanceRatio={0}
+    >
+      {productCatalogDiys.map((product, index) => (
+        <SwiperSlide key={product.id}>
+          <img
+            src={product.image}
+            onClick={() => handleThumbnailClick(index)}
+            className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
+              index === activeProductIndex
+                ? "opacity-100 scale-105 border-black"
+                : "grayscale border-transparent opacity-60 hover:opacity-100"
+            }`}
+            alt={product.name}
+            draggable="false"
+          />
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  </div>
+)}
 
     {/* Fullscreen gallery */}
     <FullscreenGallery
