@@ -465,6 +465,8 @@ export default function DiyProductDetail() {
         {productCatalogDiys.map((product, index) => (
           <SwiperSlide key={product.id}>
             <img
+              loading="lazy"
+  decoding="async"
               src={product.image}
               onClick={() => handleThumbnailClick(index)}
               className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
@@ -544,6 +546,8 @@ export default function DiyProductDetail() {
           <SwiperSlide key={product.id} style={{ height: "100%" }}>
             <div className="w-full h-full flex items-center justify-center">
               <img
+                loading="lazy"
+  decoding="async"
                 src={
                   selectedImageIndices[index] === 0
                     ? product.image
@@ -658,6 +662,8 @@ export default function DiyProductDetail() {
       {productCatalogDiys.map((product, index) => (
         <SwiperSlide key={product.id}>
           <img
+            loading="lazy"
+  decoding="async"
             src={product.image}
             onClick={() => handleThumbnailClick(index)}
             className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
