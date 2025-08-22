@@ -4,7 +4,8 @@ import LoadingScreen from "../LoadingScreen/LodingScreen";
 import SocialButtons from "../SocialButtons/SocialButtons";
 import { gsap } from "gsap";
 
-const products = [{
+const products = [
+  {
     id: 1,
      category: "skateparks",
     name: "скейтпарки",
@@ -16,7 +17,7 @@ const products = [{
   {
     id: 2,
       category: "ramps",  
-      image: "/images/diy/kicker.png",
+      image: "/images/sets/kicker2.webp",
     name: " фигуры которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
@@ -25,7 +26,7 @@ const products = [{
     id: 3,
     name: "фигуры и комплекты фигур",
     category: "sets",
-    image: "/images/sets/box.png",
+    image: "/images/sets/box.webp",
     hoverImage: ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "A bold design statement."
   },
