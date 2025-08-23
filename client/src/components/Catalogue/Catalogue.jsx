@@ -9,7 +9,7 @@ const products = [
     id: 1,
      category: "skateparks",
     name: "скейтпарки",
-    image:"/images/skateparks/park.png",
+    image:"/images/skateparks/park.webp",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   },
