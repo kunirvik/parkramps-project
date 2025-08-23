@@ -6,13 +6,14 @@ import LoadingScreen from "../LoadingScreen/LodingScreen";
 import SocialButtons from "../SocialButtons/SocialButtons";
 import { Pagination, Mousewheel, Thumbs } from "swiper/modules";
 import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
-import productCatalogRamps from "../data/productCatalogRamps";
+import productCatalogDiys from "../data/productCatalogDiys";
 import "swiper/css";
 import "swiper/css/pagination"; 
 
 // Константы
 const ANIMATION_CONFIG = {
   DURATION: 0.6,
+
   EASE: "power2.out",
   HALF_DURATION: 0.3
 };
@@ -24,7 +25,7 @@ const SWIPER_CONFIG = {
 };
 
 const LOADING_SCREEN_DURATION = 1500; // 1.5 секунды
-export default function RampsProductDetail() {
+export default function DiyProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const { id, category } = useParams();
@@ -44,10 +45,10 @@ export default function RampsProductDetail() {
 
   // Основные состояния
   const [activeProductIndex, setActiveProductIndex] = useState(() => 
-    Math.max(0, productCatalogRamps.findIndex(p => p.id === Number(id)))
+    Math.max(0, productCatalogDiys.findIndex(p => p.id === Number(id)))
   );
   const [selectedImageIndices, setSelectedImageIndices] = useState(() => 
-    productCatalogRamps.map(() => 0)
+    productCatalogDiys.map(() => 0)
   );
   const [swiperInstances, setSwiperInstances] = useState({
     main: null,
@@ -77,7 +78,7 @@ export default function RampsProductDetail() {
 
   // Мемоизированные значения
   const currentProduct = useMemo(() => 
-    productCatalogRamps[activeProductIndex], [activeProductIndex]
+    productCatalogDiys[activeProductIndex], [activeProductIndex]
   );
 
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -273,7 +274,7 @@ export default function RampsProductDetail() {
 
     // Обновляем состояние
     setActiveProductIndex(newIndex);
-    updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+    updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
 
     // Синхронизируем thumbs swiper
     if (swiperInstances.thumbs) {
@@ -382,7 +383,7 @@ export default function RampsProductDetail() {
     setSelectedImageIndices((prevIndices) => {
       const newIndices = [...prevIndices];
       const currentIndex = newIndices[activeProductIndex];
-      const product = productCatalogRamps[activeProductIndex];
+      const product = productCatalogDiys[activeProductIndex];
       const totalImages = 1 + (product.altImages?.length || 0);
 
       newIndices[activeProductIndex] = (currentIndex + 1) % totalImages;
@@ -404,7 +405,7 @@ export default function RampsProductDetail() {
     const newIndex = swiper.activeIndex;
     if (newIndex !== activeProductIndex) {
       setActiveProductIndex(newIndex);
-      updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+      updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
   
       if (swiperInstances.thumbs) {
         swiperInstances.thumbs.slideTo(newIndex);
@@ -482,7 +483,7 @@ export default function RampsProductDetail() {
         resistance={false}
         resistanceRatio={0}
       >
-        {productCatalogRamps.map((product, index) => (
+        {productCatalogDiys.map((product, index) => (
           <SwiperSlide key={product.id}>
             <img
               src={product.image}
@@ -562,7 +563,7 @@ export default function RampsProductDetail() {
         preventClicksPropagation={false}
         touchStartPreventDefault={false}
       >
-        {productCatalogRamps.map((product, index) => (
+        {productCatalogDiys.map((product, index) => (
           <SwiperSlide key={product.id} style={{ height: "100%" }}>
             <div className="w-full h-full flex items-center justify-center">
         <img
@@ -649,7 +650,7 @@ export default function RampsProductDetail() {
               resistance={false}
               resistanceRatio={0}
             >
-              {productCatalogRamps.map((product, index) => (
+              {productCatalogDiys.map((product, index) => (
                 <SwiperSlide key={product.id}>
                   <img
                     src={product.image}
@@ -768,7 +769,7 @@ export default function RampsProductDetail() {
         resistance={false}
         resistanceRatio={0}
       >
-        {productCatalogRamps.map((product, index) => (
+        {productCatalogDiys.map((product, index) => (
           <SwiperSlide key={product.id}>
             <img
               src={product.image}
