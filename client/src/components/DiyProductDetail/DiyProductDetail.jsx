@@ -524,6 +524,7 @@ useEffect(() => {
             ref={refs.transitionImage}
             src={currentProduct.image}
             alt={currentProduct.name}
+             onLoad={() => startTransitionAnimation()}
             className="object-contain"
             style={{
               position: "absolute",
