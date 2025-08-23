@@ -9,7 +9,7 @@ const products = [
     id: 1,
      category: "skateparks",
     name: "скейтпарки",
-    image:"/images/skateparks/park.webp",
+    image:"/images/skateparks/park.png",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   },
@@ -120,16 +120,18 @@ const handleMouseMove = (e, productId) => {
 const handleClick = async (product, e) => {
   if (isMobile) {
     if (mobileTooltipProductId !== product.id) {
+      // Первый тап — показать подсказку
       setMobileTooltipProductId(product.id);
       return;
     } else {
+      // Второй тап — скрыть подсказку и перейти
       setMobileTooltipProductId(null);
     }
   }
 
   setTooltip({ ...tooltip, show: false });
 
-  const imgElement = e.currentTarget.querySelector("img");
+  const imgElement = e.currentTarget.querySelector('img');
   const imgRect = imgElement.getBoundingClientRect();
 
   const imageData = {
@@ -144,13 +146,14 @@ const handleClick = async (product, e) => {
   };
 
   try {
-    // дождёмся загрузки
     await preloadImage(product.image);
+  } catch (error) {
+    console.warn("Не удалось предзагрузить изображение:", error);
+  }
 
-    // добавим паузу в 500ms
-    await new Promise((res) => setTimeout(res, 500));
+  setSelectedProduct(product.id);
 
-    // теперь только делаем navigate
+  setTimeout(() => {
     switch (product.category) {
       case "sets":
         navigate(`/product/sets/1?view=0`, { state: { imageData } });
@@ -167,10 +170,7 @@ const handleClick = async (product, e) => {
       default:
         console.warn("Неизвестная категория:", product.category);
     }
-  } catch (err) {
-    console.warn("Ошибка предзагрузки", err);
-    navigate(`/product/${product.category}/1?view=0`, { state: { imageData } });
-  }
+  }, 400);
 };
 
 

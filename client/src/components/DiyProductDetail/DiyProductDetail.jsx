@@ -142,7 +142,7 @@ export default function DiyProductDetail() {
     if (refs.urlUpdateBlocked.current) return;
     
     refs.urlUpdateBlocked.current = true;
-    const newUrl = `/product/diys/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/ramps/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     setTimeout(() => {
@@ -207,7 +207,6 @@ export default function DiyProductDetail() {
     // Скрываем swiper
     gsap.set(swiperEl, { visibility: 'hidden', opacity: 0 });
 
- gsap.set(transitionEl, { visibility: 'hidden', opacity: 0 });
     // Устанавливаем начальное состояние в контейнере
     gsap.set(transitionEl, {
       position: "absolute",
@@ -798,3 +797,8 @@ export default function DiyProductDetail() {
 
   );
 }
+
+
+
+
+
