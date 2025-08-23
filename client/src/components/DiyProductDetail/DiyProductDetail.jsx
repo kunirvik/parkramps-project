@@ -92,7 +92,87 @@ export default function DiyProductDetail() {
   [currentProduct]
 );
 
+  // Обработка завершения loading screen
+  const handleLoadingComplete = useCallback(() => {
+    setLoadingState(prev => ({ ...prev, isCompleted: true }));
+    
+    // Небольшая задержка перед началом показа контента
+    setTimeout(() => {
+      setLoadingState(prev => ({ ...prev, isLoading: false }));
+      
+      // Анимируем появление контента
+      if (refs.container.current && refs.info.current) {
+        gsap.fromTo(refs.container.current, 
+          { opacity: 0, y: 30 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: ANIMATION_CONFIG.DURATION,
+            ease: ANIMATION_CONFIG.EASE 
+          }
+        );
+        
+        gsap.fromTo(refs.info.current,
+          { opacity: 0, y: 20 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: ANIMATION_CONFIG.DURATION,
+            ease: ANIMATION_CONFIG.EASE,
+            delay: 0.2
+          }
+        );
+      }
+    }, 200);
+  }, []);
 
+  // Эффект для автоматического завершения loading screen
+  useEffect(() => {
+    if (!shouldShowLoading) return;
+
+    const timer = setTimeout(() => {
+      handleLoadingComplete();
+    }, LOADING_SCREEN_DURATION);
+
+    return () => clearTimeout(timer);
+  }, [shouldShowLoading, handleLoadingComplete]);
+
+  // Утилиты
+  const updateUrl = useCallback((productId, viewIndex = 0) => {
+    if (refs.urlUpdateBlocked.current) return;
+    
+    refs.urlUpdateBlocked.current = true;
+    const newUrl = `/product/diys/${productId}?view=${viewIndex}`;
+    window.history.replaceState(null, '', newUrl);
+    
+    setTimeout(() => {
+      refs.urlUpdateBlocked.current = false;
+    }, 50);
+  }, []);
+
+  const updateAnimationState = useCallback((updates) => {
+    setAnimationState(prev => ({ ...prev, ...updates }));
+  }, []);
+
+  // Анимации
+  const animateInfo = useCallback((direction = 'in') => {
+    if (!refs.info.current) return Promise.resolve();
+    
+    const isIn = direction === 'in';
+    const targetOpacity = isIn ? 1 : 0;
+    const targetY = isIn ? 0 : 20;
+    const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
+
+    return new Promise(resolve => {
+      gsap.to(refs.info.current, {
+        opacity: targetOpacity,
+        y: targetY,
+        duration,
+        ease: ANIMATION_CONFIG.EASE,
+        onComplete: resolve
+      });
+    });
+  }, []);
 
   const startTransitionAnimation = useCallback(() => {
     if (!refs.transitionImage.current || !refs.swiperContainer.current || 
@@ -163,87 +243,7 @@ export default function DiyProductDetail() {
       }
     });
   }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
-  // Обработка завершения loading screen
-  const handleLoadingComplete = useCallback(() => {
-    setLoadingState(prev => ({ ...prev, isCompleted: true }));
-    
-    // Небольшая задержка перед началом показа контента
-    setTimeout(() => {
-      setLoadingState(prev => ({ ...prev, isLoading: false }));
-      
-      // Анимируем появление контента
-      if (refs.container.current && refs.info.current) {
-        gsap.fromTo(refs.container.current, 
-          { opacity: 0, y: 30 },
-          { 
-            opacity: 1, 
-            y: 0, 
-            duration: ANIMATION_CONFIG.DURATION,
-            ease: ANIMATION_CONFIG.EASE 
-          }
-        );
-        
-        gsap.fromTo(refs.info.current,
-          { opacity: 0, y: 20 },
-          { 
-            opacity: 1, 
-            y: 0, 
-            duration: ANIMATION_CONFIG.DURATION,
-            ease: ANIMATION_CONFIG.EASE,
-            delay: 0.2
-          }
-        );
-      }
-    }, 200);
-  }, []);
 
-  // Эффект для автоматического завершения loading screen
-  useEffect(() => {
-    if (!shouldShowLoading) return;
-
-    const timer = setTimeout(() => {
-      handleLoadingComplete();
-    }, LOADING_SCREEN_DURATION);
-
-    return () => clearTimeout(timer);
-  }, [shouldShowLoading, handleLoadingComplete]);
-
-  // Утилиты
-  const updateUrl = useCallback((productId, viewIndex = 0) => {
-    if (refs.urlUpdateBlocked.current) return;
-    
-    refs.urlUpdateBlocked.current = true;
-    const newUrl = `/product/diy/${productId}?view=${viewIndex}`;
-    window.history.replaceState(null, '', newUrl);
-    
-    setTimeout(() => {
-      refs.urlUpdateBlocked.current = false;
-    }, 50);
-  }, []);
-
-  const updateAnimationState = useCallback((updates) => {
-    setAnimationState(prev => ({ ...prev, ...updates }));
-  }, []);
-
-  // Анимации
-  const animateInfo = useCallback((direction = 'in') => {
-    if (!refs.info.current) return Promise.resolve();
-    
-    const isIn = direction === 'in';
-    const targetOpacity = isIn ? 1 : 0;
-    const targetY = isIn ? 0 : 20;
-    const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
-
-    return new Promise(resolve => {
-      gsap.to(refs.info.current, {
-        opacity: targetOpacity,
-        y: targetY,
-        duration,
-        ease: ANIMATION_CONFIG.EASE,
-        onComplete: resolve
-      });
-    });
-  }, []);
   // Обработчики событий
   const handleSwiperInit = useCallback((swiper) => {
     setSwiperInstances(prev => ({ ...prev, main: swiper }));
