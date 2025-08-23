@@ -207,6 +207,7 @@ export default function DiyProductDetail() {
     // Скрываем swiper
     gsap.set(swiperEl, { visibility: 'hidden', opacity: 0 });
 
+ gsap.set(transitionEl, { visibility: 'hidden', opacity: 0 });
     // Устанавливаем начальное состояние в контейнере
     gsap.set(transitionEl, {
       position: "absolute",
