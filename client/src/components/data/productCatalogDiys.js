@@ -1,6 +1,6 @@
 const productCatalogDiys = [ {id: 1,
     name: "box1",
-    image: "/images/sets/kicker.webp",
+    image: "/images/sets/kicker2.png",
     altImages: ["/images/sets/box1.webp", ],
     sample: ["/images/sample/kicker1.jpg",  "/images/sample/kicker.jpg",],
     designer: "Studio 65",
