@@ -301,31 +301,8 @@ export default function DiyProductDetail() {
     setSelectedImageIndices(newIndices);
   }, [slideIndexParam, swiperInstances.main, animationState.inProgress]);
 
-  useEffect(() => {
-  if (refs.swiperContainer.current && imageData && !animationState.complete) {
-    gsap.set(refs.swiperContainer.current, { visibility: "hidden", opacity: 0 });
-  }
-}, [imageData, animationState.complete]);
 
 
-useEffect(() => {
-  if (refs.transitionImage.current && imageData && !animationState.complete) {
-    const { top, left, width, height } = imageData.rect;
-    gsap.set(refs.transitionImage.current, {
-      position: "absolute",
-      top: top - window.scrollY,
-      left: left - window.scrollX,
-      width,
-      height,
-      opacity: 1,
-      visibility: "visible",
-      zIndex: 1000,
-      objectFit: "contain",
-      borderRadius: imageData.borderRadius || '0px',
-      pointerEvents: "none"
-    });
-  }
-}, [imageData, animationState.complete]);
 
   // Стили и блокировка скролла
   useEffect(() => {
