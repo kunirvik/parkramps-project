@@ -5,7 +5,6 @@ const productCatalogDiys = [ {id: 1,
     sample: ["/images/sample/kicker1.jpg",  "/images/sample/kicker.jpg",],
     designer: "Studio 65",
     year: 2023,
-      imageMobile: "/images/diy/kicker-small.png", // <--- маленькая версия
     description: "Комплексные решения для скейтпарков.",
     details: [
       { title: "Материалы", link: "#materials" },
@@ -58,21 +57,22 @@ const productCatalogDiys = [ {id: 1,
     ],
     relatedProducts: [1, 2, 3, 5] // IDs of related products
   }, 
-  // {
-  //   id: 5,
-  //   name: "quater r215h80w125d40",
-  //    image: "/images/sets/quaterr215h80w125d40.png",
-  //   altImages: ["/images/sets/quaterr215h80w125d40left.png", "/images/sets/quaterr215h80w125d40top.png"],
-  //   designer: "DIY Workshop",
-  //   year: 2023,
-  //   description: "Комплекты для самостоятельного строительства элементов.",
-  //   details: [
-  //       { title: "Каталог фигур", link: "#catalog" },
-  //     { title: "Материалы", link: "#materials" },
+  {
+    id: 5,
+    name: "quater r215h80w125d40",
+     image: "/images/sets/quaterr215h80w125d40.png",
+    altImages: ["/images/sets/quaterr215h80w125d40left.png", "/images/sets/quaterr215h80w125d40top.png"],
+     sample: ["/images/sample/quater.JPG",  "/images/sample/box.JPG",],
+    designer: "DIY Workshop",
+    year: 2023,
+    description: "Комплекты для самостоятельного строительства элементов.",
+    details: [
+        { title: "Каталог фигур", link: "#catalog" },
+      { title: "Материалы", link: "#materials" },
 
-  //   ],
-  //   relatedProducts: [1, 2, 3, 4] // IDs of related products
-  // },
+    ],
+    relatedProducts: [1, 2, 3, 4] // IDs of related products
+  },
 // {
 //     id: 6,
 //     name: "quater r215h80w125d40",

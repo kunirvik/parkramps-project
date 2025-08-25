@@ -143,7 +143,7 @@ export default function DiyProductDetail() {
     if (refs.urlUpdateBlocked.current) return;
     
     refs.urlUpdateBlocked.current = true;
-    const newUrl = `/product/ramps/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/diy/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     setTimeout(() => {
@@ -440,7 +440,7 @@ export default function DiyProductDetail() {
       opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
     }}
   >
-    <div className="w-full flex items-start mb-4">
+    <div className="w-full flex items-start  mb-4">
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
@@ -449,14 +449,11 @@ export default function DiyProductDetail() {
         ← Back
       </button>
 
-      {/* Правая часть — описание-табличка
-      <div className="fixed hidden lg:block max-w-[690px] text-[24px] font-futura text-[#717171] font-medium border-b border-gray-200 right-5 px-4 py-2 ml-auto">
-        <p className="font-futura tracking-tighter leading-none">
-          фигуры которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы
-        </p>
-      </div> */}
+
     </div>
-<div className=" block md:hidden w-[100%] mt-7 ">
+    
+{animationState.complete && !loadingState.isLoading && (
+  <div className="block md:hidden w-[100%] transition-opacity duration-500 opacity-100">
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
@@ -500,6 +497,8 @@ export default function DiyProductDetail() {
         ))}
       </Swiper>
    </div>
+
+      )}
     {/* Мобильный заголовок */}
     <div className="block lg:hidden w-full mt-4">
       {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
@@ -534,7 +533,7 @@ export default function DiyProductDetail() {
 {/* Swiper галерея + Миниатюры (мобильная версия) */}
 <div
   ref={refs.swiperContainer}
-  className="w-full lg:w-[75%] lg:h-[50%] mt-0 lg:mt-20 lg:content-center"
+  className="w-full lg:w-[75%] lg:h-[50%] mt-0 lg:mt-20 lg:content-start"
   style={{
     visibility: !imageData || animationState.complete ? "visible" : "hidden",
     opacity: !imageData || animationState.complete ? 1 : 0,
@@ -588,11 +587,7 @@ export default function DiyProductDetail() {
   setSelectedImageIndices(updatedIndices);
   updateUrl(product.id, next);
 }}
-
-
 />
-
-
             </div>
           </SwiperSlide>
         ))}
@@ -601,73 +596,9 @@ export default function DiyProductDetail() {
       <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
     </div>
 
-    {/* Миниатюры — справа от галереи
-    <div className="block  md:hidden w-20 space-y-2">
-      {currentImages.map((img, index) => (
-        <button
-          key={index}
-          onClick={() => handleImageSelect(index)}
-          className={`border rounded-lg p-1 transition hover:scale-105 ${
-            selectedImageIndices[activeProductIndex] === index
-              ? "border-black"
-              : "border-transparent"
-          }`}
-          disabled={animationState.inProgress}
-        >
-          <img
-            src={img}
-            alt={`${currentProduct.name} Mini ${index + 1}`}
-            className="w-16 h-16 object-contain rounded"
-            draggable="false"
-          />
-        </button>
-      ))}
-    </div> */}
   </div>
 </div>
 
-
-        
-          {/* Вертикальные миниатюры на мобилках
-          <div className="block md:hidden absolute right-0 top-0 h-full w-20 z-10">
-            <Swiper
-              modules={[Thumbs]}
-              direction="vertical"
-              onSwiper={(swiper) =>
-                setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))
-              }
-              className="block md:hidden w-20 h-104 mt-4"
-              slidesPerView={5}
-              spaceBetween={10}
-              watchSlidesProgress={true}
-              slideToClickedSlide={true}
-              initialSlide={activeProductIndex}
-              speed={SWIPER_CONFIG.SPEED}
-              preventClicks={false}
-              preventClicksPropagation={false}
-              observer={true}
-              observeParents={true}
-              resistance={false}
-              resistanceRatio={0}
-            >
-              {productCatalogDiys.map((product, index) => (
-                <SwiperSlide key={product.id}>
-                  <img
-                    src={product.image}
-                    onClick={() => handleThumbnailClick(index)}
-                    className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
-                      index === activeProductIndex
-                        ? "opacity-100 scale-105 border-black"
-                        : "grayscale border-transparent opacity-60 hover:opacity-100"
-                    }`}
-                    alt={product.name}
-                    draggable="false"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div> */}
-    
 
       {/* Описание и миниатюры текущего продукта */}
       <div
@@ -697,28 +628,6 @@ export default function DiyProductDetail() {
           </p>
         </div>
 
-        {/* Миниатюры текущего товара
-        <div className="hidden md:block flex flex-wrap justify-start gap-4">
-          {currentImages.map((img, index) => (
-            <button
-              key={index}
-              onClick={() => handleImageSelect(index)}
-              className={`border rounded-lg p-1 transition hover:scale-105 ${
-                selectedImageIndices[activeProductIndex] === index
-                  ? "border-black"
-                  : "border-transparent"
-              }`}
-              disabled={animationState.inProgress}
-            >
-              <img
-                src={img}
-                alt={`${currentProduct.name} Mini ${index + 1}`}
-                className="w-16 h-16 object-contain rounded"
-                draggable="false"
-              />
-            </button>
-          ))}
-        </div> */}
 
         {currentProduct.details?.map((detail, index) => {
           const isCatalog = detail.title.toLowerCase().includes("каталог");
@@ -740,9 +649,9 @@ export default function DiyProductDetail() {
         })}
       </div>
      </div></div>
-
-    {/* ✅ Новая нижняя полоса миниатюр — после всего контента */}
-    <div className="hidden md:block w-[100%]  ">
+{animationState.complete && !loadingState.isLoading && (
+  <div className="hidden md:block w-[100%] transition-opacity duration-500 opacity-100">
+    
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
@@ -786,6 +695,7 @@ export default function DiyProductDetail() {
         ))}
       </Swiper>
    </div>
+)}
 
     {/* Fullscreen gallery */}
     <FullscreenGallery

@@ -34,7 +34,7 @@ const products = [
   {
     id: 4,
      category: "diy",
-    name: "сделай сам diy",
+    name: "хочешь самостоятельно собрать фигуру: специально для тебя мы подготовим предварительно собранную фигуру. проверим все элементы и подготовим для тебя комплект для сборки, тебе приедут все части фигуры и подробная инструкция к сборке, останется только взять шуруповерт. позвать друга и собрать фигуру для катания",
    image: "/images/ramps/ramp95garagemain.png",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
