@@ -1,13 +1,14 @@
 const productCatalogDiys = [ {id: 1,
     name: "box1",
     image: "/images/sets/kicker2.png",
-    altImages: ["/images/sets/box1.png", ],
+    altImages: ["/images/box360/jumpbox1.jpg", "/images/box360/jumpbox2.jpg", "/images/box360/jumpbox3.jpg", "/images/box360/jumpbox4.jpg","/images/box360/jumpbox5.jpg","/images/box360/jumpbox6.jpg","/images/box360/jumpbox7.jpg","/images/box360/jumpbox8.jpg","/images/box360/jumpbox9.jpg","/images/box360/jumpbox10.jpg", "/images/box360/jumpbox11.jpg", "/images/box360/jumpbox12.jpg",  ],
     sample: ["/images/sample/kicker1.jpg",  "/images/sample/kicker.jpg",],
     designer: "Studio 65",
     year: 2023,
     description: "Комплексные решения для скейтпарков.",
+     description2: "Комплексные решения для скейтпарков.",
     details: [
-      { title: "Материалы", link: "#materials" },
+      // { title: "Материалы", link: "#materials" },
      { title: "Каталог фигур", link: "#catalog" },
     ],
     relatedProducts: [2, 3, 4, 5] // IDs of related products
@@ -37,7 +38,7 @@ const productCatalogDiys = [ {id: 1,
     description: "Отдельные элементы и готовые комплекты для скейтпарков.",
     details: [
       { title: "Каталог фигур", link: "#catalog" },
-      { title: "Варианты комплектации", link: "#sets" },
+      // { title: "Варианты комплектации", link: "#sets" },
       
     ],
     relatedProducts: [1, 2, 4, 5] // IDs of related products
@@ -52,7 +53,7 @@ const productCatalogDiys = [ {id: 1,
     description: "Комплекты для самостоятельного строительства элементов.",
     details: [
         { title: "Каталог фигур", link: "#catalog" },
-      { title: "Материалы", link: "#materials" },
+      // { title: "Материалы", link: "#materials" },
       
     ],
     relatedProducts: [1, 2, 3, 5] // IDs of related products
@@ -68,7 +69,7 @@ const productCatalogDiys = [ {id: 1,
     description: "Комплекты для самостоятельного строительства элементов.",
     details: [
         { title: "Каталог фигур", link: "#catalog" },
-      { title: "Материалы", link: "#materials" },
+      // { title: "Материалы", link: "#materials" },
 
     ],
     relatedProducts: [1, 2, 3, 4] // IDs of related products

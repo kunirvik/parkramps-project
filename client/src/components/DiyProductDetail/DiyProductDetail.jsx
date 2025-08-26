@@ -31,7 +31,7 @@ export default function DiyProductDetail() {
   const { id, category } = useParams();
   const [searchParams] = useSearchParams();
   const lastInteractionRef = useRef(Date.now());
-
+const hoverIntervalRef = useRef(null);
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
 
@@ -73,7 +73,8 @@ export default function DiyProductDetail() {
     transitionImage: useRef(null),
     swiperContainer: useRef(null),
     info: useRef(null),
-    urlUpdateBlocked: useRef(false)
+    urlUpdateBlocked: useRef(false),
+      thumbs: useRef(null),
   };
 
   // Мемоизированные значения
@@ -155,25 +156,48 @@ export default function DiyProductDetail() {
     setAnimationState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  // Анимации
-  const animateInfo = useCallback((direction = 'in') => {
-    if (!refs.info.current) return Promise.resolve();
+  // // Анимации
+  // const animateInfo = useCallback((direction = 'in') => {
+  //   if (!refs.info.current) return Promise.resolve();
     
-    const isIn = direction === 'in';
-    const targetOpacity = isIn ? 1 : 0;
-    const targetY = isIn ? 0 : 20;
-    const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
+  //   const isIn = direction === 'in';
+  //   const targetOpacity = isIn ? 1 : 0;
+  //   const targetY = isIn ? 0 : 20;
+  //   const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
 
-    return new Promise(resolve => {
-      gsap.to(refs.info.current, {
-        opacity: targetOpacity,
-        y: targetY,
-        duration,
-        ease: ANIMATION_CONFIG.EASE,
-        onComplete: resolve
-      });
+  //   return new Promise(resolve => {
+  //     gsap.to(refs.info.current, {
+  //       opacity: targetOpacity,
+  //       y: targetY,
+  //       duration,
+  //       ease: ANIMATION_CONFIG.EASE,
+  //       onComplete: resolve
+  //     });
+  //   });
+  // }, []);
+
+  const animateUI = useCallback((direction = 'in') => {
+  const targets = [refs.info.current, refs.thumbs.current].filter(Boolean);
+
+  if (!targets.length) return Promise.resolve();
+
+  const isIn = direction === 'in';
+  const targetOpacity = isIn ? 1 : 0;
+  const targetY = isIn ? 0 : 20;
+  const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
+
+  return new Promise(resolve => {
+    gsap.to(targets, {
+      opacity: targetOpacity,
+      y: targetY,
+      duration,
+      ease: ANIMATION_CONFIG.EASE,
+      stagger: 0.1, // 👌 появляется с небольшой задержкой один за другим
+      onComplete: resolve,
     });
-  }, []);
+  });
+}, []);
+
 
   const startTransitionAnimation = useCallback(() => {
     if (!refs.transitionImage.current || !refs.swiperContainer.current || 
@@ -239,11 +263,12 @@ export default function DiyProductDetail() {
         updateAnimationState({ complete: true });
         
         // Анимируем появление информации
-        await animateInfo('in');
+        // await animateInfo('in');
+        await animateUI('in');
         updateAnimationState({ inProgress: false });
       }
     });
-  }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
+  }, [imageData, animationState.inProgress, updateAnimationState, animateUI]);
 
   // Обработчики событий
   const handleSwiperInit = useCallback((swiper) => {
@@ -270,8 +295,8 @@ export default function DiyProductDetail() {
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     // Анимируем скрытие информации
-    await animateInfo('out');
-
+    // await animateInfo('out');
+await animateUI('in');
     // Обновляем состояние
     setActiveProductIndex(newIndex);
     updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
@@ -282,10 +307,11 @@ export default function DiyProductDetail() {
     }
 
     // Анимируем появление новой информации
-    await animateInfo('in');
+    // await animateInfo('in');
+    await animateUI('in');
     updateAnimationState({ slideChanging: false, inProgress: false });
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
-      swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
+      swiperInstances.thumbs, updateUrl, animateUI, updateAnimationState]);
 
   // const handleImageSelect = useCallback((index) => {
   //   if (animationState.inProgress) return;
@@ -371,31 +397,58 @@ export default function DiyProductDetail() {
     };
   }, []);
 
- useEffect(() => {
-  const interval = setInterval(() => {
-    if (animationState.inProgress || isGalleryOpen) return;
 
-    const now = Date.now();
-    const timeSinceLastInteraction = now - lastInteractionRef.current;
+  const handleMouseEnter = (index, product) => {
+     if (!animationState.complete || animationState.inProgress) return; // <-- блокируем пока анимация не завершена
 
-    if (timeSinceLastInteraction < 7000) return; // пауза после клика 7 сек
+  clearInterval(hoverIntervalRef.current);
 
+  hoverIntervalRef.current = setInterval(() => {
     setSelectedImageIndices((prevIndices) => {
       const newIndices = [...prevIndices];
-      const currentIndex = newIndices[activeProductIndex];
-      const product = productCatalogDiys[activeProductIndex];
       const totalImages = 1 + (product.altImages?.length || 0);
-
-      newIndices[activeProductIndex] = (currentIndex + 1) % totalImages;
-
-      updateUrl(product.id, newIndices[activeProductIndex]);
-
+      const current = newIndices[index];
+      newIndices[index] = (current + 1) % totalImages;
       return newIndices;
     });
-  }, 4000); // каждые 5 сек
+  }, 100); // скорость смены кадров (0.5 сек)
+};
 
-  return () => clearInterval(interval);
-}, [activeProductIndex, animationState.inProgress, isGalleryOpen, updateUrl]);
+const handleMouseLeave = (index) => {
+  clearInterval(hoverIntervalRef.current);
+
+  setSelectedImageIndices((prevIndices) => {
+    const newIndices = [...prevIndices];
+    newIndices[index] = 0; // возвращаем на главное изображение
+    return newIndices;
+  });
+};
+
+//  useEffect(() => {
+//   const interval = setInterval(() => {
+//     if (animationState.inProgress || isGalleryOpen) return;
+
+//     const now = Date.now();
+//     const timeSinceLastInteraction = now - lastInteractionRef.current;
+
+//     if (timeSinceLastInteraction < 7000) return; // пауза после клика 7 сек
+
+//     setSelectedImageIndices((prevIndices) => {
+//       const newIndices = [...prevIndices];
+//       const currentIndex = newIndices[activeProductIndex];
+//       const product = productCatalogDiys[activeProductIndex];
+//       const totalImages = 1 + (product.altImages?.length || 0);
+
+//       newIndices[activeProductIndex] = (currentIndex + 1) % totalImages;
+
+//       updateUrl(product.id, newIndices[activeProductIndex]);
+
+//       return newIndices;
+//     });
+//   }, 1000); // каждые 5 сек
+
+//   return () => clearInterval(interval);
+// }, [activeProductIndex, animationState.inProgress, isGalleryOpen, updateUrl]);
 
 
   useEffect(() => {
@@ -574,19 +627,22 @@ export default function DiyProductDetail() {
   alt={product.name}
   className="max-h-full w-auto object-contain"
   draggable="false"
-  onClick={() => {
-  if (animationState.inProgress) return;
+  // onClick={() => {
+  // if (animationState.inProgress) return;
 
-  lastInteractionRef.current = Date.now(); // <-- добавили
-  const totalRenders = 1 + (product.altImages?.length || 0);
-  const current = selectedImageIndices[index];
-  const next = (current + 1) % totalRenders;
+  // lastInteractionRef.current = Date.now(); // <-- добавили
+  // const totalRenders = 1 + (product.altImages?.length || 0);
+  // const current = selectedImageIndices[index];
+  // const next = (current + 1) % totalRenders;
 
-  const updatedIndices = [...selectedImageIndices];
-  updatedIndices[index] = next;
-  setSelectedImageIndices(updatedIndices);
-  updateUrl(product.id, next);
-}}
+  // const updatedIndices = [...selectedImageIndices];
+  // updatedIndices[index] = next;
+  // setSelectedImageIndices(updatedIndices);
+  // updateUrl(product.id, next);
+// }}
+ onMouseEnter={() => handleMouseEnter(index, product)}
+  onMouseLeave={() => handleMouseLeave(index)}
+
 />
             </div>
           </SwiperSlide>
@@ -622,10 +678,14 @@ export default function DiyProductDetail() {
         <div className="hidden lg:block">
           <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
             {currentProduct.name}
-          </h1>
+          </h1><div className="w-full text-left flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
+          <p className="font-futura text-[#717171] font-medium">
+            {currentProduct.description2}
+          </p></div>
+          <div className="w-full text-left flex h-55 justify-between items-start py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
           <p className="font-futura text-[#717171] font-medium">
             {currentProduct.description}
-          </p>
+          </p></div>
         </div>
 
 
@@ -638,7 +698,7 @@ export default function DiyProductDetail() {
                 if (isCatalog) setIsGalleryOpen(true);
                 else window.location.href = detail.link;
               }}
-              className="w-full text-left flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+              className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
             >
               <span className="font-futura text-[#717171] font-medium">
                 {detail.title}
@@ -650,7 +710,7 @@ export default function DiyProductDetail() {
       </div>
      </div></div>
 {animationState.complete && !loadingState.isLoading && (
-  <div className="hidden md:block w-[100%] transition-opacity duration-500 opacity-100">
+  <div ref={refs.thumbs} className="hidden md:block w-[100%]  p-5 transition-opacity duration-500 opacity-100" >
     
       <Swiper
         modules={[Thumbs]}
@@ -703,6 +763,13 @@ export default function DiyProductDetail() {
       isOpen={isGalleryOpen}
       onClose={() => setIsGalleryOpen(false)}
     />
+
+      {/* Дата по центру внизу */}
+  <div className="flex justify-center items-center   bg-black">
+    <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
+      2015-2025
+    </span>
+  </div>
   </div>
 </>
 
