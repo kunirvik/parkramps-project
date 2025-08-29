@@ -1,74 +1,39 @@
-// import { useEffect, useState } from "react";
-// import axios from "axios";
+import { useEffect, useState } from "react";
 
-// export default function NewsPage() {
-//   const [news, setNews] = useState([]);
-//   const [form, setForm] = useState({ title: "", content: "", youtubeUrl: "" });
 
-//   const fetchNews = async () => {
-//     const res = await axios.get("https://your-server-domain.com/api/news");
-//     setNews(res.data);
-//   };
+export default function NewsPage() {
+ const [youtubeNews, setYoutubeNews] = useState([]);
 
-//   useEffect(() => {
-//     fetchNews();
-//   }, []);
+  useEffect(() => {
+    fetch("http://localhost:5001/api/youtube")
+      .then(res => res.json())
+      .then(data => setYoutubeNews(data));
+  }, []);
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     await axios.post("https://your-server-domain.com/api/news", form);
-//     setForm({ title: "", content: "", youtubeUrl: "" });
-//     fetchNews();
-//   };
-
-//   const getYoutubeEmbed = (url) => {
-//     const id = url.split("v=")[1]?.split("&")[0];
-//     return `https://www.youtube.com/embed/${id}`;
-//   };
-
-//   return (
-//     <div className="p-4 max-w-3xl mx-auto">
-//       <h1 className="text-2xl font-bold mb-4">Новости</h1>
-      
-//       <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-//         <input
-//           type="text"
-//           className="w-full border p-2 rounded"
-//           placeholder="Заголовок"
-//           value={form.title}
-//           onChange={(e) => setForm({ ...form, title: e.target.value })}
-//         />
-//         <textarea
-//           className="w-full border p-2 rounded"
-//           placeholder="Содержание"
-//           value={form.content}
-//           onChange={(e) => setForm({ ...form, content: e.target.value })}
-//         />
-//         <input
-//           type="text"
-//           className="w-full border p-2 rounded"
-//           placeholder="Ссылка на YouTube"
-//           value={form.youtubeUrl}
-//           onChange={(e) => setForm({ ...form, youtubeUrl: e.target.value })}
-//         />
-//         <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-//           Добавить новость
-//         </button>
-//       </form>
-
-//       {news.map((item) => (
-//         <div key={item.id} className="mb-6 border p-4 rounded shadow">
-//           <h2 className="text-xl font-semibold">{item.title}</h2>
-//           <p className="text-sm text-gray-600 mb-2">{new Date(item.createdAt).toLocaleString()}</p>
-//           <p className="mb-2">{item.content}</p>
-//           <iframe
-//             className="w-full h-64"
-//             src={getYoutubeEmbed(item.youtubeUrl)}
-//             title="YouTube Video"
-//             allowFullScreen
-//           />
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Новости из YouTube</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {youtubeNews.map((item) => (
+          <div key={item.id.videoId} className="bg-white shadow rounded-xl p-4">
+            <img
+              src={item.snippet.thumbnails.medium.url}
+              alt={item.snippet.title}
+              className="rounded-lg mb-2"
+            />
+            <h2 className="font-semibold text-lg">{item.snippet.title}</h2>
+            <p className="text-sm text-gray-600">{item.snippet.channelTitle}</p>
+            <a
+              href={`https://www.youtube.com/watch?v=${item.id.videoId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 mt-2 inline-block"
+            >
+              Смотреть →
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

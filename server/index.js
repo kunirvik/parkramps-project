@@ -6,37 +6,30 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors(
-  {origin: 'https://parkramps-project.vercel.app',
-  credentials: true}
-));
+// app.use(cors(
+//   {origin: 'https://parkramps-project.vercel.app',
+//   credentials: true}
+// ));
+
+app.use(cors());
 
 
-// app.use(bodyParser.json());
 
-// const FILE_PATH = "news.json";
 
-// // Чтение всех новостей
-// app.get("/api/news", (req, res) => {
-//   const data = JSON.parse(fs.readFileSync(FILE_PATH));
-//   res.json(data);
-// });
+const API_KEY = process.env.YOUTUBE_API_KEY;
 
-// // Добавление новости
-// app.post("/api/news", (req, res) => {
-//   const { title, content, youtubeUrl } = req.body;
-//   const data = JSON.parse(fs.readFileSync(FILE_PATH));
-//   const newItem = {
-//     id: uuid(),
-//     title,
-//     content,
-//     youtubeUrl,
-//     createdAt: new Date()
-//   };
-//   data.push(newItem);
-//   fs.writeFileSync(FILE_PATH, JSON.stringify(data, null, 2));
-//   res.status(201).json(newItem);
-// });
+app.get("/api/youtube", async (req, res) => {
+  const query = "новости"; // можно делать динамическим
+  const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${query}&maxResults=10&type=video&key=${API_KEY}`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    res.json(data.items);
+  } catch (err) {
+    res.status(500).json({ error: "Ошибка при загрузке данных" });
+  }
+});
 
 
 

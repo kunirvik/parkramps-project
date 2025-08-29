@@ -1061,7 +1061,7 @@ useEffect(() => {
             top: tooltip.y + 15,
             left: tooltip.x + 15,
             backgroundColor: "rgba(0, 0, 0, 0.7)",
-            color: "#fff",
+            color: "#847d7d53",
             padding: "6px 10px",
             borderRadius: "4px",
             pointerEvents: "none",

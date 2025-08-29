@@ -84,10 +84,6 @@ const hoverIntervalRef = useRef(null);
 
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
-  const currentImages = useMemo(() => 
-    currentProduct ? [currentProduct.image, ...currentProduct.altImages] : [], 
-    [currentProduct]
-  );
 
   const currentImagesFullscreen = useMemo(() => 
   currentProduct ? currentProduct.sample : [], 
@@ -192,7 +188,6 @@ const hoverIntervalRef = useRef(null);
       y: targetY,
       duration,
       ease: ANIMATION_CONFIG.EASE,
-      stagger: 0.1, // 👌 появляется с небольшой задержкой один за другим
       onComplete: resolve,
     });
   });
@@ -296,7 +291,7 @@ const hoverIntervalRef = useRef(null);
 
     // Анимируем скрытие информации
     // await animateInfo('out');
-await animateUI('in');
+await animateUI('out');
     // Обновляем состояние
     setActiveProductIndex(newIndex);
     updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
@@ -411,7 +406,7 @@ await animateUI('in');
       newIndices[index] = (current + 1) % totalImages;
       return newIndices;
     });
-  }, 100); // скорость смены кадров (0.5 сек)
+  }, 550); // скорость смены кадров (0.5 сек)
 };
 
 const handleMouseLeave = (index) => {
@@ -424,31 +419,6 @@ const handleMouseLeave = (index) => {
   });
 };
 
-//  useEffect(() => {
-//   const interval = setInterval(() => {
-//     if (animationState.inProgress || isGalleryOpen) return;
-
-//     const now = Date.now();
-//     const timeSinceLastInteraction = now - lastInteractionRef.current;
-
-//     if (timeSinceLastInteraction < 7000) return; // пауза после клика 7 сек
-
-//     setSelectedImageIndices((prevIndices) => {
-//       const newIndices = [...prevIndices];
-//       const currentIndex = newIndices[activeProductIndex];
-//       const product = productCatalogDiys[activeProductIndex];
-//       const totalImages = 1 + (product.altImages?.length || 0);
-
-//       newIndices[activeProductIndex] = (currentIndex + 1) % totalImages;
-
-//       updateUrl(product.id, newIndices[activeProductIndex]);
-
-//       return newIndices;
-//     });
-//   }, 1000); // каждые 5 сек
-
-//   return () => clearInterval(interval);
-// }, [activeProductIndex, animationState.inProgress, isGalleryOpen, updateUrl]);
 
 
   useEffect(() => {
@@ -505,53 +475,7 @@ const handleMouseLeave = (index) => {
 
     </div>
     
-{animationState.complete && !loadingState.isLoading && (
-  <div className="block md:hidden w-[100%] transition-opacity duration-500 opacity-100">
-      <Swiper
-        modules={[Thumbs]}
-        direction="horizontal"
-        onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
-     
-          breakpoints={{
-    320: { slidesPerView: 8 },
-    480: { slidesPerView: 8 },
-    640: { slidesPerView: 8 },
-    768: { slidesPerView: 8},
-    1024: { slidesPerView: 8 },
-    1280: { slidesPerView: 8 },
-  }}
-    slidesPerView="auto"
-        spaceBetween={10}
-        watchSlidesProgress={true}
-        slideToClickedSlide={true}
-        initialSlide={activeProductIndex}
-        speed={SWIPER_CONFIG.SPEED}
-        preventClicks={false}
-        preventClicksPropagation={false}
-        observer={true}
-        observeParents={true}
-        resistance={false}
-        resistanceRatio={0}
-      >
-        {productCatalogDiys.map((product, index) => (
-          <SwiperSlide key={product.id}>
-            <img
-              src={product.image}
-              onClick={() => handleThumbnailClick(index)}
-              className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
-                index === activeProductIndex
-                  ? "opacity-100 scale-105 border-black"
-                  : "grayscale border-transparent opacity-60 hover:opacity-100"
-              }`}
-              alt={product.name}
-              draggable="false"
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
-   </div>
 
-      )}
     {/* Мобильный заголовок */}
     <div className="block lg:hidden w-full mt-4">
       {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
@@ -583,10 +507,14 @@ const handleMouseLeave = (index) => {
           />
         </div>
       )}
+      
+
+
+
 {/* Swiper галерея + Миниатюры (мобильная версия) */}
 <div
   ref={refs.swiperContainer}
-  className="w-full lg:w-[75%] lg:h-[50%] mt-0 lg:mt-20 lg:content-start"
+  className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
   style={{
     visibility: !imageData || animationState.complete ? "visible" : "hidden",
     opacity: !imageData || animationState.complete ? 1 : 0,
@@ -627,19 +555,7 @@ const handleMouseLeave = (index) => {
   alt={product.name}
   className="max-h-full w-auto object-contain"
   draggable="false"
-  // onClick={() => {
-  // if (animationState.inProgress) return;
 
-  // lastInteractionRef.current = Date.now(); // <-- добавили
-  // const totalRenders = 1 + (product.altImages?.length || 0);
-  // const current = selectedImageIndices[index];
-  // const next = (current + 1) % totalRenders;
-
-  // const updatedIndices = [...selectedImageIndices];
-  // updatedIndices[index] = next;
-  // setSelectedImageIndices(updatedIndices);
-  // updateUrl(product.id, next);
-// }}
  onMouseEnter={() => handleMouseEnter(index, product)}
   onMouseLeave={() => handleMouseLeave(index)}
 
@@ -656,10 +572,10 @@ const handleMouseLeave = (index) => {
 </div>
 
 
-      {/* Описание и миниатюры текущего продукта */}
+      Описание и миниатюры текущего продукта
       <div
         ref={refs.info}
-        className="w-full lg:w-[25%] lg:h-[25%] flex flex-col justify mt-8 lg:mt-20"
+        className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
         style={{
           opacity:
             animationState.slideChanging || (!animationState.complete && imageData)
@@ -669,7 +585,8 @@ const handleMouseLeave = (index) => {
             animationState.slideChanging || (!animationState.complete && imageData)
               ? "translateY(20px)"
               : "translateY(0)",
-          visibility:
+         pointerEvents: animationState.slideChanging ? "none" : "auto",
+           visibility:
             animationState.slideChanging || (!animationState.complete && imageData)
               ? "hidden"
               : "visible",
@@ -677,15 +594,16 @@ const handleMouseLeave = (index) => {
       >
         <div className="hidden lg:block">
           <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
-            {currentProduct.name}
-          </h1><div className="w-full text-left flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
-          <p className="font-futura text-[#717171] font-medium">
-            {currentProduct.description2}
-          </p></div>
-          <div className="w-full text-left flex h-55 justify-between items-start py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
+            {currentProduct.name}</h1>
+          {/*  <div className="w-full text-left flex  justify-between items-start py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
           <p className="font-futura text-[#717171] font-medium">
             {currentProduct.description}
           </p></div>
+          <div className="w-full text-left h-55 flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
+          <p className="font-futura text-[#717171] font-medium">
+            {currentProduct.description2}
+          </p></div> */}
+         
         </div>
 
 
@@ -709,8 +627,8 @@ const handleMouseLeave = (index) => {
         })}
       </div>
      </div></div>
-{animationState.complete && !loadingState.isLoading && (
-  <div ref={refs.thumbs} className="hidden md:block w-[100%]  p-5 transition-opacity duration-500 opacity-100" >
+
+  <div ref={refs.thumbs} className="block w-[100%]  " >
     
       <Swiper
         modules={[Thumbs]}
@@ -755,7 +673,7 @@ const handleMouseLeave = (index) => {
         ))}
       </Swiper>
    </div>
-)}
+
 
     {/* Fullscreen gallery */}
     <FullscreenGallery

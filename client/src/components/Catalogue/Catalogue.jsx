@@ -17,14 +17,14 @@ const products = [
   {
     id: 2,
       category: "ramps",  
-      image: "/images/sets/kicker2.png",
-    name: " фигуры которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы",
+      image: "/images/ramps/ramp95garagemain.png",
+    name: "рампы",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }, 
   {
     id: 3,
-    name: "фигуры и комплекты фигур",
+    name: "фигуры и комплекты фигур которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы",
     category: "sets",
     image: "/images/sets/box.png",
     hoverImage: ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
@@ -35,7 +35,7 @@ const products = [
     id: 4,
      category: "diy",
     name: "хочешь самостоятельно собрать фигуру: специально для тебя мы подготовим предварительно собранную фигуру. проверим все элементы и подготовим для тебя комплект для сборки, тебе приедут все части фигуры и подробная инструкция к сборке, останется только взять шуруповерт. позвать друга и собрать фигуру для катания",
-   image: "/images/ramps/ramp95garagemain.png",
+   image: "/images/sets/kicker2.png",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }
@@ -159,13 +159,13 @@ const handleClick = async (product, e) => {
         navigate(`/product/sets/1?view=0`, { state: { imageData } });
         break;
       case "ramps":
-        navigate(`/product/diy/1?view=0`, { state: { imageData } });
+        navigate(`/product/ramps/1?view=0`, { state: { imageData } });
         break;
       case "skateparks":
         navigate(`/product/skateparks/1?view=0`, { state: { imageData } });
         break;
       case "diy":
-        navigate(`/product/ramps/1?view=0`, { state: { imageData } });
+        navigate(`/product/diy/1?view=0`, { state: { imageData } });
         break;
       default:
         console.warn("Неизвестная категория:", product.category);
@@ -251,33 +251,35 @@ useEffect(() => {
        
       >
         {/* Animated border lines */}
-        <div className={`absolute inset-0 pointer-events-none`}>
+
+
+        {/* <div className={`absolute inset-0 pointer-events-none`}> */}
           {/* Top line */}
-          <div
+          {/* <div
             className={`absolute top-0 left-0 h-px bg-gray-300 transition-all duration-1000 ease-out
               ${animatedLines ? 'w-full' : 'w-0'}`}
-          ></div>
+          ></div> */}
           
           {/* Right line - delayed animation */}
-          <div
+          {/* <div
             className={`absolute top-0 right-0 w-px bg-gray-300 transition-all duration-1000 ease-out delay-300
               ${animatedLines ? 'h-full' : 'h-0'}`}
-          ></div>
+          ></div> */}
           
           {/* Bottom line - delayed animation */}
-          <div
+          {/* <div
             className={`absolute bottom-0 right-0 h-px bg-gray-300 transition-all duration-1000 ease-out delay-500
               ${animatedLines ? 'w-full' : 'w-0'}`}
             style={{ transform: 'translateX(-100%)' }}
-          ></div>
+          ></div> */}
           
           {/* Left line - delayed animation */}
-          <div
+          {/* <div
             className={`absolute bottom-0 left-0 w-px bg-gray-300 transition-all duration-1000 ease-out delay-700
               ${animatedLines ? 'h-full' : 'h-0'}`}
-            style={{ transform: 'translateY(-100%)' }}
-          ></div>
-        </div>
+            style={{ transform: 'translateY(-100%)' }} */}
+          {/* // ></div> */}
+        {/* </div> */}
         
   <div className="flex flex-col items-center w-full h-full relative">
   <img
@@ -310,15 +312,23 @@ useEffect(() => {
       left: `${tooltip.x}px`,
       top: `${tooltip.y}px`,
     }}
-    className="absolute transform -translate-y-1/2 font-futura font-light z-10 bg-white w-[400px] h-[200px] text-black px-6 sm:px-10 py-2 shadow-lg pointer-events-none text-sm sm:text-base"
-  >
+    className="absolute transform -translate-y-1/2 font-futura  z-10 
+               bg-white text-black px-4 sm:px-6 py-2 shadow-lg pointer-events-none 
+               text-sm sm:text-base rounded-xl max-w-[300px] sm:max-w-[400px] 
+               whitespace-normal break-words"
+  ><h2
+   className="font-futura font-medium "
+   style={{ 
+    fontSize: "clamp(25px, 5vw, 25px)",
+   
+  }}> {products.find(p => p.id === tooltip.productId)?.category}</h2>
     {products.find(p => p.id === tooltip.productId)?.name}
   </div>
 )}
 
   
   {/* Дата по центру внизу */}
-  <div className="flex justify-center items-center py-4 sm:py-6 bg-black">
+  <div className="flex justify-center items-center  bg-black">
     <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
       2015-2025
     </span>

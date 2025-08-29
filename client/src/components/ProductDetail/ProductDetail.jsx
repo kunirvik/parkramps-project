@@ -31,7 +31,7 @@ export default function ProductDetail() {
   const navigate = useNavigate();
   const { id, category } = useParams();
   const [searchParams] = useSearchParams();
-  
+  const hoverIntervalRef = useRef(null);
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
 
@@ -2210,7 +2210,7 @@ export default function ProductDetail() {
 //     description: "Комплекты для самостоятельного строительства элементов.",
 //     details: [
 //       { title: "Инструкции", link: "#instructions" },
-//       { title: "Материалы", link: "#materials" },
+//       { title: "Материалы", link: "#materials" }, 
 //       { title: "Инструменты", link: "#tools" },
 //       { title: "Советы", link: "#tips" }
 //     ],

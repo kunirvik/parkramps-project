@@ -7,10 +7,11 @@ const productCatalogSkateparks = [ {id: 1,
     year: 2023,
     description: "Комплексные решения для скейтпарков.",
     details: [
-      { title: "Материалы", link: "#materials" },
-      { title: "Технические характеристики", link: "#tech-specs" },
-      { title: "Доставка", link: "#delivery" },
-      { title: "Установка", link: "#installation" }
+      { title: "Каталог фигур", link: "#catalog" },
+      // { title: "Материалы", link: "#materials" },
+      // { title: "Технические характеристики", link: "#tech-specs" },
+      // { title: "Доставка", link: "#delivery" },
+      // { title: "Установка", link: "#installation" }
     ],
     relatedProducts: [1, 2, 3, 4, 5, 6, 7] // IDs of related products
   },
@@ -24,10 +25,11 @@ const productCatalogSkateparks = [ {id: 1,
     year: 2024,
     description: "Профессиональные рампы различных размеров.",
     details: [
-      { title: "Материалы", link: "#materials" },
-      { title: "Размеры", link: "#dimensions" },
-      { title: "Установка", link: "#installation" },
-      { title: "Гарантия", link: "#warranty" }
+      { title: "Каталог фигур", link: "#catalog" },
+      // { title: "Материалы", link: "#materials" },
+      // { title: "Размеры", link: "#dimensions" },
+      // { title: "Установка", link: "#installation" },
+      // { title: "Гарантия", link: "#warranty" }
     ],
     relatedProducts: [1,  3, 4, 5, 6, 7] // IDs of related products
   },
@@ -42,9 +44,10 @@ const productCatalogSkateparks = [ {id: 1,
     description: "Отдельные элементы и готовые комплекты для скейтпарков.",
     details: [
       { title: "Каталог фигур", link: "#catalog" },
-      { title: "Варианты комплектации", link: "#sets" },
-      { title: "Технические характеристики", link: "#tech-specs" },
-      { title: "Доставка", link: "#delivery" }
+      // { title: "Каталог фигур", link: "#catalog" },
+      // { title: "Варианты комплектации", link: "#sets" },
+      // { title: "Технические характеристики", link: "#tech-specs" },
+      // { title: "Доставка", link: "#delivery" }
     ],
     relatedProducts: [1, 2, 4, 5, 6, 7] // IDs of related products
   },
@@ -58,10 +61,11 @@ const productCatalogSkateparks = [ {id: 1,
     year: 2023,
     description: "Комплекты для самостоятельного строительства элементов.",
     details: [
-      { title: "Инструкции", link: "#instructions" },
-      { title: "Материалы", link: "#materials" },
-      { title: "Инструменты", link: "#tools" },
-      { title: "Советы", link: "#tips" }
+      { title: "Каталог фигур", link: "#catalog" },
+      // { title: "Инструкции", link: "#instructions" },
+      // { title: "Материалы", link: "#materials" },
+      // { title: "Инструменты", link: "#tools" },
+      // { title: "Советы", link: "#tips" }
     ],
     relatedProducts: [1, 2, 3, 5, 6, 7] // IDs of related products
   },

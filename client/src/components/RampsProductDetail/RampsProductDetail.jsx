@@ -9,7 +9,7 @@ import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
 import productCatalogRamps from "../data/productCatalogRamps";
 import "swiper/css";
 import "swiper/css/pagination"; 
-
+// Константы
 // Константы
 const ANIMATION_CONFIG = {
   DURATION: 0.6,
@@ -24,13 +24,13 @@ const SWIPER_CONFIG = {
 };
 
 const LOADING_SCREEN_DURATION = 1500; // 1.5 секунды
+
 export default function RampsProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const { id, category } = useParams();
   const [searchParams] = useSearchParams();
-  const lastInteractionRef = useRef(Date.now());
-
+  const hoverIntervalRef = useRef(null);
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
 
@@ -72,7 +72,8 @@ export default function RampsProductDetail() {
     transitionImage: useRef(null),
     swiperContainer: useRef(null),
     info: useRef(null),
-    urlUpdateBlocked: useRef(false)
+    urlUpdateBlocked: useRef(false),
+    thumbs: useRef(null),
   };
 
   // Мемоизированные значения
@@ -154,26 +155,48 @@ export default function RampsProductDetail() {
     setAnimationState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  // Анимации
-  const animateInfo = useCallback((direction = 'in') => {
-    if (!refs.info.current) return Promise.resolve();
+  // // Анимации
+  // const animateUI = useCallback((direction = 'in') => {
+  //   if (!refs.info.current) return Promise.resolve();
     
+  //   const isIn = direction === 'in';
+  //   const targetOpacity = isIn ? 1 : 0;
+  //   const targetY = isIn ? 0 : 20;
+  //   const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
+
+  //   return new Promise(resolve => {
+  //     gsap.to(refs.info.current, {
+  //       opacity: targetOpacity,
+  //       y: targetY,
+  //       duration,
+  //       ease: ANIMATION_CONFIG.EASE,
+  //       onComplete: resolve
+  //     });
+  //   });
+  // }, []);
+
+   const animateUI = useCallback((direction = 'in') => {
+    const targets = [refs.info.current, refs.thumbs.current].filter(Boolean);
+  
+    if (!targets.length) return Promise.resolve();
+  
     const isIn = direction === 'in';
     const targetOpacity = isIn ? 1 : 0;
     const targetY = isIn ? 0 : 20;
     const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
-
+  
     return new Promise(resolve => {
-      gsap.to(refs.info.current, {
+      gsap.to(targets, {
         opacity: targetOpacity,
         y: targetY,
         duration,
         ease: ANIMATION_CONFIG.EASE,
-        onComplete: resolve
+        onComplete: resolve,
       });
     });
   }, []);
-
+  
+  
   const startTransitionAnimation = useCallback(() => {
     if (!refs.transitionImage.current || !refs.swiperContainer.current || 
         !imageData || animationState.inProgress) {
@@ -238,11 +261,11 @@ export default function RampsProductDetail() {
         updateAnimationState({ complete: true });
         
         // Анимируем появление информации
-        await animateInfo('in');
+        await animateUI('in');
         updateAnimationState({ inProgress: false });
       }
     });
-  }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
+  }, [imageData, animationState.inProgress, updateAnimationState, animateUI]);
 
   // Обработчики событий
   const handleSwiperInit = useCallback((swiper) => {
@@ -269,7 +292,7 @@ export default function RampsProductDetail() {
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     // Анимируем скрытие информации
-    await animateInfo('out');
+    await animateUI('out');
 
     // Обновляем состояние
     setActiveProductIndex(newIndex);
@@ -281,21 +304,12 @@ export default function RampsProductDetail() {
     }
 
     // Анимируем появление новой информации
-    await animateInfo('in');
+    await animateUI('in');
     updateAnimationState({ slideChanging: false, inProgress: false });
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
-      swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
+      swiperInstances.thumbs, updateUrl, animateUI, updateAnimationState]);
 
-  // const handleImageSelect = useCallback((index) => {
-  //   if (animationState.inProgress) return;
-
-  //   const newIndices = [...selectedImageIndices];
-  //   newIndices[activeProductIndex] = index;
-  //   setSelectedImageIndices(newIndices);
-  //   updateUrl(currentProduct.id, index);
-  // }, [animationState.inProgress, selectedImageIndices, activeProductIndex, 
-  //     currentProduct?.id, updateUrl]);
-
+  
   const handleThumbnailClick = useCallback((index) => {
     if (animationState.inProgress || index === activeProductIndex || !swiperInstances.main) 
       return;
@@ -370,33 +384,6 @@ export default function RampsProductDetail() {
     };
   }, []);
 
- useEffect(() => {
-  const interval = setInterval(() => {
-    if (animationState.inProgress || isGalleryOpen) return;
-
-    const now = Date.now();
-    const timeSinceLastInteraction = now - lastInteractionRef.current;
-
-    if (timeSinceLastInteraction < 7000) return; // пауза после клика 7 сек
-
-    setSelectedImageIndices((prevIndices) => {
-      const newIndices = [...prevIndices];
-      const currentIndex = newIndices[activeProductIndex];
-      const product = productCatalogRamps[activeProductIndex];
-      const totalImages = 1 + (product.altImages?.length || 0);
-
-      newIndices[activeProductIndex] = (currentIndex + 1) % totalImages;
-
-      updateUrl(product.id, newIndices[activeProductIndex]);
-
-      return newIndices;
-    });
-  }, 4000); // каждые 5 сек
-
-  return () => clearInterval(interval);
-}, [activeProductIndex, animationState.inProgress, isGalleryOpen, updateUrl]);
-
-
   useEffect(() => {
     const swiper = swiperInstances.main;
     if (!swiper || animationState.inProgress) return;
@@ -412,6 +399,32 @@ export default function RampsProductDetail() {
     }
   }, [swiperInstances.main?.activeIndex]);
 
+    const handleMouseEnter = (index, product) => {
+     if (!animationState.complete || animationState.inProgress) return; // <-- блокируем пока анимация не завершена
+
+  clearInterval(hoverIntervalRef.current);
+
+  hoverIntervalRef.current = setInterval(() => {
+    setSelectedImageIndices((prevIndices) => {
+      const newIndices = [...prevIndices];
+      const totalImages = 1 + (product.altImages?.length || 0);
+      const current = newIndices[index];
+      newIndices[index] = (current + 1) % totalImages;
+      return newIndices;
+    });
+  }, 550); // скорость смены кадров (0.5 сек)
+};
+
+const handleMouseLeave = (index) => {
+  clearInterval(hoverIntervalRef.current);
+
+  setSelectedImageIndices((prevIndices) => {
+    const newIndices = [...prevIndices];
+    newIndices[index] = 0; // возвращаем на главное изображение
+    return newIndices;
+  });
+};
+
   if (!currentProduct) {
     return <div className="text-center mt-10 p-4">Продукт не найден</div>;
   }
@@ -421,9 +434,6 @@ export default function RampsProductDetail() {
     return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
-
-
- 
   return (
    <><div className="flex flex-col min-h-screen">
   <SocialButtons
@@ -455,18 +465,18 @@ export default function RampsProductDetail() {
         </p>
       </div> */}
     </div>
-<div className=" block md:hidden w-[100%] mt-7 ">
+{/* <div className=" block md:hidden w-[100%] mt-7 ">
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
         onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
      
           breakpoints={{
-    320: { slidesPerView: 8 },
-    480: { slidesPerView: 8 },
-    640: { slidesPerView: 8 },
-    768: { slidesPerView: 8},
-    1024: { slidesPerView: 8 },
+    320: { slidesPerView: 3 },
+    480: { slidesPerView: 4 },
+    640: { slidesPerView: 5 },
+    768: { slidesPerView: 6 },
+    1024: { slidesPerView: 7 },
     1280: { slidesPerView: 8 },
   }}
     slidesPerView="auto"
@@ -498,7 +508,7 @@ export default function RampsProductDetail() {
           </SwiperSlide>
         ))}
       </Swiper>
-   </div>
+   </div> */}
     {/* Мобильный заголовок */}
     <div className="block lg:hidden w-full mt-4">
       {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
@@ -533,7 +543,7 @@ export default function RampsProductDetail() {
 {/* Swiper галерея + Миниатюры (мобильная версия) */}
 <div
   ref={refs.swiperContainer}
-  className="w-full lg:w-[75%] lg:h-[50%] mt-0 lg:mt-20 lg:content-center"
+  className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
   style={{
     visibility: !imageData || animationState.complete ? "visible" : "hidden",
     opacity: !imageData || animationState.complete ? 1 : 0,
@@ -541,6 +551,7 @@ export default function RampsProductDetail() {
 >
   <div className="w-full flex flex-row items-start justify-between gap-2">
     {/* Основная галерея */}
+    {/* <div className="w-[calc(100%-80px)]"> */}
     <div className="w-[100%]">
       <Swiper
         className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
@@ -565,33 +576,19 @@ export default function RampsProductDetail() {
         {productCatalogRamps.map((product, index) => (
           <SwiperSlide key={product.id} style={{ height: "100%" }}>
             <div className="w-full h-full flex items-center justify-center">
-        <img
-  src={
-    selectedImageIndices[index] === 0
-      ? product.image
-      : product.altImages[selectedImageIndices[index] - 1]
-  }
-  alt={product.name}
-  className="max-h-full w-auto object-contain"
-  draggable="false"
-  onClick={() => {
-  if (animationState.inProgress) return;
-
-  lastInteractionRef.current = Date.now(); // <-- добавили
-  const totalRenders = 1 + (product.altImages?.length || 0);
-  const current = selectedImageIndices[index];
-  const next = (current + 1) % totalRenders;
-
-  const updatedIndices = [...selectedImageIndices];
-  updatedIndices[index] = next;
-  setSelectedImageIndices(updatedIndices);
-  updateUrl(product.id, next);
-}}
-
-
-/>
-
-
+              <img
+                src={
+                  selectedImageIndices[index] === 0
+                    ? product.image
+                    : product.altImages[selectedImageIndices[index] - 1]
+                }
+                alt={product.name}
+                className="max-h-full w-auto object-contain"
+                draggable="false"
+                
+ onMouseEnter={() => handleMouseEnter(index, product)}
+  onMouseLeave={() => handleMouseLeave(index)}
+              />
             </div>
           </SwiperSlide>
         ))}
@@ -600,72 +597,12 @@ export default function RampsProductDetail() {
       <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
     </div>
 
-    {/* Миниатюры — справа от галереи
-    <div className="block  md:hidden w-20 space-y-2">
-      {currentImages.map((img, index) => (
-        <button
-          key={index}
-          onClick={() => handleImageSelect(index)}
-          className={`border rounded-lg p-1 transition hover:scale-105 ${
-            selectedImageIndices[activeProductIndex] === index
-              ? "border-black"
-              : "border-transparent"
-          }`}
-          disabled={animationState.inProgress}
-        >
-          <img
-            src={img}
-            alt={`${currentProduct.name} Mini ${index + 1}`}
-            className="w-16 h-16 object-contain rounded"
-            draggable="false"
-          />
-        </button>
-      ))}
-    </div> */}
+
   </div>
 </div>
 
 
         
-          {/* Вертикальные миниатюры на мобилках
-          <div className="block md:hidden absolute right-0 top-0 h-full w-20 z-10">
-            <Swiper
-              modules={[Thumbs]}
-              direction="vertical"
-              onSwiper={(swiper) =>
-                setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))
-              }
-              className="block md:hidden w-20 h-104 mt-4"
-              slidesPerView={5}
-              spaceBetween={10}
-              watchSlidesProgress={true}
-              slideToClickedSlide={true}
-              initialSlide={activeProductIndex}
-              speed={SWIPER_CONFIG.SPEED}
-              preventClicks={false}
-              preventClicksPropagation={false}
-              observer={true}
-              observeParents={true}
-              resistance={false}
-              resistanceRatio={0}
-            >
-              {productCatalogRamps.map((product, index) => (
-                <SwiperSlide key={product.id}>
-                  <img
-                    src={product.image}
-                    onClick={() => handleThumbnailClick(index)}
-                    className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
-                      index === activeProductIndex
-                        ? "opacity-100 scale-105 border-black"
-                        : "grayscale border-transparent opacity-60 hover:opacity-100"
-                    }`}
-                    alt={product.name}
-                    draggable="false"
-                  />
-                </SwiperSlide>
-              ))}
-            </Swiper>
-          </div> */}
     
 
       {/* Описание и миниатюры текущего продукта */}
@@ -696,29 +633,7 @@ export default function RampsProductDetail() {
           </p>
         </div>
 
-        {/* Миниатюры текущего товара
-        <div className="hidden md:block flex flex-wrap justify-start gap-4">
-          {currentImages.map((img, index) => (
-            <button
-              key={index}
-              onClick={() => handleImageSelect(index)}
-              className={`border rounded-lg p-1 transition hover:scale-105 ${
-                selectedImageIndices[activeProductIndex] === index
-                  ? "border-black"
-                  : "border-transparent"
-              }`}
-              disabled={animationState.inProgress}
-            >
-              <img
-                src={img}
-                alt={`${currentProduct.name} Mini ${index + 1}`}
-                className="w-16 h-16 object-contain rounded"
-                draggable="false"
-              />
-            </button>
-          ))}
-        </div> */}
-
+      
         {currentProduct.details?.map((detail, index) => {
           const isCatalog = detail.title.toLowerCase().includes("каталог");
           return (
@@ -740,19 +655,21 @@ export default function RampsProductDetail() {
       </div>
      </div></div>
 
-    {/* ✅ Новая нижняя полоса миниатюр — после всего контента */}
-    <div className="hidden md:block w-[100%]  ">
+
+
+   
+    <div ref={refs.thumbs} className="block w-[100%]  ">
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
         onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
      
           breakpoints={{
-    320: { slidesPerView: 8 },
-    480: { slidesPerView: 8 },
-    640: { slidesPerView: 8 },
-    768: { slidesPerView: 8 },
-    1024: { slidesPerView: 8 },
+    320: { slidesPerView: 3 },
+    480: { slidesPerView: 4 },
+    640: { slidesPerView: 5 },
+    768: { slidesPerView: 6 },
+    1024: { slidesPerView: 7 },
     1280: { slidesPerView: 8 },
   }}
     slidesPerView="auto"
@@ -785,6 +702,7 @@ export default function RampsProductDetail() {
         ))}
       </Swiper>
    </div>
+   )}
 
     {/* Fullscreen gallery */}
     <FullscreenGallery
@@ -797,8 +715,3 @@ export default function RampsProductDetail() {
 
   );
 }
-
-
-
-
-
