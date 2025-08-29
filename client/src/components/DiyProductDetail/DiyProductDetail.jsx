@@ -628,7 +628,10 @@ const handleMouseLeave = (index) => {
       </div>
      </div></div>
 
-  <div ref={refs.thumbs} className="block w-[100%]  " >
+  <div ref={refs.thumbs} className="block w-[100%]  "  style={{
+      opacity: animationState.complete ? 1 : 0,
+      visibility: animationState.complete ? "visible" : "hidden",
+    }} >
     
       <Swiper
         modules={[Thumbs]}
