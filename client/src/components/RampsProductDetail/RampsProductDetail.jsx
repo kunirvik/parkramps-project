@@ -13,6 +13,7 @@ import "swiper/css/pagination";
 // Константы
 const ANIMATION_CONFIG = {
   DURATION: 0.6,
+
   EASE: "power2.out",
   HALF_DURATION: 0.3
 };
@@ -24,13 +25,13 @@ const SWIPER_CONFIG = {
 };
 
 const LOADING_SCREEN_DURATION = 1500; // 1.5 секунды
-
 export default function RampsProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const { id, category } = useParams();
   const [searchParams] = useSearchParams();
-  const hoverIntervalRef = useRef(null);
+  const lastInteractionRef = useRef(Date.now());
+const hoverIntervalRef = useRef(null);
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
 
@@ -73,7 +74,7 @@ export default function RampsProductDetail() {
     swiperContainer: useRef(null),
     info: useRef(null),
     urlUpdateBlocked: useRef(false),
-    thumbs: useRef(null),
+      thumbs: useRef(null),
   };
 
   // Мемоизированные значения
@@ -83,10 +84,6 @@ export default function RampsProductDetail() {
 
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
-  const currentImages = useMemo(() => 
-    currentProduct ? [currentProduct.image, ...currentProduct.altImages] : [], 
-    [currentProduct]
-  );
 
   const currentImagesFullscreen = useMemo(() => 
   currentProduct ? currentProduct.sample : [], 
@@ -155,28 +152,48 @@ export default function RampsProductDetail() {
     setAnimationState(prev => ({ ...prev, ...updates }));
   }, []);
 
-
   // // Анимации
-  const animateInfo = useCallback((direction = 'in') => {
-    if (!refs.info.current) return Promise.resolve();
+  // const animateInfo = useCallback((direction = 'in') => {
+  //   if (!refs.info.current) return Promise.resolve();
     
-    const isIn = direction === 'in';
-    const targetOpacity = isIn ? 1 : 0;
-    const targetY = isIn ? 0 : 20;
-    const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
+  //   const isIn = direction === 'in';
+  //   const targetOpacity = isIn ? 1 : 0;
+  //   const targetY = isIn ? 0 : 20;
+  //   const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
 
-    return new Promise(resolve => {
-      gsap.to(refs.info.current, {
-        opacity: targetOpacity,
-        y: targetY,
-        duration,
-        ease: ANIMATION_CONFIG.EASE,
-        onComplete: resolve
-      });
+  //   return new Promise(resolve => {
+  //     gsap.to(refs.info.current, {
+  //       opacity: targetOpacity,
+  //       y: targetY,
+  //       duration,
+  //       ease: ANIMATION_CONFIG.EASE,
+  //       onComplete: resolve
+  //     });
+  //   });
+  // }, []);
+
+  const animateUI = useCallback((direction = 'in') => {
+  const targets = [refs.info.current, refs.thumbs.current].filter(Boolean);
+
+  if (!targets.length) return Promise.resolve();
+
+  const isIn = direction === 'in';
+  const targetOpacity = isIn ? 1 : 0;
+  const targetY = isIn ? 0 : 20;
+  const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
+
+  return new Promise(resolve => {
+    gsap.to(targets, {
+      opacity: targetOpacity,
+      y: targetY,
+      duration,
+      ease: ANIMATION_CONFIG.EASE,
+      onComplete: resolve,
     });
-  }, []);
-  
-  
+  });
+}, []);
+
+
   const startTransitionAnimation = useCallback(() => {
     if (!refs.transitionImage.current || !refs.swiperContainer.current || 
         !imageData || animationState.inProgress) {
@@ -241,11 +258,12 @@ export default function RampsProductDetail() {
         updateAnimationState({ complete: true });
         
         // Анимируем появление информации
-        await animateInfo('in');
+        // await animateInfo('in');
+        await animateUI('in');
         updateAnimationState({ inProgress: false });
       }
     });
-  }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
+  }, [imageData, animationState.inProgress, updateAnimationState, animateUI]);
 
   // Обработчики событий
   const handleSwiperInit = useCallback((swiper) => {
@@ -272,8 +290,8 @@ export default function RampsProductDetail() {
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     // Анимируем скрытие информации
-    await animateInfo('out');
-
+    // await animateInfo('out');
+await animateUI('out');
     // Обновляем состояние
     setActiveProductIndex(newIndex);
     updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
@@ -284,12 +302,22 @@ export default function RampsProductDetail() {
     }
 
     // Анимируем появление новой информации
-    await animateInfo('in');
+    // await animateInfo('in');
+    await animateUI('in');
     updateAnimationState({ slideChanging: false, inProgress: false });
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
-      swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
+      swiperInstances.thumbs, updateUrl, animateUI, updateAnimationState]);
 
-  
+  // const handleImageSelect = useCallback((index) => {
+  //   if (animationState.inProgress) return;
+
+  //   const newIndices = [...selectedImageIndices];
+  //   newIndices[activeProductIndex] = index;
+  //   setSelectedImageIndices(newIndices);
+  //   updateUrl(currentProduct.id, index);
+  // }, [animationState.inProgress, selectedImageIndices, activeProductIndex, 
+  //     currentProduct?.id, updateUrl]);
+
   const handleThumbnailClick = useCallback((index) => {
     if (animationState.inProgress || index === activeProductIndex || !swiperInstances.main) 
       return;
@@ -364,22 +392,8 @@ export default function RampsProductDetail() {
     };
   }, []);
 
-  useEffect(() => {
-    const swiper = swiperInstances.main;
-    if (!swiper || animationState.inProgress) return;
-  
-    const newIndex = swiper.activeIndex;
-    if (newIndex !== activeProductIndex) {
-      setActiveProductIndex(newIndex);
-      updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
-  
-      if (swiperInstances.thumbs) {
-        swiperInstances.thumbs.slideTo(newIndex);
-      }
-    }
-  }, [swiperInstances.main?.activeIndex]);
 
-    const handleMouseEnter = (index, product) => {
+  const handleMouseEnter = (index, product) => {
      if (!animationState.complete || animationState.inProgress) return; // <-- блокируем пока анимация не завершена
 
   clearInterval(hoverIntervalRef.current);
@@ -405,6 +419,23 @@ const handleMouseLeave = (index) => {
   });
 };
 
+
+
+  useEffect(() => {
+    const swiper = swiperInstances.main;
+    if (!swiper || animationState.inProgress) return;
+  
+    const newIndex = swiper.activeIndex;
+    if (newIndex !== activeProductIndex) {
+      setActiveProductIndex(newIndex);
+      updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
+  
+      if (swiperInstances.thumbs) {
+        swiperInstances.thumbs.slideTo(newIndex);
+      }
+    }
+  }, [swiperInstances.main?.activeIndex]);
+
   if (!currentProduct) {
     return <div className="text-center mt-10 p-4">Продукт не найден</div>;
   }
@@ -414,6 +445,9 @@ const handleMouseLeave = (index) => {
     return <LoadingScreen onComplete={handleLoadingComplete} />;
   }
 
+
+
+ 
   return (
    <><div className="flex flex-col min-h-screen">
   <SocialButtons
@@ -429,7 +463,7 @@ const handleMouseLeave = (index) => {
       opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
     }}
   >
-    <div className="w-full flex items-start mb-4">
+    <div className="w-full flex items-start  mb-4">
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
@@ -438,15 +472,10 @@ const handleMouseLeave = (index) => {
         ← Back
       </button>
 
-      {/* Правая часть — описание-табличка
-      <div className="fixed hidden lg:block max-w-[690px] text-[24px] font-futura text-[#717171] font-medium border-b border-gray-200 right-5 px-4 py-2 ml-auto">
-        <p className="font-futura tracking-tighter leading-none">
-          фигуры которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы
-        </p>
-      </div> */}
-    </div>
 
-   
+    </div>
+    
+
     {/* Мобильный заголовок */}
     <div className="block lg:hidden w-full mt-4">
       {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
@@ -478,6 +507,10 @@ const handleMouseLeave = (index) => {
           />
         </div>
       )}
+      
+
+
+
 {/* Swiper галерея + Миниатюры (мобильная версия) */}
 <div
   ref={refs.swiperContainer}
@@ -489,7 +522,6 @@ const handleMouseLeave = (index) => {
 >
   <div className="w-full flex flex-row items-start justify-between gap-2">
     {/* Основная галерея */}
-    {/* <div className="w-[calc(100%-80px)]"> */}
     <div className="w-[100%]">
       <Swiper
         className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
@@ -514,19 +546,20 @@ const handleMouseLeave = (index) => {
         {productCatalogRamps.map((product, index) => (
           <SwiperSlide key={product.id} style={{ height: "100%" }}>
             <div className="w-full h-full flex items-center justify-center">
-              <img
-                src={
-                  selectedImageIndices[index] === 0
-                    ? product.image
-                    : product.altImages[selectedImageIndices[index] - 1]
-                }
-                alt={product.name}
-                className="max-h-full w-auto object-contain"
-                draggable="false"
-                
+        <img
+  src={
+    selectedImageIndices[index] === 0
+      ? product.image
+      : product.altImages[selectedImageIndices[index] - 1]
+  }
+  alt={product.name}
+  className="max-h-full w-auto object-contain"
+  draggable="false"
+
  onMouseEnter={() => handleMouseEnter(index, product)}
   onMouseLeave={() => handleMouseLeave(index)}
-              />
+
+/>
             </div>
           </SwiperSlide>
         ))}
@@ -535,18 +568,14 @@ const handleMouseLeave = (index) => {
       <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
     </div>
 
-
   </div>
 </div>
 
 
-        
-    
-
-      {/* Описание и миниатюры текущего продукта */}
+      Описание и миниатюры текущего продукта
       <div
         ref={refs.info}
-        className="w-full lg:w-[25%] lg:h-[25%] flex flex-col justify mt-8 lg:mt-20"
+        className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
         style={{
           opacity:
             animationState.slideChanging || (!animationState.complete && imageData)
@@ -556,7 +585,8 @@ const handleMouseLeave = (index) => {
             animationState.slideChanging || (!animationState.complete && imageData)
               ? "translateY(20px)"
               : "translateY(0)",
-          visibility:
+         pointerEvents: animationState.slideChanging ? "none" : "auto",
+           visibility:
             animationState.slideChanging || (!animationState.complete && imageData)
               ? "hidden"
               : "visible",
@@ -564,14 +594,19 @@ const handleMouseLeave = (index) => {
       >
         <div className="hidden lg:block">
           <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
-            {currentProduct.name}
-          </h1>
+            {currentProduct.name}</h1>
+          {/*  <div className="w-full text-left flex  justify-between items-start py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
           <p className="font-futura text-[#717171] font-medium">
             {currentProduct.description}
-          </p>
+          </p></div>
+          <div className="w-full text-left h-55 flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
+          <p className="font-futura text-[#717171] font-medium">
+            {currentProduct.description2}
+          </p></div> */}
+         
         </div>
 
-      
+
         {currentProduct.details?.map((detail, index) => {
           const isCatalog = detail.title.toLowerCase().includes("каталог");
           return (
@@ -581,7 +616,7 @@ const handleMouseLeave = (index) => {
                 if (isCatalog) setIsGalleryOpen(true);
                 else window.location.href = detail.link;
               }}
-              className="w-full text-left flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+              className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
             >
               <span className="font-futura text-[#717171] font-medium">
                 {detail.title}
@@ -593,27 +628,22 @@ const handleMouseLeave = (index) => {
       </div>
      </div></div>
 
-
-
-{!loadingState.isLoading && (
-   
-    <div ref={refs.thumbs}
-     className="hidden md:block w-[100%] transition-opacity duration-500"
-    style={{
+  <div ref={refs.thumbs} className="block w-[100%]  "  style={{
       opacity: animationState.complete ? 1 : 0,
-      visibility: animationState.complete ? "visible" : "hidden",}}
-      >
+      visibility: animationState.complete ? "visible" : "hidden",
+    }} >
+    
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
         onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
      
           breakpoints={{
-    320: { slidesPerView: 3 },
-    480: { slidesPerView: 4 },
-    640: { slidesPerView: 5 },
-    768: { slidesPerView: 6 },
-    1024: { slidesPerView: 7 },
+    320: { slidesPerView: 8 },
+    480: { slidesPerView: 8 },
+    640: { slidesPerView: 8 },
+    768: { slidesPerView: 8 },
+    1024: { slidesPerView: 8 },
     1280: { slidesPerView: 8 },
   }}
     slidesPerView="auto"
@@ -646,7 +676,7 @@ const handleMouseLeave = (index) => {
         ))}
       </Swiper>
    </div>
-   )}
+
 
     {/* Fullscreen gallery */}
     <FullscreenGallery
@@ -654,8 +684,20 @@ const handleMouseLeave = (index) => {
       isOpen={isGalleryOpen}
       onClose={() => setIsGalleryOpen(false)}
     />
+
+      {/* Дата по центру внизу */}
+  <div className="flex justify-center items-center   bg-black">
+    <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
+      2015-2025
+    </span>
+  </div>
   </div>
 </>
 
   );
 }
+
+
+
+
+
