@@ -155,43 +155,23 @@ export default function RampsProductDetail() {
     setAnimationState(prev => ({ ...prev, ...updates }));
   }, []);
 
+
   // // Анимации
-  // const animateUI = useCallback((direction = 'in') => {
-  //   if (!refs.info.current) return Promise.resolve();
+  const animateInfo = useCallback((direction = 'in') => {
+    if (!refs.info.current) return Promise.resolve();
     
-  //   const isIn = direction === 'in';
-  //   const targetOpacity = isIn ? 1 : 0;
-  //   const targetY = isIn ? 0 : 20;
-  //   const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
-
-  //   return new Promise(resolve => {
-  //     gsap.to(refs.info.current, {
-  //       opacity: targetOpacity,
-  //       y: targetY,
-  //       duration,
-  //       ease: ANIMATION_CONFIG.EASE,
-  //       onComplete: resolve
-  //     });
-  //   });
-  // }, []);
-
-   const animateUI = useCallback((direction = 'in') => {
-    const targets = [refs.info.current, refs.thumbs.current].filter(Boolean);
-  
-    if (!targets.length) return Promise.resolve();
-  
     const isIn = direction === 'in';
     const targetOpacity = isIn ? 1 : 0;
     const targetY = isIn ? 0 : 20;
     const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
-  
+
     return new Promise(resolve => {
-      gsap.to(targets, {
+      gsap.to(refs.info.current, {
         opacity: targetOpacity,
         y: targetY,
         duration,
         ease: ANIMATION_CONFIG.EASE,
-        onComplete: resolve,
+        onComplete: resolve
       });
     });
   }, []);
@@ -261,11 +241,11 @@ export default function RampsProductDetail() {
         updateAnimationState({ complete: true });
         
         // Анимируем появление информации
-        await animateUI('in');
+        await animateInfo('in');
         updateAnimationState({ inProgress: false });
       }
     });
-  }, [imageData, animationState.inProgress, updateAnimationState, animateUI]);
+  }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
 
   // Обработчики событий
   const handleSwiperInit = useCallback((swiper) => {
@@ -292,7 +272,7 @@ export default function RampsProductDetail() {
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     // Анимируем скрытие информации
-    await animateUI('out');
+    await animateInfo('out');
 
     // Обновляем состояние
     setActiveProductIndex(newIndex);
@@ -304,10 +284,10 @@ export default function RampsProductDetail() {
     }
 
     // Анимируем появление новой информации
-    await animateUI('in');
+    await animateInfo('in');
     updateAnimationState({ slideChanging: false, inProgress: false });
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
-      swiperInstances.thumbs, updateUrl, animateUI, updateAnimationState]);
+      swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
   
   const handleThumbnailClick = useCallback((index) => {
@@ -465,50 +445,8 @@ const handleMouseLeave = (index) => {
         </p>
       </div> */}
     </div>
-{/* <div className=" block md:hidden w-[100%] mt-7 ">
-      <Swiper
-        modules={[Thumbs]}
-        direction="horizontal"
-        onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
-     
-          breakpoints={{
-    320: { slidesPerView: 3 },
-    480: { slidesPerView: 4 },
-    640: { slidesPerView: 5 },
-    768: { slidesPerView: 6 },
-    1024: { slidesPerView: 7 },
-    1280: { slidesPerView: 8 },
-  }}
-    slidesPerView="auto"
-        spaceBetween={10}
-        watchSlidesProgress={true}
-        slideToClickedSlide={true}
-        initialSlide={activeProductIndex}
-        speed={SWIPER_CONFIG.SPEED}
-        preventClicks={false}
-        preventClicksPropagation={false}
-        observer={true}
-        observeParents={true}
-        resistance={false}
-        resistanceRatio={0}
-      >
-        {productCatalogRamps.map((product, index) => (
-          <SwiperSlide key={product.id}>
-            <img
-              src={product.image}
-              onClick={() => handleThumbnailClick(index)}
-              className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
-                index === activeProductIndex
-                  ? "opacity-100 scale-105 border-black"
-                  : "grayscale border-transparent opacity-60 hover:opacity-100"
-              }`}
-              alt={product.name}
-              draggable="false"
-            />
-          </SwiperSlide>
-        ))}
-      </Swiper>
-   </div> */}
+
+   
     {/* Мобильный заголовок */}
     <div className="block lg:hidden w-full mt-4">
       {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
@@ -657,8 +595,14 @@ const handleMouseLeave = (index) => {
 
 
 
+{!loadingState.isLoading && (
    
-    <div ref={refs.thumbs} className="block w-[100%]  ">
+    <div ref={refs.thumbs}
+     className="hidden md:block w-[100%] transition-opacity duration-500"
+    style={{
+      opacity: animationState.complete ? 1 : 0,
+      visibility: animationState.complete ? "visible" : "hidden",}}
+      >
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
