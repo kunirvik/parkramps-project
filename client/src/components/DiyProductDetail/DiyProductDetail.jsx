@@ -77,18 +77,27 @@ const [thumbsShown, setThumbsShown] = useState(false);
       thumbs: useRef(null),
   };
 
+
+
   // Мемоизированные значения
   const currentProduct = useMemo(() => 
     productCatalogDiys[activeProductIndex], [activeProductIndex]
   );
 
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  // 2. Состояния для галереи
+const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+const [galleryStartIndex, setGalleryStartIndex] = useState(0);
 
 
   const currentImagesFullscreen = useMemo(() => 
   currentProduct ? currentProduct.sample : [], 
   [currentProduct]
 );
+// 1. Собираем общий альбом
+const allImages = useMemo(() => {
+  return productCatalogDiys.flatMap((p) => p.sample || []);
+}, []); 
+
 
   // Обработка завершения loading screen
   const handleLoadingComplete = useCallback(() => {
@@ -199,6 +208,22 @@ const [thumbsShown, setThumbsShown] = useState(false);
 //   });
 // }, []);
 
+const openGallery = () => {
+  // считаем сколько фото было ДО текущего продукта
+  const productStartIndex = productCatalogDiys
+    .slice(0, activeProductIndex)
+    .reduce((acc, p) => acc + (p.sample?.length || 0), 0);
+
+  // если у продукта есть фото → открываем с его первой картинки
+  if (currentProduct.sample?.length) {
+    setGalleryStartIndex(productStartIndex);
+  } else {
+    // если фото нет → открываем с самого начала
+    setGalleryStartIndex(0);
+  }
+
+  setIsGalleryOpen(true);
+};
 
   const startTransitionAnimation = useCallback(() => {
     if (!refs.transitionImage.current || !refs.swiperContainer.current || 
@@ -619,7 +644,9 @@ const handleMouseLeave = (index) => {
             <button
               key={index}
               onClick={() => {
-                if (isCatalog) setIsGalleryOpen(true);
+                if (isCatalog){
+                  //  setIsGalleryOpen(true);
+                openGallery();}
                 else window.location.href = detail.link;
               }}
               className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
@@ -686,9 +713,10 @@ const handleMouseLeave = (index) => {
 
     {/* Fullscreen gallery */}
     <FullscreenGallery
-      images={currentImagesFullscreen}
-      isOpen={isGalleryOpen}
-      onClose={() => setIsGalleryOpen(false)}
+      i  images={allImages}
+  startIndex={galleryStartIndex}
+  isOpen={isGalleryOpen}
+  onClose={() => setIsGalleryOpen(false)}
     />
 
       {/* Дата по центру внизу */}

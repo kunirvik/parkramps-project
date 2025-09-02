@@ -34,7 +34,7 @@ export default function RampsProductDetail() {
 const hoverIntervalRef = useRef(null);
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
-
+const [thumbsShown, setThumbsShown] = useState(false);
   // Определяем, нужен ли loading screen
   const shouldShowLoading = useMemo(() => {
     // Показываем loading screen если:
@@ -152,46 +152,51 @@ const hoverIntervalRef = useRef(null);
     setAnimationState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  // // Анимации
-  // const animateInfo = useCallback((direction = 'in') => {
-  //   if (!refs.info.current) return Promise.resolve();
+  // Анимации
+  const animateInfo = useCallback((direction = 'in') => {
+    if (!refs.info.current) return Promise.resolve();
     
-  //   const isIn = direction === 'in';
-  //   const targetOpacity = isIn ? 1 : 0;
-  //   const targetY = isIn ? 0 : 20;
-  //   const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
+    const isIn = direction === 'in';
+    const targetOpacity = isIn ? 1 : 0;
+    const targetY = isIn ? 0 : 20;
+    const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
 
-  //   return new Promise(resolve => {
-  //     gsap.to(refs.info.current, {
-  //       opacity: targetOpacity,
-  //       y: targetY,
-  //       duration,
-  //       ease: ANIMATION_CONFIG.EASE,
-  //       onComplete: resolve
-  //     });
-  //   });
-  // }, []);
-
-  const animateUI = useCallback((direction = 'in') => {
-  const targets = [refs.info.current, refs.thumbs.current].filter(Boolean);
-
-  if (!targets.length) return Promise.resolve();
-
-  const isIn = direction === 'in';
-  const targetOpacity = isIn ? 1 : 0;
-  const targetY = isIn ? 0 : 20;
-  const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
-
-  return new Promise(resolve => {
-    gsap.to(targets, {
-      opacity: targetOpacity,
-      y: targetY,
-      duration,
-      ease: ANIMATION_CONFIG.EASE,
-      onComplete: resolve,
+    return new Promise(resolve => {
+      gsap.to(refs.info.current, {
+        opacity: targetOpacity,
+        y: targetY,
+        duration,
+        ease: ANIMATION_CONFIG.EASE,
+        onComplete: resolve
+      });
     });
-  });
-}, []);
+  }, []);
+
+//   const animateInfo = useCallback((direction = 'in') => {
+//   const targets = [refs.info.current, refs.thumbs.current].filter(Boolean);
+
+//   if (!targets.length) return Promise.resolve();
+
+//   const isIn = direction === 'in';
+//   const targetOpacity = isIn ? 1 : 0;
+//   const targetY = isIn ? 0 : 20;
+//   const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
+
+//   return new Promise(resolve => {
+//     gsap.to(targets, {
+//       opacity: targetOpacity,
+//       y: targetY,
+//       duration,
+//       ease: ANIMATION_CONFIG.EASE,
+//       onComplete: resolve,
+//     });
+//   });
+// }, []);
+useEffect(() => {
+  if (animationState.complete && !thumbsShown) {
+    setThumbsShown(true);
+  }
+}, [animationState.complete, thumbsShown]);
 
 
   const startTransitionAnimation = useCallback(() => {
@@ -259,11 +264,11 @@ const hoverIntervalRef = useRef(null);
         
         // Анимируем появление информации
         // await animateInfo('in');
-        await animateUI('in');
+        await animateInfo('in');
         updateAnimationState({ inProgress: false });
       }
     });
-  }, [imageData, animationState.inProgress, updateAnimationState, animateUI]);
+  }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
 
   // Обработчики событий
   const handleSwiperInit = useCallback((swiper) => {
@@ -291,7 +296,7 @@ const hoverIntervalRef = useRef(null);
 
     // Анимируем скрытие информации
     // await animateInfo('out');
-await animateUI('out');
+await animateInfo('out');
     // Обновляем состояние
     setActiveProductIndex(newIndex);
     updateUrl(productCatalogRamps[newIndex].id, selectedImageIndices[newIndex]);
@@ -303,10 +308,10 @@ await animateUI('out');
 
     // Анимируем появление новой информации
     // await animateInfo('in');
-    await animateUI('in');
+    await animateInfo('in');
     updateAnimationState({ slideChanging: false, inProgress: false });
   }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
-      swiperInstances.thumbs, updateUrl, animateUI, updateAnimationState]);
+      swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
 
   // const handleImageSelect = useCallback((index) => {
   //   if (animationState.inProgress) return;
@@ -629,8 +634,8 @@ const handleMouseLeave = (index) => {
      </div></div>
 
   <div ref={refs.thumbs} className="block w-[100%]  "  style={{
-      opacity: animationState.complete ? 1 : 0,
-      visibility: animationState.complete ? "visible" : "hidden",
+      opacity: thumbsShown ? 1 : 0,
+      visibility: thumbsShown ? "visible" : "hidden",
     }} >
     
       <Swiper
