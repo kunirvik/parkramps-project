@@ -219,118 +219,85 @@ useEffect(() => {
     };
   }, []); 
 
-  return (<>
+return (
+  <>
+    <div className="bg-black flex flex-col min-h-screen relative">
 
-   <div className="bg-black overflow-hidden relative min-h-screen flex flex-col">
- 
-  
-  <SocialButtons
-    buttonLabel="gallery"
-    onButtonClick={handleExit}
-    buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
-  />
-   {isLoading && <LoadingScreen isFadingOut={isFadingOut} />}
-  {/* Контейнер для карточек с flex-grow */}
-  <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6 p-14 sm:p-2 mt-0 sm:mt-10">
-    {products.map((product) => (
-      <div
-        key={product.id}
-        ref={(el) => {
-          if (el) productsRef.current.set(product.id, el);
-        }}
-        className={`cursor-pointer flex justify-center items-center p-2 sm:p-4
-          relative overflow-hidden
-          transition-all duration-400 ease-in-out
-          h-40 sm:h-60 md:h-80 lg:h-90
-          ${selectedProduct !== null
-            ? selectedProduct === product.id
-              ? "scale-100"
-              : "scale-0 pointer-events-none"
-            : "scale-100"}`}
-        onClick={(e) => handleClick(product, e)}
-       
-      >
-        {/* Animated border lines */}
-
-
-        {/* <div className={`absolute inset-0 pointer-events-none`}> */}
-          {/* Top line */}
-          {/* <div
-            className={`absolute top-0 left-0 h-px bg-gray-300 transition-all duration-1000 ease-out
-              ${animatedLines ? 'w-full' : 'w-0'}`}
-          ></div> */}
-          
-          {/* Right line - delayed animation */}
-          {/* <div
-            className={`absolute top-0 right-0 w-px bg-gray-300 transition-all duration-1000 ease-out delay-300
-              ${animatedLines ? 'h-full' : 'h-0'}`}
-          ></div> */}
-          
-          {/* Bottom line - delayed animation */}
-          {/* <div
-            className={`absolute bottom-0 right-0 h-px bg-gray-300 transition-all duration-1000 ease-out delay-500
-              ${animatedLines ? 'w-full' : 'w-0'}`}
-            style={{ transform: 'translateX(-100%)' }}
-          ></div> */}
-          
-          {/* Left line - delayed animation */}
-          {/* <div
-            className={`absolute bottom-0 left-0 w-px bg-gray-300 transition-all duration-1000 ease-out delay-700
-              ${animatedLines ? 'h-full' : 'h-0'}`}
-            style={{ transform: 'translateY(-100%)' }} */}
-          {/* // ></div> */}
-        {/* </div> */}
-        
-  <div className="flex flex-col items-center w-full h-full relative">
-  <img
-    src={product.image}
-    alt={product.name}
-    className="w-full h-full object-contain transition-all duration-300"
-    onMouseMove={!isMobile ? (e) => handleMouseMove(e, product.id) : undefined}
-    onMouseLeave={!isMobile ? handleMouseLeave : undefined}
-  />
-
-  {/* Подсказка внутри карточки — только для мобилок */}
-  {isMobile && mobileTooltipProductId === product.id && (
-    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 
-                  bg-white/90 text-black text-base sm:text-lg 
-                  px-4 py-2 rounded-xl shadow-xl animate-fadeIn 
-                  font-light leading-snug w-[90%] max-w-xs text-center z-20">
-      {product.name}
-    </div>
-  )}
-</div>
-
+      {/* SocialButtons всегда вверху */}
+      <div className="flex-shrink-0">
+        <SocialButtons
+          buttonLabel="gallery"
+          onButtonClick={handleExit}
+          buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
+        />
       </div>
-    ))}
-  </div>
-  
-{tooltip.show && (
-  <div
-    ref={tooltipRef}
-    style={{
-      left: `${tooltip.x}px`,
-      top: `${tooltip.y}px`,
-    }}
-    className="absolute transform -translate-y-1/2 font-futura  z-10 
-               bg-white text-black px-4 sm:px-6 py-2 shadow-lg pointer-events-none 
-               text-sm sm:text-base rounded-xl max-w-[300px] sm:max-w-[400px] 
-               whitespace-normal break-words"
-  ><h2
-   className="font-futura font-medium "
-   style={{ 
-    fontSize: "clamp(25px, 5vw, 25px)",
-   
-  }}> {products.find(p => p.id === tooltip.productId)?.category}</h2>
-    {products.find(p => p.id === tooltip.productId)?.name}
-  </div>
-)}
 
-  
-  {/* Дата по центру внизу */}
-  <div className="flex justify-center items-center  bg-black">
-    <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
-      2015-2025
-    </span>
-  </div>
-</div></>)}
+      {isLoading && <LoadingScreen isFadingOut={isFadingOut} />}
+
+      {/* Основной контент — карточки растягиваются */}
+      <div className="flex-grow overflow-hidden flex  items-center justify-center">
+        <div className="flex-grow grid grid-cols-1 gap-8 sm:grid-cols-2 "
+        style={{ marginTop: "1.5rem", height: "calc(100% - 1.5rem)" }}>
+          {products.map((product) => (
+            <div
+              key={product.id}
+              ref={(el) => el && productsRef.current.set(product.id, el)}
+              className={`cursor-pointer flex justify-center items-center p-2 sm:p-4
+                relative overflow-hidden transition-all duration-400 ease-in-out
+                h-40 sm:h-60 md:h-80 lg:h-90
+                ${selectedProduct !== null
+                  ? selectedProduct === product.id
+                    ? "scale-100"
+                    : "scale-0 pointer-events-none"
+                  : "scale-100"}`}
+              onClick={(e) => handleClick(product, e)}
+            >
+              <div className="flex flex-col items-center w-full h-full relative">
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-full h-full object-contain transition-all duration-300"
+                  onMouseMove={!isMobile ? (e) => handleMouseMove(e, product.id) : undefined}
+                  onMouseLeave={!isMobile ? handleMouseLeave : undefined}
+                />
+                {isMobile && mobileTooltipProductId === product.id && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 
+                    bg-white/90 text-black text-base sm:text-lg 
+                    px-4 py-2 rounded-xl shadow-xl animate-fadeIn 
+                    font-light leading-snug w-[90%] max-w-xs text-center z-20">
+                    {product.name}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Текст снизу */}
+      <div className="flex-shrink-0 flex justify-center items-center bg-black">
+        <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
+          2015-2025
+        </span>
+      </div>
+    </div>
+
+    {/* Tooltip */}
+    {tooltip.show && (
+      <div
+        ref={tooltipRef}
+        style={{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }}
+        className="absolute transform -translate-y-1/2 font-futura z-10 
+                   bg-white text-black px-4 sm:px-6 py-2 shadow-lg pointer-events-none 
+                   text-sm sm:text-base rounded-xl max-w-[300px] sm:max-w-[400px] 
+                   whitespace-normal break-words"
+      >
+        <h2 className="font-futura font-medium" style={{ fontSize: "clamp(25px, 5vw, 25px)" }}>
+          {products.find(p => p.id === tooltip.productId)?.category}
+        </h2>
+        {products.find(p => p.id === tooltip.productId)?.name}
+      </div>
+    )}
+  </>
+);
+}

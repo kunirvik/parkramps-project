@@ -9,6 +9,32 @@ import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
 import productCatalogDiys from "../data/productCatalogDiys";
 import "swiper/css";
 import "swiper/css/pagination"; 
+import { ChevronDown, ChevronUp } from "lucide-react";
+
+const Accordion = ({ title, children }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="w-full border-b border-gray-200">
+      <button
+        className="w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="font-futura text-[#717171] font-medium">{title}</span>
+        {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+      </button>
+
+      <div
+        className={`transition-all duration-300 overflow-hidden ${
+          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="p-2 text-sm text-[#717171] font-futura">{children}</div>
+      </div>
+    </div>
+  );
+};
+
 
 // Константы
 const ANIMATION_CONFIG = {
@@ -32,8 +58,15 @@ export default function DiyProductDetail() {
   const [searchParams] = useSearchParams();
   const lastInteractionRef = useRef(Date.now());
 const hoverIntervalRef = useRef(null);
+const hoveredIndexRef = useRef(null);        // текущий индекс, над которым hover
+const pendingHoverRef = useRef(null);        // если hover пришёл во время анимации — отложим
+const mousePosRef = useRef({ x: 0, y: 0 });  // последние координаты мыши
+
+
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
+
+  
 
   // Определяем, нужен ли loading screen
   const shouldShowLoading = useMemo(() => {
@@ -84,6 +117,7 @@ const [thumbsShown, setThumbsShown] = useState(false);
     productCatalogDiys[activeProductIndex], [activeProductIndex]
   );
 
+  const [hoveredIndex, setHoveredIndex] = useState(null);
   // 2. Состояния для галереи
 const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 const [galleryStartIndex, setGalleryStartIndex] = useState(0);
@@ -186,6 +220,48 @@ const allImages = useMemo(() => {
       });
     });
   }, []);
+
+
+  useEffect(() => {
+  const onMove = (e) => {
+    mousePosRef.current = { x: e.clientX, y: e.clientY };
+  };
+  const onTouch = (e) => {
+    if (e.touches && e.touches[0]) mousePosRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+  };
+
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchstart', onTouch, { passive: true });
+
+  return () => {
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('touchstart', onTouch);
+  };
+}, []);
+
+
+const startHoverInterval = useCallback((index, product) => {
+  clearInterval(hoverIntervalRef.current);
+
+  const totalImages = 1 + (product?.altImages?.length || 0);
+  if (totalImages <= 1) return; // нечего листать
+
+  hoverIntervalRef.current = setInterval(() => {
+    setSelectedImageIndices(prev => {
+      const next = [...prev];
+      const cur = next[index] ?? 0;
+      next[index] = (cur + 1) % totalImages;
+      return next;
+    });
+  }, 550);
+}, []);
+
+const isPointerOverSwiper = useCallback(() => {
+  if (!refs.swiperContainer.current) return false;
+  const { x, y } = mousePosRef.current;
+  const el = document.elementFromPoint(x, y);
+  return !!el && refs.swiperContainer.current.contains(el);
+}, []);
 
 //   const animateInfo = useCallback((direction = 'in') => {
 //   const targets = [refs.info.current, refs.thumbs.current].filter(Boolean);
@@ -314,30 +390,51 @@ const openGallery = () => {
   }, [imageData, startTransitionAnimation, shouldShowLoading, loadingState.isCompleted]);
 
   const handleSlideChange = useCallback(async (swiper) => {
-    const newIndex = swiper.activeIndex;
-    
-    if (newIndex === activeProductIndex || animationState.inProgress) return;
+  const newIndex = swiper.activeIndex;
+  if (newIndex === activeProductIndex || animationState.inProgress) return;
 
-    updateAnimationState({ slideChanging: true, inProgress: true });
+  updateAnimationState({ slideChanging: true, inProgress: true });
 
-    // Анимируем скрытие информации
-    // await animateInfo('out');
-await animateInfo('out');
-    // Обновляем состояние
-    setActiveProductIndex(newIndex);
-    updateUrl(productCatalogDiys[newIndex].id, selectedImageIndices[newIndex]);
+  // спрячем инфо (пользователь не видит что мы сбрасываем изображение)
+  await animateInfo('out');
 
-    // Синхронизируем thumbs swiper
-    if (swiperInstances.thumbs) {
-      swiperInstances.thumbs.slideTo(newIndex);
-    }
+  // переключаем продукт
+  setActiveProductIndex(newIndex);
 
-    // Анимируем появление новой информации
-    // await animateInfo('in');
-    await animateInfo('in');
-    updateAnimationState({ slideChanging: false, inProgress: false });
-  }, [activeProductIndex, animationState.inProgress, selectedImageIndices, 
-      swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState]);
+  // сбросим картинку на первую (пока контент скрыт — это незаметно)
+  setSelectedImageIndices(prev => {
+    const reset = [...prev];
+    reset[newIndex] = 0;
+    return reset;
+  });
+
+  updateUrl(productCatalogDiys[newIndex].id, 0);
+
+  if (swiperInstances.thumbs) {
+    swiperInstances.thumbs.slideTo(newIndex);
+  }
+
+  // показываем инфо
+  await animateInfo('in');
+
+  // снимаем блокировку анимации
+  updateAnimationState({ slideChanging: false, inProgress: false });
+
+  // если курсор всё ещё "над" слайдером или был pending — запустить hover-анимацию
+  const pending = pendingHoverRef.current;
+  if ((pending && pending.index === newIndex) || hoveredIndexRef.current === newIndex || isPointerOverSwiper()) {
+    const product = productCatalogDiys[newIndex];
+    startHoverInterval(newIndex, product);
+    pendingHoverRef.current = null;
+  }
+}, [activeProductIndex, animationState.inProgress, swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState, isPointerOverSwiper, startHoverInterval]);
+
+useEffect(() => {
+  return () => {
+    clearInterval(hoverIntervalRef.current);
+  };
+}, []);
+
 
   // const handleImageSelect = useCallback((index) => {
   //   if (animationState.inProgress) return;
@@ -426,7 +523,7 @@ await animateInfo('out');
 
   const handleMouseEnter = (index, product) => {
      if (!animationState.complete || animationState.inProgress) return; // <-- блокируем пока анимация не завершена
-
+ setHoveredIndex(index); // запоминаем индекс
   clearInterval(hoverIntervalRef.current);
 
   hoverIntervalRef.current = setInterval(() => {
@@ -441,13 +538,14 @@ await animateInfo('out');
 };
 
 const handleMouseLeave = (index) => {
+    setHoveredIndex(null); // курсор ушёл
   clearInterval(hoverIntervalRef.current);
 
-  setSelectedImageIndices((prevIndices) => {
-    const newIndices = [...prevIndices];
-    newIndices[index] = 0; // возвращаем на главное изображение
-    return newIndices;
-  });
+  // setSelectedImageIndices((prevIndices) => {
+  //   const newIndices = [...prevIndices];
+  //   newIndices[index] = 0; // возвращаем на главное изображение
+  //   return newIndices;
+  // });
 };
 
 
@@ -626,14 +724,13 @@ const handleMouseLeave = (index) => {
         <div className="hidden lg:block">
           <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
             {currentProduct.name}</h1>
-          {/*  <div className="w-full text-left flex  justify-between items-start py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
-          <p className="font-futura text-[#717171] font-medium">
-            {currentProduct.description}
-          </p></div>
-          <div className="w-full text-left h-55 flex justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
-          <p className="font-futura text-[#717171] font-medium">
-            {currentProduct.description2}
-          </p></div> */}
+      <Accordion title="Описание">
+    {currentProduct.description}
+  </Accordion>
+
+  <Accordion title="Дополнительная информация">
+    {currentProduct.description2}
+  </Accordion>
          
         </div>
 

@@ -8,6 +8,7 @@ import RampsProductDetail from "./components/RampsProductDetail/RampsProductDeta
 import SkateparksProductDetail from "./components/SkateparksProductDetail/SkateparksProductDetail"
 import DiyProductDetail from "./components/DiyProductDetail/DiyProductDetail";
 import NewsPage from "./components/NewsPage/NewsPage";
+import ProjectPage from "./components/ProjectPage/ProjectPage"
 import './App.css'
 
 function App() {
@@ -31,8 +32,8 @@ function App() {
 
         <Route  path="/photopage" element={<PhotoPage />} />
         
-{/*         
-         <Route path="projectpage" element={<ProjectPage/>}/> */}
+        
+         <Route path="projectpage" element={<ProjectPage/>}/>
       </Routes>
      
     </>
