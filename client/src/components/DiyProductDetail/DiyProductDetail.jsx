@@ -395,32 +395,36 @@ const openGallery = () => {
 
   updateAnimationState({ slideChanging: true, inProgress: true });
 
-  // спрячем инфо (пользователь не видит что мы сбрасываем изображение)
+  // Сначала скрываем информацию
   await animateInfo('out');
 
-  // переключаем продукт
+  // Меняем индекс продукта
   setActiveProductIndex(newIndex);
 
-  // сбросим картинку на первую (пока контент скрыт — это незаметно)
-  setSelectedImageIndices(prev => {
-    const reset = [...prev];
-    reset[newIndex] = 0;
-    return reset;
-  });
-
+  // Обновляем URL и thumbs
   updateUrl(productCatalogDiys[newIndex].id, 0);
-
   if (swiperInstances.thumbs) {
     swiperInstances.thumbs.slideTo(newIndex);
   }
 
-  // показываем инфо
+  // Ждём завершения перелистывания Swiper
+  setTimeout(() => {
+    requestAnimationFrame(() => {
+      // Сбрасываем изображение только после того, как слайд появился
+      setSelectedImageIndices(prev => {
+        const reset = [...prev];
+        reset[newIndex] = 0;
+        return reset;
+      });
+    });
+  }, SWIPER_CONFIG.SPEED); // скорость анимации Swiper
+
+  // Показываем информацию
   await animateInfo('in');
 
-  // снимаем блокировку анимации
   updateAnimationState({ slideChanging: false, inProgress: false });
 
-  // если курсор всё ещё "над" слайдером или был pending — запустить hover-анимацию
+  // Если курсор остался на слайде — перезапускаем анимацию
   const pending = pendingHoverRef.current;
   if ((pending && pending.index === newIndex) || hoveredIndexRef.current === newIndex || isPointerOverSwiper()) {
     const product = productCatalogDiys[newIndex];
@@ -428,6 +432,7 @@ const openGallery = () => {
     pendingHoverRef.current = null;
   }
 }, [activeProductIndex, animationState.inProgress, swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState, isPointerOverSwiper, startHoverInterval]);
+
 
 useEffect(() => {
   return () => {
