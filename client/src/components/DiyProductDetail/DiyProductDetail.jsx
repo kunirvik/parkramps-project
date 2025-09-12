@@ -11,34 +11,48 @@ import "swiper/css";
 import "swiper/css/pagination"; 
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const Accordion = ({ title, children }) => {
-  const [isOpen, setIsOpen] = useState(false);
+
+const Accordion = ({ items, defaultOpenIndex = null }) => {
+  const [openIndex, setOpenIndex] = useState(defaultOpenIndex);
+
+  const toggleAccordion = (index) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
 
   return (
     <div className="w-full border-b border-gray-200">
-      <button
-        className="w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span className="font-futura text-[#717171] font-medium">{title}</span>
-        {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-      </button>
+      {items.map((item, index) => (
+        <div key={index}>
+          <button
+            className="w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors"
+            onClick={() => toggleAccordion(index)}
+          >
+            <span className="font-futura text-[#717171] font-medium">{item.title}</span>
+            {openIndex === index ? (
+              <ChevronUp className="w-5 h-5" />
+            ) : (
+              <ChevronDown className="w-5 h-5" />
+            )}
+          </button>
 
-      <div
-        className={`transition-all duration-300 overflow-hidden ${
-          isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="p-2 text-sm text-[#717171] font-futura">{children}</div>
-      </div>
+          <div
+            className={`transition-all duration-300 overflow-hidden ${
+              openIndex === index ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            <div className="p-2 text-sm text-[#717171] font-futura">{item.content}</div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
 
 
+
 // Константы
 const ANIMATION_CONFIG = {
-  DURATION: 0.6,
+  DURATION: 0.5,
 
   EASE: "power2.out",
   HALF_DURATION: 0.3
@@ -389,9 +403,15 @@ const openGallery = () => {
     requestAnimationFrame(startTransitionAnimation);
   }, [imageData, startTransitionAnimation, shouldShowLoading, loadingState.isCompleted]);
 
-  const handleSlideChange = useCallback(async (swiper) => {
+
+
+  
+
+const handleSlideChange = useCallback(async (swiper) => {
   const newIndex = swiper.activeIndex;
   if (newIndex === activeProductIndex || animationState.inProgress) return;
+
+  const oldIndex = activeProductIndex; // сохраняем старый индекс
 
   updateAnimationState({ slideChanging: true, inProgress: true });
 
@@ -401,38 +421,40 @@ const openGallery = () => {
   // Меняем индекс продукта
   setActiveProductIndex(newIndex);
 
-  // Обновляем URL и thumbs
+  // Сбрасываем изображение нового продукта сразу на 0 (основное изображение)
+  setSelectedImageIndices(prev => {
+    const newIndices = [...prev];
+    newIndices[newIndex] = 0;
+    return newIndices;
+  });
+
+  // Обновляем URL и миниатюры
   updateUrl(productCatalogDiys[newIndex].id, 0);
   if (swiperInstances.thumbs) {
     swiperInstances.thumbs.slideTo(newIndex);
   }
 
   // Ждём завершения перелистывания Swiper
-  setTimeout(() => {
-    requestAnimationFrame(() => {
-      // Сбрасываем изображение только после того, как слайд появился
-      setSelectedImageIndices(prev => {
-        const reset = [...prev];
-        reset[newIndex] = 0;
-        return reset;
-      });
+
+    await animateInfo('in');
+    updateAnimationState({ slideChanging: false, inProgress: false });
+  setTimeout(async () => {
+    // После окончания анимации сбрасываем индекс старого продукта
+    setSelectedImageIndices(prev => {
+      const newIndices = [...prev];
+      newIndices[oldIndex] = 0;
+      return newIndices;
     });
-  }, SWIPER_CONFIG.SPEED); // скорость анимации Swiper
 
-  // Показываем информацию
-  await animateInfo('in');
-
-  updateAnimationState({ slideChanging: false, inProgress: false });
-
-  // Если курсор остался на слайде — перезапускаем анимацию
-  const pending = pendingHoverRef.current;
-  if ((pending && pending.index === newIndex) || hoveredIndexRef.current === newIndex || isPointerOverSwiper()) {
-    const product = productCatalogDiys[newIndex];
-    startHoverInterval(newIndex, product);
-    pendingHoverRef.current = null;
-  }
+    // Перезапускаем hover-анимацию, если курсор остался на слайде
+    const pending = pendingHoverRef.current;
+    if ((pending && pending.index === newIndex) || hoveredIndexRef.current === newIndex || isPointerOverSwiper()) {
+      const product = productCatalogDiys[newIndex];
+      startHoverInterval(newIndex, product);
+      pendingHoverRef.current = null;
+    }
+  }, SWIPER_CONFIG.SPEED);
 }, [activeProductIndex, animationState.inProgress, swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState, isPointerOverSwiper, startHoverInterval]);
-
 
 useEffect(() => {
   return () => {
@@ -729,13 +751,13 @@ const handleMouseLeave = (index) => {
         <div className="hidden lg:block">
           <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
             {currentProduct.name}</h1>
-      <Accordion title="Описание">
-    {currentProduct.description}
-  </Accordion>
+<Accordion
+  items={[
+    { title: "Описание", content: currentProduct.description },
+    { title: "Дополнительная информация", content: currentProduct.description2 },
+  ]} defaultOpenIndex={1} 
+/>
 
-  <Accordion title="Дополнительная информация">
-    {currentProduct.description2}
-  </Accordion>
          
         </div>
 
