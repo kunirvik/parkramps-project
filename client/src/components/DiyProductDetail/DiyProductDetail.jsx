@@ -52,7 +52,7 @@ const Accordion = ({ items, defaultOpenIndex = null }) => {
 
 // Константы
 const ANIMATION_CONFIG = {
-  DURATION: 0.5,
+  DURATION: 0.6,
 
   EASE: "power2.out",
   HALF_DURATION: 0.3
