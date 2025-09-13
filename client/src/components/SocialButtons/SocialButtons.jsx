@@ -64,6 +64,7 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
   return (
     <>
       {/* Верхняя зелёная кнопка */}
+      <div className="fixed">
       <button
         onClick={() => (window.location.href = "/projectpage")}
         className="fixed top-0 left-0 w-full h-[17px] bg-green-700 flex items-center text-lg font-futura font-light justify-center z-40"
@@ -72,7 +73,7 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
       </button>
 
       {/* Хедер */}
-      <div className="fixed top-4 left-0 w-full h-10 bg-black flex items-center justify-between px-4 shadow-md z-50">
+  <div className="fixed top-4 left-0 w-full h-10 bg-black flex items-center justify-between  shadow-md z-50">
         <div className="flex items-center space-x-2">
           <img src="/logo.png" alt="Logo" className="sm:h-10 sm:w-auto opacity-50 drop-shadow-lg" />
            {/* <span   style={{
@@ -108,7 +109,7 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
             animationProps={buttonAnimationProps}
           />
         </div>
-      </div>
+      </div></div>
     </>
   );
 }

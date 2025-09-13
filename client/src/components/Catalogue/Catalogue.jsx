@@ -17,7 +17,7 @@ const products = [
   {
     id: 2,
       category: "ramps",  
-      image: "/images/ramps/ramp95garagemain.png",
+      image: "/images/ramps/minir180h60w200d40alt.png",
     name: "рампы",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
@@ -45,7 +45,6 @@ export default function Catalogue() {
   const navigate = useNavigate();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, productId: null });
-  const [animatedLines, setAnimatedLines] = useState(false);
   const productsRef = useRef(new Map());
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,15 +73,15 @@ const preloadImage = (src) => {
   });
 };
 
-  // Start animation when component mounts
-  useEffect(() => {
-    // Short delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      setAnimatedLines(true);
-    }, 100);
+  // // Start animation when component mounts
+  // useEffect(() => {
+  //   // Short delay to ensure DOM is ready
+  //   const timer = setTimeout(() => {
+  //     setAnimatedLines(true);
+  //   }, 100);
     
-    return () => clearTimeout(timer);
-  }, []);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   // Track mouse position for tooltip
 const handleMouseMove = (e, productId) => {
@@ -220,7 +219,7 @@ useEffect(() => {
   }, []); 
 
 return (
-  <>
+  <>  {isLoading && <LoadingScreen isFadingOut={isFadingOut} />}
     <div className="bg-black flex flex-col min-h-screen relative">
 
       {/* SocialButtons всегда вверху */}
@@ -232,7 +231,7 @@ return (
         />
       </div>
 
-      {isLoading && <LoadingScreen isFadingOut={isFadingOut} />}
+    
 
       {/* Основной контент — карточки растягиваются */}
       <div className="flex-grow overflow-hidden flex  items-center justify-center">
@@ -288,7 +287,7 @@ return (
         ref={tooltipRef}
         style={{ left: `${tooltip.x}px`, top: `${tooltip.y}px` }}
         className="absolute transform -translate-y-1/2 font-futura z-10 
-                   bg-white text-black px-4 sm:px-6 py-2 shadow-lg pointer-events-none 
+                   bg-black text-white px-4 sm:px-6 py-2 shadow-lg pointer-events-none 
                    text-sm sm:text-base rounded-xl max-w-[300px] sm:max-w-[400px] 
                    whitespace-normal break-words"
       >

@@ -724,34 +724,55 @@ const Accordion = ({ items, defaultOpenIndex = null }) => {
   };
 
   return (
-    <div className="w-full border-b border-gray-200">
-      {items.map((item, index) => (
-        <div key={index}>
-          <button
-            className="w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors"
-            onClick={() => toggleAccordion(index)}
-          >
-            <span className="font-futura text-[#717171] font-medium">{item.title}</span>
-            {openIndex === index ? (
-              <ChevronUp className="w-5 h-5" />
-            ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
-          </button>
+    <div className="w-full">
+      {items.map((item, index) => {
+        const isOpen = openIndex === index;
 
-          <div
-            className={`transition-all duration-300 overflow-hidden ${
-              openIndex === index ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-            }`}
-          >
-            <div className="p-2 text-sm text-[#717171] font-futura">{item.content}</div>
+        return (
+          <div key={index} className="w-full relative">
+            <button
+              className="relative w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors group"
+              onClick={() => toggleAccordion(index)}
+            >
+              <span className="font-futura text-[#717171] font-medium">{item.title}</span>
+              {isOpen ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+
+              {/* Линия всегда есть, но у открытого блока она уезжает вниз */}
+              <span
+                className={`absolute left-0 w-full h-[1px] bg-gray-200 transition-transform duration-300`}
+                style={{
+                  bottom: isOpen ? "-8px" : "0px",
+                  transform: isOpen ? "translateY(100%)" : "translateY(0)",
+                  opacity: isOpen ? 0 : 1
+                }}
+              />
+            </button>
+
+            {/* Контент */}
+            <div
+              className={`transition-all duration-300 overflow-hidden ${
+                isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
+              <div className="p-2 text-sm text-[#717171] font-futura relative">
+                {item.content}
+
+                {/* Когда открыт — линия появляется под текстом */}
+                {isOpen && (
+                  <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-200" />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
-
 
 
 // Константы
@@ -1166,17 +1187,6 @@ useEffect(() => {
   };
 }, []);
 
-
-  // const handleImageSelect = useCallback((index) => {
-  //   if (animationState.inProgress) return;
-
-  //   const newIndices = [...selectedImageIndices];
-  //   newIndices[activeProductIndex] = index;
-  //   setSelectedImageIndices(newIndices);
-  //   updateUrl(currentProduct.id, index);
-  // }, [animationState.inProgress, selectedImageIndices, activeProductIndex, 
-  //     currentProduct?.id, updateUrl]);
-
   const handleThumbnailClick = useCallback((index) => {
     if (animationState.inProgress || index === activeProductIndex || !swiperInstances.main) 
       return;
@@ -1374,13 +1384,13 @@ const handleMouseLeave = (index) => {
 {/* Swiper галерея + Миниатюры (мобильная версия) */}
 <div
   ref={refs.swiperContainer}
-  className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
+  className="w-full lg:w-[75%] lg:h-[100%] mt-0  lg:content-center"
   style={{
     visibility: !imageData || animationState.complete ? "visible" : "hidden",
     opacity: !imageData || animationState.complete ? 1 : 0,
   }}
 >
-  <div className="w-full flex flex-row items-start justify-between gap-2">
+  <div className="w-full flex flex-row items-start justify-between gap-2 lg:p-10">
     {/* Основная галерея */}
     <div className="w-[100%]">
       <Swiper
@@ -1431,8 +1441,6 @@ const handleMouseLeave = (index) => {
   </div>
 </div>
 
-
-      Описание и миниатюры текущего продукта
       <div
         ref={refs.info}
         className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
@@ -1455,17 +1463,13 @@ const handleMouseLeave = (index) => {
         <div className="hidden lg:block">
           <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
             {currentProduct.name}</h1>
-<Accordion
+
+        </div><Accordion
   items={[
-    { title: "Описание", content: currentProduct.description },
-    { title: "Дополнительная информация", content: currentProduct.description2 },
-  ]} defaultOpenIndex={1} 
-/>
-
-         
-        </div>
-
-
+   
+    { title: "iнфо", content: currentProduct.description2 }, { title: "материалы", content: currentProduct.description },
+  ]} defaultOpenIndex={2} 
+/>     
         {currentProduct.details?.map((detail, index) => {
           const isCatalog = detail.title.toLowerCase().includes("каталог");
           return (
@@ -1488,17 +1492,14 @@ const handleMouseLeave = (index) => {
         })}
       </div>
      </div></div>
-
-  <div ref={refs.thumbs} className="block w-[100%]  "  style={{
+  <div ref={refs.thumbs} className="block w-[100%]  lg:p-5"  style={{
      opacity: thumbsShown ? 1 : 0,
       visibility: thumbsShown ? "visible" : "hidden",
     }} >
-    
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
         onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
-     
           breakpoints={{
     320: { slidesPerView: 8 },
     480: { slidesPerView: 8 },
@@ -1525,7 +1526,7 @@ const handleMouseLeave = (index) => {
             <img
               src={product.image}
               onClick={() => handleThumbnailClick(index)}
-              className={`cursor-pointer transition-all duration-300 rounded-lg border-2 ${
+              className={`cursor-pointer transition-all duration-300 rounded-lg p-1 border-2 ${
                 index === activeProductIndex
                   ? "opacity-100 scale-105 border-black"
                   : "grayscale border-transparent opacity-60 hover:opacity-100"

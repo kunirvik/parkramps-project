@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import LoadingScreen from "../LoadingScreen/LodingScreen";
 // import { PiEyesFill } from "react-icons/pi";
-import TooltipEyes from "../TooltipEyes/TooltipEyes"; // путь подстрой под себя
+
 
 const words = ["Skateparks",  "Ramps", "Parkramps"];
 
@@ -9,7 +10,8 @@ export default function MenuPage() {
   const [index, setIndex] = useState(0);
   const [tooltip, setTooltip] = useState({ visible: false, x:0 , y: 0 });
   const tooltipRef = useRef(null);
-
+  const [isLoading, setIsLoading] = useState(true); 
+    const [isFadingOut, setIsFadingOut] = useState(false);
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % words.length);
@@ -25,9 +27,19 @@ export default function MenuPage() {
     setTooltip({ visible: false, x: 0, y: 0 });
   };
 
-  
+   useEffect(() => {
+    // Запускаем анимацию исчезновения перед снятием лоадинга
+    const timer = setTimeout(() => setIsFadingOut(true), 1500);
+    const removeLoadingScreen = setTimeout(() => setIsLoading(false), 2300);
+    
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(removeLoadingScreen);
+    };
+  }, []);  
 
-  return (
+  return (<>
+   {isLoading && <LoadingScreen isFadingOut={isFadingOut} />}
     <div className="relative w-full  bg-white-200  h-screen flex items-center justify-center overflow-visible ">
       {/* Фоновое видео */}
       {/* <video
@@ -113,9 +125,6 @@ export default function MenuPage() {
           </motion.div>
         )} */}
 
-{tooltip.visible && (
-  <TooltipEyes x={tooltip.x} y={tooltip.y} />
-)}
 
 
 
@@ -128,6 +137,6 @@ export default function MenuPage() {
         >explore
         </motion.button>
       </div>
-    </div>
+    </div></>
   );
 }

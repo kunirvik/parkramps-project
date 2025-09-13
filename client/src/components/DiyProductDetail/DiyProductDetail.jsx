@@ -611,7 +611,7 @@ const handleMouseLeave = (index) => {
     onButtonClick={() => navigate("/catalogue")}
     buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
   />
- 
+
   <div
     ref={refs.container}
     className="w-full flex-grow  mt-[70px] mx-auto px-4"
@@ -619,17 +619,7 @@ const handleMouseLeave = (index) => {
       opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
     }}
   >
-    <div className="w-full flex items-start  mb-4">
-      {/* Левая часть — Back */}
-      <button
-        onClick={() => navigate(-1)}
-        className="text-gray-200 hover:text-pink-800 transition-colors"
-      >
-        ← Back
-      </button>
-
-
-    </div>
+   
     
 
     {/* Мобильный заголовок */}
@@ -642,7 +632,17 @@ const handleMouseLeave = (index) => {
       </p>
     </div>
 
-    
+      <div className="w-full flex items-start  mb-4">
+      {/* Левая часть — Back */}
+      <button
+        onClick={() => navigate(-1)}
+        className="text-gray-200 hover:text-pink-800 transition-colors"
+      >
+        ← Back
+      </button>
+
+
+    </div>
     {/* Основной контент */}
     <div className="w-full  lg:h-[50%]  flex flex-col lg:flex-row lg:content-center  relative">
       {/* Переходное изображение */}
