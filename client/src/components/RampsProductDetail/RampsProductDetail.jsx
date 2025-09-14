@@ -1333,17 +1333,17 @@ const handleMouseLeave = (index) => {
       opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
     }}
   >
-    <div className="w-full flex items-start  mb-4">
+    {/* <div className="w-full flex items-start  mb-4"> */}
       {/* Левая часть — Back */}
-      <button
-        onClick={() => navigate(-1)}
+      {/* <button
+        onClick={() => navigate("/catalogue")}
         className="text-gray-200 hover:text-pink-800 transition-colors"
       >
         ← Back
-      </button>
+      </button> */}
 
 
-    </div>
+    {/* </div> */}
     
 
     {/* Мобильный заголовок */}
