@@ -716,6 +716,7 @@ import "swiper/css/pagination";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 
+
 const Accordion = ({ items, defaultOpenIndex = null }) => {
   const [openIndex, setOpenIndex] = useState(defaultOpenIndex);
 
@@ -773,6 +774,8 @@ const Accordion = ({ items, defaultOpenIndex = null }) => {
     </div>
   );
 };
+
+
 
 
 // Константы
@@ -1325,7 +1328,7 @@ const handleMouseLeave = (index) => {
     onButtonClick={() => navigate("/catalogue")}
     buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
   />
- 
+
   <div
     ref={refs.container}
     className="w-full flex-grow  mt-[70px] mx-auto px-4"
@@ -1333,17 +1336,7 @@ const handleMouseLeave = (index) => {
       opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
     }}
   >
-    {/* <div className="w-full flex items-start  mb-4"> */}
-      {/* Левая часть — Back */}
-      {/* <button
-        onClick={() => navigate("/catalogue")}
-        className="text-gray-200 hover:text-pink-800 transition-colors"
-      >
-        ← Back
-      </button> */}
-
-
-    {/* </div> */}
+   
     
 
     {/* Мобильный заголовок */}
@@ -1355,8 +1348,18 @@ const handleMouseLeave = (index) => {
       {currentProduct.name}
       </p>
     </div>
+{/* 
+      <div className="w-full flex items-start  mb-4"> */}
+      {/* Левая часть — Back */}
+      {/* <button
+        onClick={() => navigate(-1)}
+        className="text-gray-200 hover:text-pink-800 transition-colors"
+      >
+        ← Back
+      </button> */}
 
-    
+
+    {/* </div> */}
     {/* Основной контент */}
     <div className="w-full  lg:h-[50%]  flex flex-col lg:flex-row lg:content-center  relative">
       {/* Переходное изображение */}
@@ -1384,13 +1387,13 @@ const handleMouseLeave = (index) => {
 {/* Swiper галерея + Миниатюры (мобильная версия) */}
 <div
   ref={refs.swiperContainer}
-  className="w-full lg:w-[75%] lg:h-[100%] mt-0  lg:content-center"
+  className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
   style={{
     visibility: !imageData || animationState.complete ? "visible" : "hidden",
     opacity: !imageData || animationState.complete ? 1 : 0,
   }}
 >
-  <div className="w-full flex flex-row items-start justify-between gap-2 lg:p-10">
+  <div className="w-full flex flex-row items-start justify-between gap-2">
     {/* Основная галерея */}
     <div className="w-[100%]">
       <Swiper
@@ -1441,6 +1444,8 @@ const handleMouseLeave = (index) => {
   </div>
 </div>
 
+
+      Описание и миниатюры текущего продукта
       <div
         ref={refs.info}
         className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
@@ -1463,13 +1468,17 @@ const handleMouseLeave = (index) => {
         <div className="hidden lg:block">
           <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
             {currentProduct.name}</h1>
-
-        </div><Accordion
+<Accordion
   items={[
-   
-    { title: "iнфо", content: currentProduct.description2 }, { title: "материалы", content: currentProduct.description },
-  ]} defaultOpenIndex={2} 
-/>     
+    { title: "Описание", content: currentProduct.description },
+    { title: "Дополнительная информация", content: currentProduct.description2 },
+  ]} defaultOpenIndex={1} 
+/>
+
+         
+        </div>
+
+
         {currentProduct.details?.map((detail, index) => {
           const isCatalog = detail.title.toLowerCase().includes("каталог");
           return (
@@ -1492,14 +1501,17 @@ const handleMouseLeave = (index) => {
         })}
       </div>
      </div></div>
-  <div ref={refs.thumbs} className="block w-[100%]  lg:p-5"  style={{
+
+  <div ref={refs.thumbs} className="block w-[100%] px-1 "  style={{
      opacity: thumbsShown ? 1 : 0,
       visibility: thumbsShown ? "visible" : "hidden",
     }} >
+    
       <Swiper
         modules={[Thumbs]}
         direction="horizontal"
         onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
+     
           breakpoints={{
     320: { slidesPerView: 8 },
     480: { slidesPerView: 8 },
@@ -1526,7 +1538,7 @@ const handleMouseLeave = (index) => {
             <img
               src={product.image}
               onClick={() => handleThumbnailClick(index)}
-              className={`cursor-pointer transition-all duration-300 rounded-lg p-1 border-2 ${
+              className={`cursor-pointer transition-all duration-300 rounded-lg border-2 px-3 ${
                 index === activeProductIndex
                   ? "opacity-100 scale-105 border-black"
                   : "grayscale border-transparent opacity-60 hover:opacity-100"
@@ -1559,12 +1571,4 @@ const handleMouseLeave = (index) => {
 
   );
 }
-
-
-
-
-
-
-
-
 

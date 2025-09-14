@@ -20,33 +20,56 @@ const Accordion = ({ items, defaultOpenIndex = null }) => {
   };
 
   return (
-    <div className="w-full border-b border-gray-200">
-      {items.map((item, index) => (
-        <div key={index}>
-          <button
-            className="w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors"
-            onClick={() => toggleAccordion(index)}
-          >
-            <span className="font-futura text-[#717171] font-medium">{item.title}</span>
-            {openIndex === index ? (
-              <ChevronUp className="w-5 h-5" />
-            ) : (
-              <ChevronDown className="w-5 h-5" />
-            )}
-          </button>
+    <div className="w-full">
+      {items.map((item, index) => {
+        const isOpen = openIndex === index;
 
-          <div
-            className={`transition-all duration-300 overflow-hidden ${
-              openIndex === index ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-            }`}
-          >
-            <div className="p-2 text-sm text-[#717171] font-futura">{item.content}</div>
+        return (
+          <div key={index} className="w-full relative">
+            <button
+              className="relative w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors group"
+              onClick={() => toggleAccordion(index)}
+            >
+              <span className="font-futura text-[#717171] font-medium">{item.title}</span>
+              {isOpen ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+
+              {/* Линия всегда есть, но у открытого блока она уезжает вниз */}
+              <span
+                className={`absolute left-0 w-full h-[1px] bg-gray-200 transition-transform duration-300`}
+                style={{
+                  bottom: isOpen ? "-8px" : "0px",
+                  transform: isOpen ? "translateY(100%)" : "translateY(0)",
+                  opacity: isOpen ? 0 : 1
+                }}
+              />
+            </button>
+
+            {/* Контент */}
+            <div
+              className={`transition-all duration-300 overflow-hidden ${
+                isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+              }`}
+            >
+              <div className="p-2 text-sm text-[#717171] font-futura relative">
+                {item.content}
+
+                {/* Когда открыт — линия появляется под текстом */}
+                {isOpen && (
+                  <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-200" />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
+
 
 
 
@@ -631,18 +654,18 @@ const handleMouseLeave = (index) => {
       {currentProduct.name}
       </p>
     </div>
-
-      <div className="w-full flex items-start  mb-4">
+{/* 
+      <div className="w-full flex items-start  mb-4"> */}
       {/* Левая часть — Back */}
-      <button
+      {/* <button
         onClick={() => navigate(-1)}
         className="text-gray-200 hover:text-pink-800 transition-colors"
       >
         ← Back
-      </button>
+      </button> */}
 
 
-    </div>
+    {/* </div> */}
     {/* Основной контент */}
     <div className="w-full  lg:h-[50%]  flex flex-col lg:flex-row lg:content-center  relative">
       {/* Переходное изображение */}
