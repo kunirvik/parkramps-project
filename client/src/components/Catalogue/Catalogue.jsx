@@ -188,7 +188,7 @@ useEffect(() => {
         opacity: 0.95,
         scaleX: 1,
         scaleY: 1,
-        duration: 0.6, // медленнее
+        duration: 1, // медленнее
         ease: "power3.out",
       }
     );
@@ -223,7 +223,7 @@ return (
     <div className="bg-black flex flex-col min-h-screen relative">
 
       {/* SocialButtons всегда вверху */}
-      <div className="flex-shrink-0">
+      <div className="z-50 flex-shrink-0">
         <SocialButtons
           buttonLabel="gallery"
           onButtonClick={handleExit}
@@ -233,45 +233,45 @@ return (
 
     
 
-      {/* Основной контент — карточки растягиваются */}
-      <div className="flex-grow overflow-hidden flex  items-center justify-center">
-        <div className="flex-grow grid grid-cols-1 gap-8 sm:grid-cols-2 "
-        style={{ marginTop: "1.5rem", height: "calc(100% - 1.5rem)" }}>
-          {products.map((product) => (
-            <div
-              key={product.id}
-              ref={(el) => el && productsRef.current.set(product.id, el)}
-              className={`cursor-pointer flex justify-center items-center p-2 sm:p-4
-                relative overflow-hidden transition-all duration-400 ease-in-out
-                h-40 sm:h-60 md:h-80 lg:h-90
-                ${selectedProduct !== null
-                  ? selectedProduct === product.id
-                    ? "scale-100"
-                    : "scale-0 pointer-events-none"
-                  : "scale-100"}`}
-              onClick={(e) => handleClick(product, e)}
-            >
-              <div className="flex flex-col items-center w-full h-full relative">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-contain transition-all duration-300"
-                  onMouseMove={!isMobile ? (e) => handleMouseMove(e, product.id) : undefined}
-                  onMouseLeave={!isMobile ? handleMouseLeave : undefined}
-                />
-                {isMobile && mobileTooltipProductId === product.id && (
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 
-                    bg-white/90 text-black text-base sm:text-lg 
-                    px-4 py-2 rounded-xl shadow-xl animate-fadeIn 
-                    font-light leading-snug w-[90%] max-w-xs text-center z-20">
-                    {product.name}
-                  </div>
-                )}
-              </div>
+  <div className="flex-grow overflow-hidden flex items-center justify-center ">
+  <div className="grid grid-cols-1 p-10 sm:grid-cols-2 w-full h-full "
+       style={{ maxHeight: "100%", overflow: "auto" }}>
+    {products.map((product) => (
+      <div
+        key={product.id}
+        ref={(el) => el && productsRef.current.set(product.id, el)}
+        className={`cursor-pointer flex justify-center items-center p-2 sm:p-4
+          relative overflow-hidden transition-all duration-400 ease-in-out
+          h-40 sm:h-60 md:h-80 lg:h-90
+          ${selectedProduct !== null
+            ? selectedProduct === product.id
+              ? "scale-100"
+              : "scale-0 pointer-events-none"
+            : "scale-100"}`}
+      >
+        <div onClick={(e) => handleClick(product, e)} 
+        className="flex flex-col items-center w-full h-full relative">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-contain transition-all duration-300"
+            onMouseMove={!isMobile ? (e) => handleMouseMove(e, product.id) : undefined}
+            onMouseLeave={!isMobile ? handleMouseLeave : undefined} 
+          />
+          {isMobile && mobileTooltipProductId === product.id && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 
+              bg-white/90 text-black text-base sm:text-lg 
+              px-4 py-2 rounded-xl shadow-xl animate-fadeIn 
+              font-light leading-snug w-[90%] max-w-xs text-center z-20">
+              {product.name}
             </div>
-          ))}
+          )}
         </div>
       </div>
+    ))}
+  </div>
+</div>
+
 
       {/* Текст снизу */}
       <div className="flex-shrink-0 flex justify-center items-center bg-black">

@@ -759,7 +759,7 @@ const Accordion = ({ items, defaultOpenIndex = null }) => {
                 isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
               }`}
             >
-              <div className="p-2 text-sm text-[#717171] font-futura relative">
+              <div className="p-2 text-[#717171] font-futura relative">
                 {item.content}
 
                 {/* Когда открыт — линия появляется под текстом */}
@@ -1224,7 +1224,7 @@ useEffect(() => {
           transition: transform ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
                       opacity ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
         }
-        .swiper-slide-active { z-index: 2; }
+       
         .swiper-no-transition .swiper-wrapper { transition: none !important; }
         .swiper-slide-thumb-active {
           opacity: 1 !important;
@@ -1240,7 +1240,7 @@ useEffect(() => {
           height: 100vh !important;
           overflow: hidden !important;
           pointer-events: none !important;
-          z-index: 9999 !important;
+          
         }
       `;
 
@@ -1323,11 +1323,17 @@ const handleMouseLeave = (index) => {
  
   return (
    <><div className="flex flex-col min-h-screen">
-  <SocialButtons
+    {/* SocialButtons всегда вверху */}
+          <div className="z-50 flex-shrink-0">
+         
+          
+    <SocialButtons
+   
     buttonLabel="shop"
     onButtonClick={() => navigate("/catalogue")}
     buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
   />
+    </div>
 
   <div
     ref={refs.container}
@@ -1336,18 +1342,18 @@ const handleMouseLeave = (index) => {
       opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
     }}
   >
-   
     
+       
 
     {/* Мобильный заголовок */}
-    <div className="block lg:hidden w-full mt-4">
+    {/* <div className="block lg:hidden w-full mt-4"> */}
       {/* <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
           {currentProduct.description}
       </h1> */}
-      <p className="font-futura text-[#717171] font-medium">
+      {/* <p className="font-futura text-[#717171] font-medium">
       {currentProduct.name}
       </p>
-    </div>
+    </div> */}
 {/* 
       <div className="w-full flex items-start  mb-4"> */}
       {/* Левая часть — Back */}
@@ -1465,19 +1471,19 @@ const handleMouseLeave = (index) => {
               : "visible",
         }}
       >
-        <div className="hidden lg:block">
+        <div className="lg:block">
           <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
             {currentProduct.name}</h1>
+
+         
+        </div>
+
 <Accordion
   items={[
     { title: "Описание", content: currentProduct.description },
     { title: "Дополнительная информация", content: currentProduct.description2 },
   ]} defaultOpenIndex={1} 
 />
-
-         
-        </div>
-
 
         {currentProduct.details?.map((detail, index) => {
           const isCatalog = detail.title.toLowerCase().includes("каталог");
@@ -1502,7 +1508,7 @@ const handleMouseLeave = (index) => {
       </div>
      </div></div>
 
-  <div ref={refs.thumbs} className="block w-[100%] px-1 "  style={{
+  <div ref={refs.thumbs} className="block w-[100%] p-10 sm:px-1"  style={{
      opacity: thumbsShown ? 1 : 0,
       visibility: thumbsShown ? "visible" : "hidden",
     }} >
@@ -1513,7 +1519,7 @@ const handleMouseLeave = (index) => {
         onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
      
           breakpoints={{
-    320: { slidesPerView: 8 },
+        320: { slidesPerView: 4, spaceBetween: 8 },
     480: { slidesPerView: 8 },
     640: { slidesPerView: 8 },
     768: { slidesPerView: 8 },
@@ -1571,4 +1577,3 @@ const handleMouseLeave = (index) => {
 
   );
 }
-

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import LoadingScreen from "../LoadingScreen/LodingScreen";
 // import { PiEyesFill } from "react-icons/pi";
@@ -10,6 +11,7 @@ export default function MenuPage() {
   const [index, setIndex] = useState(0);
   const [tooltip, setTooltip] = useState({ visible: false, x:0 , y: 0 });
   const tooltipRef = useRef(null);
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true); 
     const [isFadingOut, setIsFadingOut] = useState(false);
   useEffect(() => {
@@ -40,6 +42,7 @@ export default function MenuPage() {
 
   return (<>
    {isLoading && <LoadingScreen isFadingOut={isFadingOut} />}
+   
     <div className="relative w-full  bg-white-200  h-screen flex items-center justify-center overflow-visible ">
       {/* Фоновое видео */}
       {/* <video
@@ -132,8 +135,15 @@ export default function MenuPage() {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
+
           className="px-6 py-3 bg-white/20 backdrop-blur-md rounded-lg text-lg font-futura font-light shadow-lg hover:bg-pink-300 cursor-pointer"
-          onClick={() => window.location.href = "/catalogue"}
+         onClick={() =>{
+ 
+        
+           navigate("/catalogue")
+        }
+          
+          }
         >explore
         </motion.button>
       </div>
