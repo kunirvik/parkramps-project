@@ -997,7 +997,7 @@ const startHoverInterval = useCallback((index, product) => {
       next[index] = (cur + 1) % totalImages;
       return next;
     });
-  }, 1000);
+  }, 2000);
 }, []);
 
 const isPointerOverSwiper = useCallback(() => {
