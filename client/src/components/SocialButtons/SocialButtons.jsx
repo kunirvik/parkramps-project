@@ -88,7 +88,7 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
         присоеденяйся к развитию экстрима в Украине
       </button>
 </div>
-        {/* 
+        
           {buttons.map((button, index) => (
             <motion.a
               key={index}
@@ -101,7 +101,7 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
             >
               {button.icon}
             </motion.a>
-          ))} */}
+          ))}
 
           <HeaderButton
             label={buttonLabel}

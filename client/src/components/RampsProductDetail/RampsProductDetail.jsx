@@ -1525,8 +1525,8 @@ useEffect(() => {
         </div>
 
 <Accordion
-  items={[{ title: "описание", content: currentProduct.description2 },
-    { title: "приобрести рампу", content: currentProduct.description },
+  items={[{ title: "приобрести рампу", content: currentProduct.description },{ title: "описание", content: currentProduct.description2 },
+    
     
   ]} defaultOpenIndex={1} 
 />
