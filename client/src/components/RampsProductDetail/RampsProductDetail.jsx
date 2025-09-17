@@ -940,11 +940,22 @@ const allImages = useMemo(() => {
     setAnimationState(prev => ({ ...prev, ...updates }));
   }, []);
 
-  useEffect(() => {
-  if (animationState.complete && !thumbsShown) {
-    setThumbsShown(true);
+//   useEffect(() => {
+//   if (animationState.complete && !thumbsShown) {
+//     setThumbsShown(true);
+//   }
+// }, [animationState.complete, thumbsShown]);
+useEffect(() => {
+  if (animationState.complete && refs.thumbs.current) {
+    gsap.killTweensOf(refs.thumbs.current); // убиваем старые анимации
+    gsap.fromTo(
+      refs.thumbs.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: ANIMATION_CONFIG.DURATION, ease: ANIMATION_CONFIG.EASE }
+    );
   }
-}, [animationState.complete, thumbsShown]);
+}, [animationState.complete]);
+
   // Анимации
   const animateInfo = useCallback((direction = 'in') => {
     if (!refs.info.current) return Promise.resolve();
@@ -997,7 +1008,7 @@ const startHoverInterval = useCallback((index, product) => {
       next[index] = (cur + 1) % totalImages;
       return next;
     });
-  }, 2000);
+  }, 1000);
 }, []);
 
 const isPointerOverSwiper = useCallback(() => {
