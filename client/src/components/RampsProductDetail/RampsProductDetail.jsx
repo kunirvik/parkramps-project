@@ -1295,6 +1295,37 @@ const handleMouseLeave = (index) => {
   //   return newIndices;
   // });
 };
+const handleTouchStart = (index, product) => {
+  // Проверяем, что анимация завершена
+  if (!animationState.complete || animationState.inProgress) return;
+
+  setHoveredIndex(index);
+
+  clearInterval(hoverIntervalRef.current);
+
+  const totalImages = 1 + (product?.altImages?.length || 0);
+  if (totalImages <= 1) return;
+
+  hoverIntervalRef.current = setInterval(() => {
+    setSelectedImageIndices((prev) => {
+      const newIndices = [...prev];
+      newIndices[index] = (newIndices[index] + 1) % totalImages;
+      return newIndices;
+    });
+  }, 550); // Скорость смены кадров
+};
+
+const handleTouchEnd = (index) => {
+  setHoveredIndex(null);
+  clearInterval(hoverIntervalRef.current);
+
+  // Можно вернуть основное изображение
+  setSelectedImageIndices((prev) => {
+    const newIndices = [...prev];
+    newIndices[index] = 0;
+    return newIndices;
+  });
+};
 
 
 useEffect(() => {
@@ -1450,6 +1481,8 @@ useEffect(() => {
 
  onMouseEnter={() => handleMouseEnter(index, product)}
   onMouseLeave={() => handleMouseLeave(index)}
+   onTouchStart={() => handleTouchStart(index, product)}
+  onTouchEnd={() => handleTouchEnd(index)}
 
 />
             </div>
