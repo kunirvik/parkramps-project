@@ -997,7 +997,7 @@ const startHoverInterval = useCallback((index, product) => {
       next[index] = (cur + 1) % totalImages;
       return next;
     });
-  }, 550);
+  }, 1000);
 }, []);
 
 const isPointerOverSwiper = useCallback(() => {
@@ -1312,7 +1312,7 @@ const handleTouchStart = (index, product) => {
       newIndices[index] = (newIndices[index] + 1) % totalImages;
       return newIndices;
     });
-  }, 550); // Скорость смены кадров
+  }, 2050); // Скорость смены кадров
 };
 
 const handleTouchEnd = (index) => {
