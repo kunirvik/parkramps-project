@@ -713,67 +713,68 @@ import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
 import productCatalogRamps from "../data/productCatalogRamps";
 import "swiper/css";
 import "swiper/css/pagination"; 
-import { ChevronDown, ChevronUp } from "lucide-react";
+// import { ChevronDown, ChevronUp } from "lucide-react";
+import Accordion from "../Accordion/Accordion";
 
 
 
-const Accordion = ({ items, defaultOpenIndex = null }) => {
-  const [openIndex, setOpenIndex] = useState(defaultOpenIndex);
+// const Accordion = ({ items, defaultOpenIndex = null }) => {
+//   const [openIndex, setOpenIndex] = useState(defaultOpenIndex);
 
-  const toggleAccordion = (index) => {
-    setOpenIndex(openIndex === index ? null : index);
-  };
+//   const toggleAccordion = (index) => {
+//     setOpenIndex(openIndex === index ? null : index);
+//   };
 
-  return (
-    <div className="w-full">
-      {items.map((item, index) => {
-        const isOpen = openIndex === index;
+//   return (
+//     <div className="w-full">
+//       {items.map((item, index) => {
+//         const isOpen = openIndex === index;
 
-        return (
-          <div key={index} className="w-full relative">
-            <button
-              className="relative w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors group"
-              onClick={() => toggleAccordion(index)}
-            >
-              <span className="font-futura text-[#717171] font-medium">{item.title}</span>
-              {isOpen ? (
-                <ChevronUp className="w-5 h-5" />
-              ) : (
-                <ChevronDown className="w-5 h-5" />
-              )}
+//         return (
+//           <div key={index} className="w-full relative">
+//             <button
+//               className="relative w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors group"
+//               onClick={() => toggleAccordion(index)}
+//             >
+//               <span className="font-futura text-[#717171] font-medium">{item.title}</span>
+//               {isOpen ? (
+//                 <ChevronUp className="w-5 h-5" />
+//               ) : (
+//                 <ChevronDown className="w-5 h-5" />
+//               )}
 
-              {/* Линия всегда есть, но у открытого блока она уезжает вниз */}
-              <span
-                className={`absolute left-0 w-full h-[1px] bg-gray-200 transition-transform duration-300`}
-                style={{
-                  bottom: isOpen ? "-8px" : "0px",
-                  transform: isOpen ? "translateY(100%)" : "translateY(0)",
-                  opacity: isOpen ? 0 : 1
-                }}
-              />
-            </button>
+//               {/* Линия всегда есть, но у открытого блока она уезжает вниз */}
+//               <span
+//                 className={`absolute left-0 w-full h-[1px] bg-gray-200 transition-transform duration-300`}
+//                 style={{
+//                   bottom: isOpen ? "-8px" : "0px",
+//                   transform: isOpen ? "translateY(100%)" : "translateY(0)",
+//                   opacity: isOpen ? 0 : 1
+//                 }}
+//               />
+//             </button>
 
-            {/* Контент */}
-            <div
-              className={`transition-all duration-300 overflow-hidden ${
-                isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-              }`}
-            >
-              <div className="p-2 text-[#717171] font-futura relative">
-                {item.content}
+//             {/* Контент */}
+//             <div
+//               className={`transition-all duration-300 overflow-hidden ${
+//                 isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+//               }`}
+//             >
+//               <div className="p-2 text-[#717171] font-futura relative">
+//                 {item.content}
 
-                {/* Когда открыт — линия появляется под текстом */}
-                {isOpen && (
-                  <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-200" />
-                )}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+//                 {/* Когда открыт — линия появляется под текстом */}
+//                 {isOpen && (
+//                   <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-200" />
+//                 )}
+//               </div>
+//             </div>
+//           </div>
+//         );
+//       })}
+//     </div>
+//   );
+// };
 
 
 
@@ -875,6 +876,7 @@ const allImages = useMemo(() => {
 }, []); 
 
 
+
   // Обработка завершения loading screen
   const handleLoadingComplete = useCallback(() => {
     setLoadingState(prev => ({ ...prev, isCompleted: true }));
@@ -886,7 +888,7 @@ const allImages = useMemo(() => {
       // Анимируем появление контента
       if (refs.container.current && refs.info.current) {
         gsap.fromTo(refs.container.current, 
-          { opacity: 0, y: 30 },
+          { opacity: 0, y: 50 },
           { 
             opacity: 1, 
             y: 0, 
@@ -896,7 +898,7 @@ const allImages = useMemo(() => {
         );
         
         gsap.fromTo(refs.info.current,
-          { opacity: 0, y: 20 },
+          { opacity: 0, y: 50 },
           { 
             opacity: 1, 
             y: 0, 
@@ -1278,7 +1280,7 @@ useEffect(() => {
       newIndices[index] = (current + 1) % totalImages;
       return newIndices;
     });
-  }, 550); // скорость смены кадров (0.5 сек)
+  }, 2050); // скорость смены кадров (0.5 сек)
 };
 
 const handleMouseLeave = (index) => {
@@ -1451,7 +1453,7 @@ const handleMouseLeave = (index) => {
 </div>
 
 
-      Описание и миниатюры текущего продукта
+    
       <div
         ref={refs.info}
         className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
@@ -1480,8 +1482,8 @@ const handleMouseLeave = (index) => {
 
 <Accordion
   items={[
-    { title: "Описание", content: currentProduct.description },
-    { title: "Дополнительная информация", content: currentProduct.description2 },
+    { title: "приобрести рампу", content: currentProduct.description },
+    { title: "описание", content: currentProduct.description2 },
   ]} defaultOpenIndex={1} 
 />
 
@@ -1560,7 +1562,7 @@ const handleMouseLeave = (index) => {
 
     {/* Fullscreen gallery */}
     <FullscreenGallery
-      i  images={allImages}
+       images={allImages}
   startIndex={galleryStartIndex}
   isOpen={isGalleryOpen}
   onClose={() => setIsGalleryOpen(false)}
