@@ -43,7 +43,7 @@ const Accordion = ({ items, defaultOpenIndex = null }) => {
                 isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
               }`}
             >
-              <div className="p-2 text-[#717171] font-futura relative">
+              <div className="p-0 text-[#717171] font-futura relative">
                 {item.content}
 
                 {/* Когда открыт — линия появляется под текстом */}

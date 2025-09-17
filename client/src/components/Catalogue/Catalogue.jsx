@@ -85,9 +85,9 @@ const preloadImage = (src) => {
 
   // Track mouse position for tooltip
 const handleMouseMove = (e, productId) => {
-  const tooltipWidth = tooltipRef.current?.offsetWidth || 0;
+  const tooltipWidth = 300
   const tooltipHeight = tooltipRef.current?.offsetHeight || 0;
-  const padding = 10;
+  const padding = 20;
   
 
   let x = e.clientX + padding;
@@ -234,7 +234,7 @@ return (
     
 
   <div className="flex-grow overflow-hidden flex items-center justify-center ">
-  <div className="grid grid-cols-1 p-15 sm:p-10 sm:grid-cols-2 w-full h-full "
+  <div className="grid grid-cols-1 p-15 gap-10 sm:gap-0 sm:p-10 sm:grid-cols-2 w-full h-full "
        style={{ maxHeight: "100%", overflow: "auto" }}>
     {products.map((product) => (
       <div

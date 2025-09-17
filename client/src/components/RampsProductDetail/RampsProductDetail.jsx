@@ -1467,10 +1467,10 @@ const handleMouseLeave = (index) => {
               ? "translateY(20px)"
               : "translateY(0)",
          pointerEvents: animationState.slideChanging ? "none" : "auto",
-           visibility:
-            animationState.slideChanging || (!animationState.complete && imageData)
-              ? "hidden"
-              : "visible",
+          //  visibility:
+          //   animationState.slideChanging || (!animationState.complete && imageData)
+          //     ? "hidden"
+          //     : "visible",
         }}
       >
         <div className="lg:block">
@@ -1481,9 +1481,9 @@ const handleMouseLeave = (index) => {
         </div>
 
 <Accordion
-  items={[
+  items={[{ title: "описание", content: currentProduct.description2 },
     { title: "приобрести рампу", content: currentProduct.description },
-    { title: "описание", content: currentProduct.description2 },
+    
   ]} defaultOpenIndex={1} 
 />
 

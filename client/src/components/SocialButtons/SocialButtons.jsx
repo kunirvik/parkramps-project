@@ -88,7 +88,7 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
   {/* )} */}
         </div>
 
-        <div className="flex space-x-4">
+        {/* <div className="flex space-x-4">
           {buttons.map((button, index) => (
             <motion.a
               key={index}
@@ -101,14 +101,14 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
             >
               {button.icon}
             </motion.a>
-          ))}
+          ))} */}
 
           <HeaderButton
             label={buttonLabel}
             onClick={onButtonClick}
             animationProps={buttonAnimationProps}
           />
-        </div>
+        {/* </div> */}
       </div></div>
     </>
   );
