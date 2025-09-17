@@ -1028,6 +1028,8 @@ const isPointerOverSwiper = useCallback(() => {
 //   });
 // }, []);
 
+
+
 const openGallery = () => {
   // считаем сколько фото было ДО текущего продукта
   const productStartIndex = productCatalogRamps
@@ -1295,6 +1297,15 @@ const handleMouseLeave = (index) => {
 };
 
 
+useEffect(() => {
+  if (thumbsShown && refs.thumbs.current) {
+    gsap.fromTo(
+      refs.thumbs.current,
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, duration: ANIMATION_CONFIG.DURATION, ease: ANIMATION_CONFIG.EASE }
+    );
+  }
+}, [thumbsShown]);
 
   useEffect(() => {
     const swiper = swiperInstances.main;
@@ -1512,7 +1523,7 @@ const handleMouseLeave = (index) => {
 
   <div ref={refs.thumbs} className="block w-[100%] p-10 sm:px-1"  style={{
      opacity: thumbsShown ? 1 : 0,
-      visibility: thumbsShown ? "visible" : "hidden",
+      // visibility: thumbsShown ? "visible" : "hidden",
     }} >
     
       <Swiper
