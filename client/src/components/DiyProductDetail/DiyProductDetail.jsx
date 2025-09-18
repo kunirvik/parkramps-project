@@ -921,7 +921,7 @@ export default function DiyProductDetail() {
   const navigate = useNavigate();
   const { id, category } = useParams();
   const [searchParams] = useSearchParams();
-
+const isTouchDevice = typeof window !== "undefined" && ("ontouchstart" in window || navigator.maxTouchPoints > 0);
   // Извлекаем данные из location state
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
@@ -1365,16 +1365,15 @@ onComplete: async () => {
 
 
 
-  useEffect(() => {
+useEffect(() => {
+  if (!isTouchDevice) {
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  } else {
     window.addEventListener('touchstart', handleTouchMove, { passive: true });
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchstart', handleTouchMove);
-    };
-  }, [handleMouseMove, handleTouchMove]);
-
+    return () => window.removeEventListener('touchstart', handleTouchMove);
+  }
+}, [handleMouseMove, handleTouchMove, isTouchDevice]);
   useEffect(() => {
     if (!swiperInstances.main || animationState.inProgress) return;
 
