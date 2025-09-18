@@ -779,496 +779,736 @@ import Accordion from "../Accordion/Accordion";
 
 
 
-
-
-
-
+// Константы
 const ANIMATION_CONFIG = {
   DURATION: 0.6,
   EASE: "power2.out",
-  HALF_DURATION: 0.3,
+  HALF_DURATION: 0.3
 };
 
 const SWIPER_CONFIG = {
   SPEED: ANIMATION_CONFIG.DURATION * 1000,
   THRESHOLD: 20,
-  RESISTANCE_RATIO: 0.85,
+  RESISTANCE_RATIO: 0.85
 };
 
-const LOADING_SCREEN_DURATION = 1500; // ms
+const LOADING_SCREEN_DURATION = 1500;
 
 export default function RampsProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { id, category } = useParams();
   const [searchParams] = useSearchParams();
 
-  // ----- refs -----
-  const refs = {
-    container: useRef(null),
-    transitionImage: useRef(null),
-    swiperContainer: useRef(null),
-    info: useRef(null),
-    thumbs: useRef(null),
-    urlUpdateBlocked: useRef(false),
-  };
+  // Извлекаем данные из location state
+  const imageData = location.state?.imageData;
+  const slideIndexParam = Number(searchParams.get('view')) || 0;
 
-  // Hover interval ref (single source of truth)
-  const hoverIntervalRef = useRef(null);
-  const mousePosRef = useRef({ x: 0, y: 0 });
-
-  // imageData передаётся через navigation state при анимированном переходе
-  const imageData = location.state?.imageData || null;
-  const slideIndexParam = Number(searchParams.get("view")) || 0;
-
-  // ----- derived state -----
+  // Определяем, нужен ли loading screen
   const shouldShowLoading = useMemo(() => !imageData, [imageData]);
 
-  const initialProductIndex = useMemo(() => {
-    const idx = productCatalogRamps.findIndex((p) => p.id === Number(id));
-    return Math.max(0, idx);
-  }, [id]);
+  // Основные состояния - объединены в один объект для лучшей производительности
+  const [state, setState] = useState(() => ({
+    activeProductIndex: Math.max(0, productCatalogRamps.findIndex(p => p.id === Number(id))),
+    selectedImageIndices: productCatalogRamps.map(() => 0),
+    hoveredIndex: null,
+    isGalleryOpen: false,
+    galleryStartIndex: 0,
+    thumbsShown: false
+  }));
 
-  const [activeProductIndex, setActiveProductIndex] = useState(initialProductIndex);
+  // Состояния Swiper
+  const [swiperInstances, setSwiperInstances] = useState({
+    main: null,
+    thumbs: null
+  });
 
-  const [selectedImageIndices, setSelectedImageIndices] = useState(() =>
-    productCatalogRamps.map(() => 0)
-  );
-
-  const [swiperInstances, setSwiperInstances] = useState({ main: null, thumbs: null });
-
+  // Состояния анимации
   const [animationState, setAnimationState] = useState({
     complete: !imageData,
     inProgress: false,
-    slideChanging: false,
+    slideChanging: false
   });
 
-  const [loadingState, setLoadingState] = useState({ isLoading: shouldShowLoading, isCompleted: false });
+  // Состояния загрузки
+  const [loadingState, setLoadingState] = useState({
+    isLoading: shouldShowLoading,
+    isCompleted: false
+  });
 
-  const [thumbsShown, setThumbsShown] = useState(false);
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
-  const [galleryStartIndex, setGalleryStartIndex] = useState(0);
+  // Refs - объединены в один объект
+  const refs = useRef({
+    container: null,
+    transitionImage: null,
+    swiperContainer: null,
+    info: null,
+    thumbs: null,
+    urlUpdateBlocked: false,
+    lastInteraction: Date.now(),
+    hoverInterval: null,
+    hoveredIndex: null,
+    pendingHover: null,
+    mousePos: { x: 0, y: 0 }
+  });
 
-  const currentProduct = useMemo(() => productCatalogRamps[activeProductIndex], [activeProductIndex]);
-  const allImages = useMemo(() => productCatalogRamps.flatMap((p) => p.sample || []), []);
+  // Мемоизированные значения
+  const currentProduct = useMemo(() => 
+    productCatalogRamps[state.activeProductIndex], 
+    [state.activeProductIndex]
+  );
 
-  // ----- helpers -----
-  const updateAnimationState = useCallback((updates) => {
-    setAnimationState((prev) => ({ ...prev, ...updates }));
-  }, []);
+  const currentImagesFullscreen = useMemo(() => 
+    currentProduct ? currentProduct.sample : [], 
+    [currentProduct]
+  );
 
+  const allImages = useMemo(() => 
+    productCatalogRamps.flatMap((p) => p.sample || []), 
+    []
+  );
+
+  // Утилиты - мемоизированы с useCallback
   const updateUrl = useCallback((productId, viewIndex = 0) => {
-    if (refs.urlUpdateBlocked.current) return;
-    refs.urlUpdateBlocked.current = true;
+    if (refs.current.urlUpdateBlocked) return;
+    
+    refs.current.urlUpdateBlocked = true;
     const newUrl = `/product/ramps/${productId}?view=${viewIndex}`;
-    window.history.replaceState(null, "", newUrl);
-    // гарантированный сброс блокировки
-    setTimeout(() => (refs.urlUpdateBlocked.current = false), 60);
+    window.history.replaceState(null, '', newUrl);
+    
+    setTimeout(() => {
+      refs.current.urlUpdateBlocked = false;
+    }, 50);
   }, []);
 
-  // ----- loading screen management -----
-  useEffect(() => {
-    if (!shouldShowLoading) return;
-    const t = setTimeout(() => {
-      setLoadingState((s) => ({ ...s, isCompleted: true }));
-      // Небольшая задержка — плавный переход
-      setTimeout(() => setLoadingState((s) => ({ ...s, isLoading: false })), 200);
-    }, LOADING_SCREEN_DURATION);
-    return () => clearTimeout(t);
-  }, [shouldShowLoading]);
+  const updateAnimationState = useCallback((updates) => {
+    setAnimationState(prev => ({ ...prev, ...updates }));
+  }, []);
 
-  // show thumbs when animation completes
-  useEffect(() => {
-    if (animationState.complete) setThumbsShown(true);
-  }, [animationState.complete]);
+  const updateState = useCallback((updates) => {
+    setState(prev => ({ ...prev, ...updates }));
+  }, []);
 
-  // animate info show/hide
-  const animateInfo = useCallback((direction = "in") => {
-    if (!refs.info.current) return Promise.resolve();
-    const isIn = direction === "in";
-    return new Promise((resolve) => {
-      gsap.to(refs.info.current, {
-        opacity: isIn ? 1 : 0,
-        y: isIn ? 0 : 20,
-        duration: isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION,
+  // Обработка завершения loading screen
+  const handleLoadingComplete = useCallback(() => {
+    setLoadingState(prev => ({ ...prev, isCompleted: true }));
+    
+    setTimeout(() => {
+      setLoadingState(prev => ({ ...prev, isLoading: false }));
+      
+      // Анимируем появление контента
+      if (refs.current.container && refs.current.info) {
+        gsap.fromTo(refs.current.container, 
+          { opacity: 0, y: 50 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: ANIMATION_CONFIG.DURATION,
+            ease: ANIMATION_CONFIG.EASE 
+          }
+        );
+        
+        gsap.fromTo(refs.current.info,
+          { opacity: 0, y: 50 },
+          { 
+            opacity: 1, 
+            y: 0, 
+            duration: ANIMATION_CONFIG.DURATION,
+            ease: ANIMATION_CONFIG.EASE,
+            delay: 0.2
+          }
+        );
+      }
+    }, 200);
+  }, []);
+
+  // Анимации
+  const animateInfo = useCallback((direction = 'in') => {
+    if (!refs.current.info) return Promise.resolve();
+    
+    const isIn = direction === 'in';
+    const targetOpacity = isIn ? 1 : 0;
+    const targetY = isIn ? 0 : 20;
+    const duration = isIn ? ANIMATION_CONFIG.DURATION : ANIMATION_CONFIG.HALF_DURATION;
+
+    return new Promise(resolve => {
+      gsap.to(refs.current.info, {
+        opacity: targetOpacity,
+        y: targetY,
+        duration,
         ease: ANIMATION_CONFIG.EASE,
-        onComplete: resolve,
+        onComplete: resolve
       });
     });
   }, []);
 
-  // mouse/touch position tracking (used for pointer checks)
-  useEffect(() => {
-    const onMove = (e) => {
-      mousePosRef.current = { x: e.clientX, y: e.clientY };
-    };
-    const onTouch = (e) => {
-      if (e.touches && e.touches[0]) mousePosRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("touchstart", onTouch, { passive: true });
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("touchstart", onTouch);
-    };
+  // Обработчики мыши - оптимизированы
+  const handleMouseMove = useCallback((e) => {
+    refs.current.mousePos = { x: e.clientX, y: e.clientY };
   }, []);
 
-  // utility: is pointer over swiper container
-  const isPointerOverSwiper = useCallback(() => {
-    if (!refs.swiperContainer.current) return false;
-    const { x, y } = mousePosRef.current;
-    const el = document.elementFromPoint(x, y);
-    return !!el && refs.swiperContainer.current.contains(el);
+  const handleTouchMove = useCallback((e) => {
+    if (e.touches && e.touches[0]) {
+      refs.current.mousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
   }, []);
 
-  // start hover slideshow for a product index (safe, clears existing interval)
+  // Hover логика - оптимизирована
   const startHoverInterval = useCallback((index, product) => {
-    clearInterval(hoverIntervalRef.current);
+    clearInterval(refs.current.hoverInterval);
+
     const totalImages = 1 + (product?.altImages?.length || 0);
     if (totalImages <= 1) return;
-    hoverIntervalRef.current = setInterval(() => {
-      setSelectedImageIndices((prev) => {
-        const copy = [...prev];
-        copy[index] = (copy[index] + 1) % totalImages;
-        return copy;
+
+    refs.current.hoverInterval = setInterval(() => {
+      setState(prev => {
+        const newIndices = [...prev.selectedImageIndices];
+        const cur = newIndices[index] ?? 0;
+        newIndices[index] = (cur + 1) % totalImages;
+        return { ...prev, selectedImageIndices: newIndices };
       });
     }, 2050);
   }, []);
 
-  // stop hover and optionally reset to main image
-  const stopHoverInterval = useCallback((resetToMain = false, index = null) => {
-    clearInterval(hoverIntervalRef.current);
-    hoverIntervalRef.current = null;
-    if (resetToMain && index != null) {
-      setSelectedImageIndices((prev) => {
-        const copy = [...prev];
-        copy[index] = 0;
-        return copy;
-      });
-    }
+  const isPointerOverSwiper = useCallback(() => {
+    if (!refs.current.swiperContainer) return false;
+    const { x, y } = refs.current.mousePos;
+    const el = document.elementFromPoint(x, y);
+    return !!el && refs.current.swiperContainer.contains(el);
   }, []);
 
-  useEffect(() => {
-    return () => clearInterval(hoverIntervalRef.current);
-  }, []);
+  const openGallery = useCallback(() => {
+    const productStartIndex = productCatalogRamps
+      .slice(0, state.activeProductIndex)
+      .reduce((acc, p) => acc + (p.sample?.length || 0), 0);
 
-  // ----- transition animation (from catalog -> detail) -----
+    updateState({
+      galleryStartIndex: currentProduct.sample?.length ? productStartIndex : 0,
+      isGalleryOpen: true
+    });
+  }, [state.activeProductIndex, currentProduct]);
+
+  // Анимация перехода - оптимизирована
   const startTransitionAnimation = useCallback(() => {
-    if (!refs.transitionImage.current || !refs.swiperContainer.current || !imageData) {
+    if (!refs.current.transitionImage || !refs.current.swiperContainer || 
+        !imageData || animationState.inProgress) {
       updateAnimationState({ complete: true });
       return;
     }
 
     updateAnimationState({ inProgress: true });
 
-    const transitionEl = refs.transitionImage.current;
-    const swiperEl = refs.swiperContainer.current;
-    const { top, left, width, height } = imageData.rect || {};
+    const { top, left, width, height } = imageData.rect;
+    const transitionEl = refs.current.transitionImage;
+    const swiperEl = refs.current.swiperContainer;
+    const firstSlideImage = swiperEl.querySelector('.swiper-slide-active img');
 
-    const firstSlideImage = swiperEl.querySelector(".swiper-slide-active img");
-    const finalRect = firstSlideImage?.getBoundingClientRect();
-
-    // Надёжный fallback: если финальный прямоугольник некорректен — отменяем анимацию
-    if (!finalRect || finalRect.width === 0 || finalRect.height === 0) {
-      // Не пытаться рекурсивно валидировать бесконечно — просто показываем контент
+    if (!firstSlideImage) {
+      console.warn("Активное изображение слайда не найдено");
       updateAnimationState({ complete: true, inProgress: false });
-      // Показать сразу контент
-      gsap.set(swiperEl, { visibility: "visible", opacity: 1 });
-      animateInfo("in");
       return;
     }
 
-    // Скрыть swiper на время анимации
-    gsap.set(swiperEl, { visibility: "hidden", opacity: 0 });
+    const finalRect = firstSlideImage.getBoundingClientRect();
+    
+    if (finalRect.width === 0 || finalRect.height === 0) {
+      setTimeout(() => {
+        updateAnimationState({ inProgress: false });
+        startTransitionAnimation();
+      }, 100);
+      return;
+    }
 
-    // установить начальные параметры transitionEl
+    // Скрываем swiper
+    gsap.set(swiperEl, { visibility: 'hidden', opacity: 0 });
+
+    // Устанавливаем начальное состояние
     gsap.set(transitionEl, {
       position: "absolute",
-      top: (top || 0) - window.scrollY,
-      left: (left || 0) - window.scrollX,
-      width: width || finalRect.width,
-      height: height || finalRect.height,
+      top: top - window.scrollY,
+      left: left - window.scrollX,
+      width, height,
       zIndex: 1000,
       opacity: 1,
-      visibility: "visible",
+      visibility: 'visible',
       objectFit: "contain",
-      borderRadius: imageData.borderRadius || "0px",
-      pointerEvents: "none",
+      borderRadius: imageData.borderRadius || '0px',
+      pointerEvents: 'none'
     });
 
+    // Анимируем переход
     gsap.to(transitionEl, {
       top: finalRect.top - window.scrollY,
       left: finalRect.left - window.scrollX,
       width: finalRect.width,
       height: finalRect.height,
-      borderRadius: "12px",
+      borderRadius: '12px',
       duration: ANIMATION_CONFIG.DURATION,
       ease: ANIMATION_CONFIG.EASE,
       onComplete: async () => {
-        gsap.set(swiperEl, { visibility: "visible", opacity: 1 });
-        gsap.set(transitionEl, { visibility: "hidden", opacity: 0 });
-        updateAnimationState({ complete: true, inProgress: false });
-        await animateInfo("in");
-      },
-    });
-  }, [imageData, animateInfo, updateAnimationState]);
-
-  // ----- Swiper handlers -----
-  const handleSwiperInit = useCallback(
-    (swiper) => {
-      setSwiperInstances((s) => ({ ...s, main: swiper }));
-      // Если есть imageData — запустить анимацию перехода
-      if (imageData) {
-        requestAnimationFrame(() => startTransitionAnimation());
-      } else {
-        // Если нет анимации — сразу показать инфо в зависимости от loading
-        if (shouldShowLoading && !loadingState.isCompleted) {
-          gsap.set(refs.info.current, { opacity: 0, y: 0 });
-        } else {
-          gsap.set(refs.info.current, { opacity: 1, y: 0 });
-        }
+        gsap.set(swiperEl, { visibility: 'visible', opacity: 1 });
+        gsap.set(transitionEl, { visibility: 'hidden', opacity: 0 });
+        
+        updateAnimationState({ complete: true });
+        await animateInfo('in');
+        updateAnimationState({ inProgress: false });
       }
-    },
-    [imageData, startTransitionAnimation, shouldShowLoading, loadingState.isCompleted]
-  );
+    });
+  }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
 
-  const handleSlideChange = useCallback(
-    async (swiper) => {
-      const newIndex = swiper.activeIndex;
-      if (newIndex === activeProductIndex || animationState.inProgress) return;
+  // Обработчики Swiper - оптимизированы
+  const handleSwiperInit = useCallback((swiper) => {
+    setSwiperInstances(prev => ({ ...prev, main: swiper }));
+    
+    if (!imageData) {
+      if (shouldShowLoading && !loadingState.isCompleted) {
+        gsap.set(refs.current.info, { opacity: 0, y: 0 });
+      } else {
+        gsap.set(refs.current.info, { opacity: 1, y: 0 });
+      }
+      return;
+    }
 
-      const oldIndex = activeProductIndex;
-      updateAnimationState({ slideChanging: true, inProgress: true });
+    requestAnimationFrame(startTransitionAnimation);
+  }, [imageData, startTransitionAnimation, shouldShowLoading, loadingState.isCompleted]);
 
-      await animateInfo("out");
+  const handleSlideChange = useCallback(async (swiper) => {
+    const newIndex = swiper.activeIndex;
+    if (newIndex === state.activeProductIndex || animationState.inProgress) return;
 
-      setActiveProductIndex(newIndex);
+    const oldIndex = state.activeProductIndex;
+    updateAnimationState({ slideChanging: true, inProgress: true });
 
-      // сбросить изображение нового продукта на 0
-      setSelectedImageIndices((prev) => {
-        const copy = [...prev];
-        copy[newIndex] = 0;
-        return copy;
+    await animateInfo('out');
+
+    // Обновляем состояние одним вызовом
+    setState(prev => {
+      const newIndices = [...prev.selectedImageIndices];
+      newIndices[newIndex] = 0;
+      return {
+        ...prev,
+        activeProductIndex: newIndex,
+        selectedImageIndices: newIndices
+      };
+    });
+
+    updateUrl(productCatalogRamps[newIndex].id, 0);
+    if (swiperInstances.thumbs) {
+      swiperInstances.thumbs.slideTo(newIndex);
+    }
+
+    await animateInfo('in');
+    updateAnimationState({ slideChanging: false, inProgress: false });
+    
+    clearInterval(refs.current.hoverInterval);
+    refs.current.hoverInterval = null;
+
+    setTimeout(async () => {
+      setState(prev => {
+        const newIndices = [...prev.selectedImageIndices];
+        newIndices[oldIndex] = 0;
+        return { ...prev, selectedImageIndices: newIndices };
       });
 
-      updateUrl(productCatalogRamps[newIndex].id, 0);
-      if (swiperInstances.thumbs) swiperInstances.thumbs.slideTo(newIndex);
+      const pending = refs.current.pendingHover;
+      if ((pending && pending.index === newIndex) || 
+          refs.current.hoveredIndex === newIndex || 
+          isPointerOverSwiper()) {
+        const product = productCatalogRamps[newIndex];
+        startHoverInterval(newIndex, product);
+        refs.current.pendingHover = null;
+      }
+    }, SWIPER_CONFIG.SPEED);
+  }, [state.activeProductIndex, animationState.inProgress, swiperInstances.thumbs, 
+      updateUrl, animateInfo, updateAnimationState, isPointerOverSwiper, startHoverInterval]);
 
-      await animateInfo("in");
+  const handleThumbnailClick = useCallback((index) => {
+    if (animationState.inProgress || index === state.activeProductIndex || !swiperInstances.main) 
+      return;
+    
+    swiperInstances.main.slideTo(index);
+  }, [animationState.inProgress, state.activeProductIndex, swiperInstances.main]);
 
-      updateAnimationState({ slideChanging: false, inProgress: false });
+  // Обработчики событий мыши/касания
+  const handleMouseEnter = useCallback((index, product) => {
+    if (!animationState.complete || animationState.inProgress) return;
+    
+    updateState({ hoveredIndex: index });
+    clearInterval(refs.current.hoverInterval);
 
-      // очистить hover-таймеры
-      clearInterval(hoverIntervalRef.current);
-      hoverIntervalRef.current = null;
+    refs.current.hoverInterval = setInterval(() => {
+      setState(prev => {
+        const newIndices = [...prev.selectedImageIndices];
+        const totalImages = 1 + (product.altImages?.length || 0);
+        const current = newIndices[index];
+        newIndices[index] = (current + 1) % totalImages;
+        return { ...prev, selectedImageIndices: newIndices };
+      });
+    }, 2050);
+  }, [animationState.complete, animationState.inProgress]);
 
-      // вернуть старый индекс изображения после анимации (без гонки)
-      setTimeout(() => {
-        setSelectedImageIndices((prev) => {
-          const copy = [...prev];
-          copy[oldIndex] = 0;
-          return copy;
-        });
+  const handleMouseLeave = useCallback((index) => {
+    updateState({ hoveredIndex: null });
+    clearInterval(refs.current.hoverInterval);
+  }, []);
 
-        // если указатель всё ещё над swiper — запустить hover
-        if (isPointerOverSwiper()) {
-          startHoverInterval(newIndex, productCatalogRamps[newIndex]);
-        }
-      }, SWIPER_CONFIG.SPEED);
-    },
-    [activeProductIndex, animationState.inProgress, swiperInstances.thumbs, updateUrl, animateInfo, updateAnimationState, isPointerOverSwiper, startHoverInterval]
-  );
+  const handleTouchStart = useCallback((index, product) => {
+    if (!animationState.complete || animationState.inProgress) return;
 
-  const handleThumbnailClick = useCallback(
-    (index) => {
-      if (animationState.inProgress || index === activeProductIndex || !swiperInstances.main) return;
-      swiperInstances.main.slideTo(index);
-    },
-    [animationState.inProgress, activeProductIndex, swiperInstances.main]
-  );
+    updateState({ hoveredIndex: index });
+    clearInterval(refs.current.hoverInterval);
 
-  // sync selectedImageIndices from URL param after swiper ready
+    const totalImages = 1 + (product?.altImages?.length || 0);
+    if (totalImages <= 1) return;
+
+    refs.current.hoverInterval = setInterval(() => {
+      setState(prev => {
+        const newIndices = [...prev.selectedImageIndices];
+        newIndices[index] = (newIndices[index] + 1) % totalImages;
+        return { ...prev, selectedImageIndices: newIndices };
+      });
+    }, 2050);
+  }, [animationState.complete, animationState.inProgress]);
+
+  const handleTouchEnd = useCallback((index) => {
+    updateState({ hoveredIndex: null });
+    clearInterval(refs.current.hoverInterval);
+
+    setState(prev => {
+      const newIndices = [...prev.selectedImageIndices];
+      newIndices[index] = 0;
+      return { ...prev, selectedImageIndices: newIndices };
+    });
+  }, []);
+
+  // Effects - оптимизированы
+  useEffect(() => {
+    if (!shouldShowLoading) return;
+
+    const timer = setTimeout(() => {
+      handleLoadingComplete();
+    }, LOADING_SCREEN_DURATION);
+
+    return () => clearTimeout(timer);
+  }, [shouldShowLoading, handleLoadingComplete]);
+
+  useEffect(() => {
+    if (animationState.complete && refs.current.thumbs) {
+      gsap.killTweensOf(refs.current.thumbs);
+      gsap.fromTo(
+        refs.current.thumbs,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: ANIMATION_CONFIG.DURATION, ease: ANIMATION_CONFIG.EASE }
+      );
+    }
+  }, [animationState.complete]);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('touchstart', handleTouchMove, { passive: true });
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchstart', handleTouchMove);
+    };
+  }, [handleMouseMove, handleTouchMove]);
+
   useEffect(() => {
     if (!swiperInstances.main || animationState.inProgress) return;
-    setSelectedImageIndices((prev) => {
-      const copy = [...prev];
-      copy[activeProductIndex] = slideIndexParam;
-      return copy;
-    });
-  }, [slideIndexParam, swiperInstances.main, animationState.inProgress, activeProductIndex]);
 
-  // styles injection (desktop lock) — можно оставить, но лучше вынести в css
+    setState(prev => {
+      const newIndices = [...prev.selectedImageIndices];
+      newIndices[state.activeProductIndex] = slideIndexParam;
+      return { ...prev, selectedImageIndices: newIndices };
+    });
+  }, [slideIndexParam, swiperInstances.main, animationState.inProgress, state.activeProductIndex]);
+
+  // Стили и блокировка скролла - оптимизированы
   useEffect(() => {
     const styleElement = document.createElement("style");
     document.head.appendChild(styleElement);
 
     const applyStyles = (isDesktop) => {
-      const styles = `
-        html, body { overflow: ${isDesktop ? "hidden" : "auto"} !important; height: 100% !important; width: 100% !important; }
-        .swiper-wrapper { transition-timing-function: cubic-bezier(0.25,0.46,0.45,0.94) !important; }
-        .swiper-slide { transition: transform ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25,0.46,0.45,0.94), opacity ${ANIMATION_CONFIG.DURATION}s !important; }
+      styleElement.innerHTML = `
+        html, body { 
+          overflow: ${isDesktop ? "hidden" : "auto"} !important; 
+          height: 100% !important;
+          width: 100% !important;
+        }
+        .swiper-wrapper { 
+          transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
+        }
+        .swiper-slide { 
+          transition: transform ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                      opacity ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
+        }
         .swiper-no-transition .swiper-wrapper { transition: none !important; }
-        .swiper-slide-thumb-active { transform: scale(1.05) !important; border: 2px solid black !important; border-radius: 0.5rem !important; }
-        .transition-image-container { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; overflow: hidden !important; pointer-events: none !important; }
+        .swiper-slide-thumb-active {
+          opacity: 1 !important;
+          transform: scale(1.05) !important;
+          border: 2px solid black !important;
+          border-radius: 0.5rem !important;
+        }
+        .transition-image-container {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          overflow: hidden !important;
+          pointer-events: none !important;
+        }
       `;
-      styleElement.innerHTML = styles;
     };
 
     const handleResize = () => applyStyles(window.innerWidth >= 1024);
     handleResize();
     window.addEventListener("resize", handleResize);
+
     return () => {
       window.removeEventListener("resize", handleResize);
       document.head.removeChild(styleElement);
+      clearInterval(refs.current.hoverInterval);
     };
   }, []);
 
-  // ----- hover / touch handlers -----
-  const handleMouseEnter = (index, product) => {
-    if (!animationState.complete || animationState.inProgress) return;
-    startHoverInterval(index, product);
-  };
-
-  const handleMouseLeave = (index) => {
-    stopHoverInterval(true, index);
-  };
-
-  const handleTouchStart = (index, product) => {
-    if (!animationState.complete || animationState.inProgress) return;
-    startHoverInterval(index, product);
-  };
-
-  const handleTouchEnd = (index) => {
-    stopHoverInterval(true, index);
-  };
-
-  // ----- gallery open -----
-  const openGallery = useCallback(() => {
-    const productStartIndex = productCatalogRamps.slice(0, activeProductIndex).reduce((acc, p) => acc + (p.sample?.length || 0), 0);
-    setGalleryStartIndex(productStartIndex);
-    setIsGalleryOpen(true);
-  }, [activeProductIndex]);
-
-  // ----- cleanup on unmount -----
   useEffect(() => {
-    return () => {
-      clearInterval(hoverIntervalRef.current);
-      refs.urlUpdateBlocked.current = false;
-    };
-  }, []);
+    const swiper = swiperInstances.main;
+    if (!swiper || animationState.inProgress) return;
 
-  // ----- render guards -----
-  if (!currentProduct) return <div className="text-center mt-10 p-4">Продукт не найден</div>;
-  if (loadingState.isLoading) return <LoadingScreen onComplete={() => setLoadingState((s) => ({ ...s, isCompleted: true }))} />;
+    const newIndex = swiper.activeIndex;
+    if (newIndex !== state.activeProductIndex) {
+      updateState({ activeProductIndex: newIndex });
+      updateUrl(productCatalogRamps[newIndex].id, state.selectedImageIndices[newIndex]);
+
+      if (swiperInstances.thumbs) {
+        swiperInstances.thumbs.slideTo(newIndex);
+      }
+    }
+  }, [swiperInstances.main?.activeIndex, animationState.inProgress, state.activeProductIndex, state.selectedImageIndices]);
+
+  // Early returns
+  if (!currentProduct) {
+    return <div className="text-center mt-10 p-4">Продукт не найден</div>;
+  }
+
+  if (loadingState.isLoading) {
+    return <LoadingScreen onComplete={handleLoadingComplete} />;
+  }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="z-50 flex-shrink-0">
-        <SocialButtons buttonLabel="shop" onButtonClick={() => navigate("/catalogue")} buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }} />
-      </div>
+    <>
+      <div className="flex flex-col min-h-screen">
+        <div className="z-50 flex-shrink-0">
+          <SocialButtons
+            buttonLabel="shop"
+            onButtonClick={() => navigate("/catalogue")}
+            buttonAnimationProps={{ whileTap: { scale: 0.85, opacity: 0.6 } }}
+          />
+        </div>
 
-      <div ref={refs.container} className="w-full flex-grow mt-[70px] mx-auto px-4">
-        {/* Transition image used for animated navigation */}
-        {!animationState.complete && imageData && (
-          <div className="transition-image-container">
-            <img ref={refs.transitionImage} src={currentProduct.image} alt={currentProduct.name} className="object-contain" style={{ position: "absolute", top: 0, left: 0, visibility: "visible", pointerEvents: "none" }} />
-          </div>
-        )}
+        <div
+          ref={el => refs.current.container = el}
+          className="w-full flex-grow mt-[70px] mx-auto px-4"
+          style={{
+            opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
+          }}
+        >
+          <div className="w-full lg:h-[50%] flex flex-col lg:flex-row lg:content-center relative">
+            {/* Переходное изображение */}
+            {!animationState.complete && imageData && (
+              <div className="transition-image-container">
+                <img
+                  ref={el => refs.current.transitionImage = el}
+                  src={currentProduct.image}
+                  alt={currentProduct.name}
+                  className="object-contain"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    visibility: "visible",
+                    pointerEvents: "none",
+                  }}
+                />
+              </div>
+            )}
 
-        <div className="w-full lg:h-[50%] flex flex-col lg:flex-row relative">
-          <div ref={refs.swiperContainer} className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20" style={{ visibility: !imageData || animationState.complete ? "visible" : "hidden", opacity: !imageData || animationState.complete ? 1 : 0 }}>
-            <Swiper
-              className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
-              modules={[Pagination, Mousewheel, Thumbs]}
-              pagination={{ clickable: true, el: ".custom-swiper-pagination" }}
-              mousewheel
-              direction="horizontal"
-              centeredSlides
-              thumbs={{ swiper: swiperInstances.thumbs }}
-              spaceBetween={20}
-              initialSlide={activeProductIndex}
-              speed={SWIPER_CONFIG.SPEED}
-              threshold={SWIPER_CONFIG.THRESHOLD}
-              resistance
-              resistanceRatio={SWIPER_CONFIG.RESISTANCE_RATIO}
-              onInit={handleSwiperInit}
-              onSlideChange={handleSlideChange}
-              preventClicks={false}
-              preventClicksPropagation={false}
-              touchStartPreventDefault={false}
+            {/* Swiper галерея */}
+            <div
+              ref={el => refs.current.swiperContainer = el}
+              className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
+              style={{
+                visibility: !imageData || animationState.complete ? "visible" : "hidden",
+                opacity: !imageData || animationState.complete ? 1 : 0,
+              }}
             >
-              {productCatalogRamps.map((product, index) => {
-                const imageSrc = selectedImageIndices[index] === 0 ? product.image : product.altImages?.[selectedImageIndices[index] - 1] ?? product.image;
-                return (
-                  <SwiperSlide key={product.id} style={{ height: "100%" }}>
-                    <div className="w-full h-full flex items-center justify-center">
-                      <img src={imageSrc} alt={product.name} className="max-h-full w-auto object-contain" draggable={false}
-                        onMouseEnter={() => handleMouseEnter(index, product)}
-                        onMouseLeave={() => handleMouseLeave(index)}
-                        onTouchStart={() => handleTouchStart(index, product)}
-                        onTouchEnd={() => handleTouchEnd(index)}
-                      />
-                    </div>
-                  </SwiperSlide>
-                );
-              })}
-            </Swiper>
-
-            <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
-          </div>
-
-          <div ref={refs.info} className="w-full lg:w-[%] lg:h-[55%] flex flex-col mt-8 lg:mt-20" style={{ opacity: animationState.slideChanging || (!animationState.complete && imageData) ? 0 : 1, transform: animationState.slideChanging || (!animationState.complete && imageData) ? "translateY(20px)" : "translateY(0)", pointerEvents: animationState.slideChanging ? "none" : "auto" }}>
-            <div className="lg:block">
-              <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">{currentProduct.name}</h1>
+              <div className="w-full flex flex-row items-start justify-between gap-2">
+                <div className="w-[100%]">
+                  <Swiper
+                    className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
+                    modules={[Pagination, Mousewheel, Thumbs]}
+                    pagination={{ clickable: true, el: ".custom-swiper-pagination" }}
+                    mousewheel={true}
+                    direction="horizontal"
+                    centeredSlides={true}
+                    thumbs={{ swiper: swiperInstances.thumbs }}
+                    spaceBetween={20}
+                    initialSlide={state.activeProductIndex}
+                    speed={SWIPER_CONFIG.SPEED}
+                    threshold={SWIPER_CONFIG.THRESHOLD}
+                    resistance={true}
+                    resistanceRatio={SWIPER_CONFIG.RESISTANCE_RATIO}
+                    onInit={handleSwiperInit}
+                    onSlideChange={handleSlideChange}
+                    preventClicks={false}
+                    preventClicksPropagation={false}
+                    touchStartPreventDefault={false}
+                  >
+                    {productCatalogRamps.map((product, index) => (
+                      <SwiperSlide key={product.id} style={{ height: "100%" }}>
+                        <div className="w-full h-full flex items-center justify-center">
+                          <img
+                            src={
+                              state.selectedImageIndices[index] === 0
+                                ? product.image
+                                : product.altImages[state.selectedImageIndices[index] - 1]
+                            }
+                            alt={product.name}
+                            className="max-h-full w-auto object-contain"
+                            draggable="false"
+                            onMouseEnter={() => handleMouseEnter(index, product)}
+                            onMouseLeave={() => handleMouseLeave(index)}
+                            onTouchStart={() => handleTouchStart(index, product)}
+                            onTouchEnd={() => handleTouchEnd(index)}
+                          />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                  <div className="custom-swiper-pagination mt-4 sm:mt-4 flex justify-center text-[#ff00fb]" />
+                </div>
+              </div>
             </div>
 
-            <Accordion items={[{ title: "приобрести рампу", content: currentProduct.description }, { title: "описание", content: currentProduct.description2 }]} defaultOpenIndex={1} />
+            <div
+              ref={el => refs.current.info = el}
+              className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
+              style={{
+                opacity:
+                  animationState.slideChanging || (!animationState.complete && imageData)
+                    ? 0
+                    : 1,
+                transform:
+                  animationState.slideChanging || (!animationState.complete && imageData)
+                    ? "translateY(20px)"
+                    : "translateY(0)",
+                pointerEvents: animationState.slideChanging ? "none" : "auto",
+              }}
+            >
+              <div className="lg:block">
+                <h1 className="text-3xl font-futura text-[#717171] font-bold mb-3">
+                  {currentProduct.name}
+                </h1>
+              </div>
 
-            {currentProduct.details?.map((detail, i) => {
-              const isCatalog = detail.title.toLowerCase().includes("каталог");
-              return (
-                <button key={i} onClick={() => (isCatalog ? openGallery() : (window.location.href = detail.link))} className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors">
-                  <span className="font-futura text-[#717171] font-medium">{detail.title}</span>
-                  <span className="font-futura text-[#717171] text-lg">→</span>
-                </button>
-              );
-            })}
+              <Accordion
+                items={[
+                  { title: "приобрести рампу", content: currentProduct.description },
+                  { title: "описание", content: currentProduct.description2 },
+                ]}
+                defaultOpenIndex={1}
+              />
+
+              {currentProduct.details?.map((detail, index) => {
+                const isCatalog = detail.title.toLowerCase().includes("каталог");
+                return (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      if (isCatalog) {
+                        openGallery();
+                      } else {
+                        window.location.href = detail.link;
+                      }
+                    }}
+                    className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+                  >
+                    <span className="font-futura text-[#717171] font-medium">
+                      {detail.title}
+                    </span>
+                    <span className="font-futura text-[#717171] text-lg">→</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        <div ref={refs.thumbs} className="block w-[100%] p-10 sm:px-1" style={{ opacity: thumbsShown ? 1 : 0 }}>
+        <div
+          ref={el => refs.current.thumbs = el}
+          className="block w-[100%] p-10 sm:px-1"
+          style={{
+            opacity: state.thumbsShown ? 1 : 0,
+          }}
+        >
           <Swiper
             modules={[Thumbs]}
             direction="horizontal"
             onSwiper={(swiper) => setSwiperInstances((prev) => ({ ...prev, thumbs: swiper }))}
-            breakpoints={{ 320: { slidesPerView: 4, spaceBetween: 8 }, 480: { slidesPerView: 8 }, 640: { slidesPerView: 8 }, 768: { slidesPerView: 8 }, 1024: { slidesPerView: 8 }, 1280: { slidesPerView: 8 } }}
+            breakpoints={{
+              320: { slidesPerView: 4, spaceBetween: 8 },
+              480: { slidesPerView: 8 },
+              640: { slidesPerView: 8 },
+              768: { slidesPerView: 8 },
+              1024: { slidesPerView: 8 },
+              1280: { slidesPerView: 8 },
+            }}
             slidesPerView="auto"
             spaceBetween={10}
-            watchSlidesProgress
-            slideToClickedSlide
-            initialSlide={activeProductIndex}
+            watchSlidesProgress={true}
+            slideToClickedSlide={true}
+            initialSlide={state.activeProductIndex}
             speed={SWIPER_CONFIG.SPEED}
             preventClicks={false}
             preventClicksPropagation={false}
-            observer
-            observeParents
+            observer={true}
+            observeParents={true}
             resistance={false}
             resistanceRatio={0}
           >
             {productCatalogRamps.map((product, index) => (
               <SwiperSlide key={product.id}>
-                <img src={product.image} onClick={() => handleThumbnailClick(index)} className={`cursor-pointer transition-all duration-300 rounded-lg border-2 px-3 ${index === activeProductIndex ? "opacity-100 scale-105 border-black" : "grayscale border-transparent opacity-60 hover:opacity-100"}`} alt={product.name} draggable={false} />
+                <img
+                  src={product.image}
+                  onClick={() => handleThumbnailClick(index)}
+                  className={`cursor-pointer transition-all duration-300 rounded-lg border-2 px-3 ${
+                    index === state.activeProductIndex
+                      ? "opacity-100 scale-105 border-black"
+                      : "grayscale border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                  alt={product.name}
+                  draggable="false"
+                />
               </SwiperSlide>
             ))}
           </Swiper>
         </div>
 
-        <FullscreenGallery images={allImages} startIndex={galleryStartIndex} isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} />
+        {/* Fullscreen gallery */}
+        <FullscreenGallery
+          images={allImages}
+          startIndex={state.galleryStartIndex}
+          isOpen={state.isGalleryOpen}
+          onClose={() => updateState({ isGalleryOpen: false })}
+        />
 
+        {/* Дата по центру внизу */}
         <div className="flex justify-center items-center bg-black">
-          <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">2015-2025</span>
+          <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
+            2015-2025
+          </span>
         </div>
       </div>
-    </div>
+    </>
   );
 }
