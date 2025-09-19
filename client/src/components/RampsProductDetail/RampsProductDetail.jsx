@@ -1052,7 +1052,10 @@ onComplete: async () => {
     const oldIndex = state.activeProductIndex;
     updateAnimationState({ slideChanging: true, inProgress: true });
 
+   // Анимацию делаем только на десктопе
+  if (isDesktop()) {
     await animateInfo('out');
+  }
 
     // Обновляем состояние одним вызовом
     setState(prev => {
