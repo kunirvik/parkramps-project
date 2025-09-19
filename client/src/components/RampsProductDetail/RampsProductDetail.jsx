@@ -1046,18 +1046,14 @@ onComplete: async () => {
 }, [imageData, startTransitionAnimation, state.thumbsShown, showInfoAndThumbs]);
 
   const handleSlideChange = useCallback(async (swiper) => {
-    const newIndex = swiper.activeIndex;
-    if (newIndex === state.activeProductIndex || animationState.inProgress) return;
+  const newIndex = swiper.activeIndex;
+  if (newIndex === state.activeProductIndex || animationState.inProgress) return;
 
-    const oldIndex = state.activeProductIndex;
-    updateAnimationState({ slideChanging: true, inProgress: true });
+  const oldIndex = state.activeProductIndex;
+  updateAnimationState({ slideChanging: true, inProgress: true });
 
-   // Анимацию делаем только на десктопе
-  if (isDesktop()) {
-    await animateInfo('out');
-  }
-
-    // Обновляем состояние одним вызовом
+  // Если не десктоп, просто меняем состояние без анимаций
+  if (!isDesktop()) {
     setState(prev => {
       const newIndices = [...prev.selectedImageIndices];
       newIndices[newIndex] = 0;
@@ -1073,30 +1069,53 @@ onComplete: async () => {
       swiperInstances.thumbs.slideTo(newIndex);
     }
 
-    await animateInfo('in');
     updateAnimationState({ slideChanging: false, inProgress: false });
-    
-    clearInterval(refs.current.hoverInterval);
-    refs.current.hoverInterval = null;
+    return;
+  }
 
-    setTimeout(async () => {
-      setState(prev => {
-        const newIndices = [...prev.selectedImageIndices];
-        newIndices[oldIndex] = 0;
-        return { ...prev, selectedImageIndices: newIndices };
-      });
+  // На десктопе выполняем анимацию
+  await animateInfo('out');
 
-      const pending = refs.current.pendingHover;
-      if ((pending && pending.index === newIndex) || 
-          refs.current.hoveredIndex === newIndex || 
-          isPointerOverSwiper()) {
-        const product = productCatalogRamps[newIndex];
-        startHoverInterval(newIndex, product);
-        refs.current.pendingHover = null;
-      }
-    }, SWIPER_CONFIG.SPEED);
-  }, [state.activeProductIndex, animationState.inProgress, swiperInstances.thumbs, 
-      updateUrl, animateInfo, updateAnimationState, isPointerOverSwiper, startHoverInterval]);
+  setState(prev => {
+    const newIndices = [...prev.selectedImageIndices];
+    newIndices[newIndex] = 0;
+    return {
+      ...prev,
+      activeProductIndex: newIndex,
+      selectedImageIndices: newIndices
+    };
+  });
+
+  updateUrl(productCatalogRamps[newIndex].id, 0);
+  if (swiperInstances.thumbs) {
+    swiperInstances.thumbs.slideTo(newIndex);
+  }
+
+  await animateInfo('in');
+  updateAnimationState({ slideChanging: false, inProgress: false });
+
+  clearInterval(refs.current.hoverInterval);
+  refs.current.hoverInterval = null;
+
+  setTimeout(async () => {
+    setState(prev => {
+      const newIndices = [...prev.selectedImageIndices];
+      newIndices[oldIndex] = 0;
+      return { ...prev, selectedImageIndices: newIndices };
+    });
+
+    const pending = refs.current.pendingHover;
+    if ((pending && pending.index === newIndex) || 
+        refs.current.hoveredIndex === newIndex || 
+        isPointerOverSwiper()) {
+      const product = productCatalogRamps[newIndex];
+      startHoverInterval(newIndex, product);
+      refs.current.pendingHover = null;
+    }
+  }, SWIPER_CONFIG.SPEED);
+}, [state.activeProductIndex, animationState.inProgress, swiperInstances.thumbs, 
+    updateUrl, animateInfo, updateAnimationState, isPointerOverSwiper, startHoverInterval]);
+
 
   const handleThumbnailClick = useCallback((index) => {
     if (animationState.inProgress || index === state.activeProductIndex || !swiperInstances.main) 
