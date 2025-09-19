@@ -925,7 +925,7 @@ const isTouchDevice = typeof window !== "undefined" && ("ontouchstart" in window
   // Извлекаем данные из location state
   const imageData = location.state?.imageData;
   const slideIndexParam = Number(searchParams.get('view')) || 0;
-
+const isDesktop = () => window.innerWidth >= 1024; // или другой порог
   // Определяем, нужен ли loading screen
   const shouldShowLoading = useMemo(() => !imageData, [imageData]);
 
@@ -1072,7 +1072,7 @@ const isTouchDevice = typeof window !== "undefined" && ("ontouchstart" in window
     if (e.touches && e.touches[0]) {
       refs.current.mousePos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
-  }, []);
+  }, [])
 
 
   const getIntervalDuration = (totalImages) => {
@@ -1323,34 +1323,44 @@ onComplete: async () => {
     clearInterval(refs.current.hoverInterval);
   }, []);
 
-  const handleTouchStart = useCallback((index, product) => {
-    if (!animationState.complete || animationState.inProgress) return;
+  
+  const handleTouchStart = useCallback(() => {
+  if (!isDesktop()) return; // на телефоне просто ничего не делаем
+}, []);
 
-    updateState({ hoveredIndex: index });
-    clearInterval(refs.current.hoverInterval);
+const handleTouchEnd = useCallback(() => {
+  if (!isDesktop()) return;
+  clearInterval(refs.current.hoverInterval);
+}, []);
 
-    const totalImages = 1 + (product?.altImages?.length || 0);
-    if (totalImages <= 1) return;
+  // const handleTouchStart = useCallback((index, product) => {
+  //   if (!animationState.complete || animationState.inProgress) return;
 
-    refs.current.hoverInterval = setInterval(() => {
-      setState(prev => {
-        const newIndices = [...prev.selectedImageIndices];
-        newIndices[index] = (newIndices[index] + 1) % totalImages;
-        return { ...prev, selectedImageIndices: newIndices };
-      });
-    }, 2050);
-  }, [animationState.complete, animationState.inProgress]);
+  //   updateState({ hoveredIndex: index });
+  //   clearInterval(refs.current.hoverInterval);
 
-  const handleTouchEnd = useCallback((index) => {
-    updateState({ hoveredIndex: null });
-    clearInterval(refs.current.hoverInterval);
+  //   const totalImages = 1 + (product?.altImages?.length || 0);
+  //   if (totalImages <= 1) return;
 
-    setState(prev => {
-      const newIndices = [...prev.selectedImageIndices];
-      newIndices[index] = 0;
-      return { ...prev, selectedImageIndices: newIndices };
-    });
-  }, []);
+  //   refs.current.hoverInterval = setInterval(() => {
+  //     setState(prev => {
+  //       const newIndices = [...prev.selectedImageIndices];
+  //       newIndices[index] = (newIndices[index] + 1) % totalImages;
+  //       return { ...prev, selectedImageIndices: newIndices };
+  //     });
+  //   }, 2050);
+  // }, [animationState.complete, animationState.inProgress]);
+
+  // const handleTouchEnd = useCallback((index) => {
+  //   updateState({ hoveredIndex: null });
+  //   clearInterval(refs.current.hoverInterval);
+
+  //   setState(prev => {
+  //     const newIndices = [...prev.selectedImageIndices];
+  //     newIndices[index] = 0;
+  //     return { ...prev, selectedImageIndices: newIndices };
+  //   });
+  // }, []);
 
   // Effects - оптимизированы
   useEffect(() => {
