@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const Accordion = ({ items, defaultOpenIndexDesktop = 0 }) => {
+const Accordion = ({ items, defaultOpenIndexDesktop = 0, forceCloseTrigger }) => {
   const [openIndex, setOpenIndex] = useState(null);
   const [isDesktop, setIsDesktop] = useState(() => window.innerWidth >= 1024);
 
@@ -9,22 +9,15 @@ const Accordion = ({ items, defaultOpenIndexDesktop = 0 }) => {
     const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
     window.addEventListener("resize", handleResize);
 
-    // При первой загрузке открываем на десктопе
-    if (window.innerWidth >= 1024) {
-      setOpenIndex(defaultOpenIndexDesktop);
-    }
-
     return () => window.removeEventListener("resize", handleResize);
-  }, [defaultOpenIndexDesktop]);
+  }, []);
+
+  // 👉 Когда forceCloseTrigger меняется — закрываем аккордеон
+  useEffect(() => {
+    setOpenIndex(null);
+  }, [forceCloseTrigger]);
 
   const toggleAccordion = (index) => {
-    // На десктопе нельзя закрывать — всегда открыт
-    if (isDesktop) {
-      setOpenIndex(index);
-      return;
-    }
-
-    // На мобильных открытие/закрытие
     setOpenIndex(openIndex === index ? null : index);
   };
 
@@ -34,15 +27,15 @@ const Accordion = ({ items, defaultOpenIndexDesktop = 0 }) => {
         const isOpen = openIndex === index;
 
         return (
-          <div key={index} className="w-full relative">
+          <div key={index} className="w-full">
             <button
-              className="relative w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-blue-600 transition-colors group"
+              className="cursor-pointer relative w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-gray-300 transition-colors group"
               onClick={() => toggleAccordion(index)}
             >
-              <span className="font-futura text-[#717171] font-medium">{item.title}</span>
+              <span className="font-futura font-medium text-[#717171]">{item.title}</span>
               {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
               <span
-                className={`absolute left-0 w-full h-[1px] bg-gray-200 transition-transform duration-300`}
+                className={`absolute left-0 w-full h-[1px] bg-gray-500 transition-transform duration-300`}
                 style={{
                   bottom: isOpen ? "-8px" : "0px",
                   transform: isOpen ? "translateY(100%)" : "translateY(0)",
@@ -56,10 +49,10 @@ const Accordion = ({ items, defaultOpenIndexDesktop = 0 }) => {
                 isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
               }`}
             >
-              <div className="p-0 text-[#717171] font-futura relative">
+              <div className="pb-5 text-[#717171] font-futura relative">
                 {item.content}
-                {isOpen && <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-200" />}
               </div>
+              {isOpen && <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-500" />}
             </div>
           </div>
         );

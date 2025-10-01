@@ -616,7 +616,7 @@ const handleMouseLeave = (index) => {
                 if (isCatalog) setIsGalleryOpen(true);
                 else window.location.href = detail.link;
               }}
-              className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+              className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-500 text-gray-900 hover:text-gray-600 transition-colors"
             >
               <span className="font-futura text-[#717171] font-medium">
                 {detail.title}

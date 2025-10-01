@@ -893,7 +893,7 @@ import "swiper/css";
 import "swiper/css/pagination"; 
 // import { ChevronDown, ChevronUp } from "lucide-react";
 import Accordion from "../Accordion/Accordion";
-
+import ContactButton from "../ContactButtons/ContactButton";
 
 
 
@@ -1081,7 +1081,7 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
   // 3 картинки → 1500 мс, 15 картинок → 500 мс
   const minImages = 3;
   const maxImages = 15;
-  const minInterval = 500;
+  const minInterval = 200;
   const maxInterval = 1500;
 
   // Линейная интерполяция
@@ -1268,9 +1268,9 @@ onComplete: async () => {
       swiperInstances.thumbs.slideTo(newIndex);
     }
 
-    await animateInfo('in');
-    updateAnimationState({ slideChanging: false, inProgress: false });
     
+    updateAnimationState({ slideChanging: false, inProgress: false });
+    await animateInfo('in');
     clearInterval(refs.current.hoverInterval);
     refs.current.hoverInterval = null;
 
@@ -1300,28 +1300,54 @@ onComplete: async () => {
     swiperInstances.main.slideTo(index);
   }, [animationState.inProgress, state.activeProductIndex, swiperInstances.main]);
 
-  // Обработчики событий мыши/касания
-  const handleMouseEnter = useCallback((index, product) => {
-    if (!animationState.complete || animationState.inProgress) return;
+  // // Обработчики событий мыши/касания
+  // const handleMouseEnter = useCallback((index, product) => {
+  //   if (!animationState.complete || animationState.inProgress) return;
     
-    updateState({ hoveredIndex: index });
-    clearInterval(refs.current.hoverInterval);
+  //   updateState({ hoveredIndex: index });
+  //   clearInterval(refs.current.hoverInterval);
 
-    refs.current.hoverInterval = setInterval(() => {
-      setState(prev => {
-        const newIndices = [...prev.selectedImageIndices];
-        const totalImages = 1 + (product.altImages?.length || 0);
-        const current = newIndices[index];
-        newIndices[index] = (current + 1) % totalImages;
-        return { ...prev, selectedImageIndices: newIndices };
-      });
-    }, 2050);
-  }, [animationState.complete, animationState.inProgress]);
+  //   refs.current.hoverInterval = setInterval(() => {
+  //     setState(prev => {
+  //       const newIndices = [...prev.selectedImageIndices];
+  //       const totalImages = 1 + (product.altImages?.length || 0);
+  //       const current = newIndices[index];
+  //       newIndices[index] = (current + 1) % totalImages;
+  //       return { ...prev, selectedImageIndices: newIndices };
+  //     });
+  //   }, 2050);
+  // }, [animationState.complete, animationState.inProgress]);
 
-  const handleMouseLeave = useCallback((index) => {
-    updateState({ hoveredIndex: null });
-    clearInterval(refs.current.hoverInterval);
-  }, []);
+  // const handleMouseLeave = useCallback((index) => {
+  //   updateState({ hoveredIndex: null });
+  //   clearInterval(refs.current.hoverInterval);
+  // }, []);
+const handleMouseEnter = useCallback((index, product) => {
+  if (!animationState.complete || animationState.inProgress) return;
+
+  updateState({ hoveredIndex: index });
+  clearInterval(refs.current.hoverInterval);
+
+  const totalImages = 1 + (product?.altImages?.length || 0);
+  if (totalImages <= 1) return;
+
+  const intervalDuration = getIntervalDuration(totalImages); // динамический расчёт
+
+  refs.current.hoverInterval = setInterval(() => {
+    setState(prev => {
+      const newIndices = [...prev.selectedImageIndices];
+      const cur = newIndices[index] ?? 0;
+      newIndices[index] = (cur + 1) % totalImages;
+      return { ...prev, selectedImageIndices: newIndices };
+    });
+  }, intervalDuration);
+}, [animationState.complete, animationState.inProgress, getIntervalDuration]);
+
+const handleMouseLeave = useCallback(() => {
+  updateState({ hoveredIndex: null });
+  clearInterval(refs.current.hoverInterval);
+  refs.current.hoverInterval = null;
+}, []);
 
   
   const handleTouchStart = useCallback(() => {
@@ -1333,34 +1359,7 @@ const handleTouchEnd = useCallback(() => {
   clearInterval(refs.current.hoverInterval);
 }, []);
 
-  // const handleTouchStart = useCallback((index, product) => {
-  //   if (!animationState.complete || animationState.inProgress) return;
-
-  //   updateState({ hoveredIndex: index });
-  //   clearInterval(refs.current.hoverInterval);
-
-  //   const totalImages = 1 + (product?.altImages?.length || 0);
-  //   if (totalImages <= 1) return;
-
-  //   refs.current.hoverInterval = setInterval(() => {
-  //     setState(prev => {
-  //       const newIndices = [...prev.selectedImageIndices];
-  //       newIndices[index] = (newIndices[index] + 1) % totalImages;
-  //       return { ...prev, selectedImageIndices: newIndices };
-  //     });
-  //   }, 2050);
-  // }, [animationState.complete, animationState.inProgress]);
-
-  // const handleTouchEnd = useCallback((index) => {
-  //   updateState({ hoveredIndex: null });
-  //   clearInterval(refs.current.hoverInterval);
-
-  //   setState(prev => {
-  //     const newIndices = [...prev.selectedImageIndices];
-  //     newIndices[index] = 0;
-  //     return { ...prev, selectedImageIndices: newIndices };
-  //   });
-  // }, []);
+ 
 
   // Effects - оптимизированы
   useEffect(() => {
@@ -1485,6 +1484,19 @@ useEffect(() => {
             opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
           }}
         >
+
+                      <div className="w-full flex items-start  mb-4">
+      {/* Левая часть — Back */}
+      <button
+        onClick={() => navigate(-1)}
+        className="text-gray-200 hover:text-pink-800 transition-colors"
+      >
+        ← Back
+      </button>
+
+
+    </div> 
+
           <div className="w-full lg:h-[50%] flex flex-col lg:flex-row lg:content-center relative">
             {/* Переходное изображение */}
             {!animationState.complete && imageData && (
@@ -1535,6 +1547,10 @@ useEffect(() => {
                     preventClicks={false}
                     preventClicksPropagation={false}
                     touchStartPreventDefault={false}
+                     onSlideChangeTransitionStart={() => {
+    clearInterval(refs.current.hoverInterval);
+    refs.current.hoverInterval = null;
+  }}
                   >
                     {productCatalogDiys.map((product, index) => (
                       <SwiperSlide key={product.id} style={{ height: "100%" }}>
@@ -1585,10 +1601,12 @@ useEffect(() => {
 
               <Accordion
                 items={[
-                  { title: "приобрести рампу", content: currentProduct.description },
-                  { title: "описание", content: currentProduct.description2 },
+                  //  {title: "описание", content: currentProduct.description2 },
+                  { title: "приобрести рампу", content: (<>{currentProduct.description} <ContactButton/></>) },
+                 
                 ]}
                 defaultOpenIndex={1}
+                 forceCloseTrigger={state.activeProductIndex}
               />
 
               {currentProduct.details?.map((detail, index) => {

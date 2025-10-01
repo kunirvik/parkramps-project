@@ -234,8 +234,13 @@ return (
     
 
   <div className="flex-grow overflow-hidden flex items-center justify-center ">
-  <div className="grid grid-cols-1 p-15 gap-10 sm:gap-0 sm:p-10 sm:grid-cols-2 w-full h-full "
-       style={{ maxHeight: "100%", overflow: "auto" }}>
+  <div className="grid grid-cols-1  sm:grid-cols-2 w-full h-full "
+        style={{
+    maxHeight: "100%",
+    overflow: "auto",
+    gap: "clamp(10px, 5vw, 20px)", // min 10px, растет до 40px с экраном
+    padding: "clamp(50px, 3vw, 20px)", // тоже динамически для отступов
+  }}>
     {products.map((product) => (
       <div
         key={product.id}

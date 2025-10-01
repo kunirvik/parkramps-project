@@ -95,7 +95,7 @@ export default function SocialButtons({ buttonLabel, onButtonClick, buttonAnimat
               href={button.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 backdrop-blur-xl shadow-lg flex items-center justify-center w-[35.5px] h-[35.5px] transition-all hover:bg-white/30"
+              className=" backdrop-blur-xl shadow-lg flex items-center justify-center w-[35.5px] h-[35.5px] transition-all hover:bg-white/30"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
             >
