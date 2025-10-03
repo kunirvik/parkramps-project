@@ -6,10 +6,12 @@ import Catalogue from "./components/Catalogue/Catalogue";
 import PhotoPage from "./components/PhotoPage/PhotoPage";
 import RampsProductDetail from "./components/RampsProductDetail/RampsProductDetail";
 import SkateparksProductDetail from "./components/SkateparksProductDetail/SkateparksProductDetail"
-import DiyProductDetail from "./components/DiyProductDetail/DiyProductDetail";
+import DiyProductDetail from "./components/SetsProductDetail/SetsProductDetail";
 import NewsPage from "./components/NewsPage/NewsPage";
 import ProjectPage from "./components/ProjectPage/ProjectPage"
 import './App.css'
+import FAQPage from "./components/FAQPage/FAQPage"
+import SetsProductDetail from "./components/SetsProductDetail/SetsProductDetail";
 
 function App() {
  const location = useLocation();
@@ -22,13 +24,14 @@ function App() {
         
         <Route  path="/catalogue" element={<Catalogue />} />
       {/* <Route path="/product/:category/:id" element={<ProductDetail />} /> */}
-       <Route path="/product/sets/:id" element={<ProductDetail />} />
+       <Route path="/product/sets/:id" element={<SetsProductDetail />} />
  <Route path="/product/ramps/:id" element={<RampsProductDetail />} /> 
  <Route path="/product/skateparks/:id" element={<SkateparksProductDetail />} />
  <Route path="/product/diy/:id" element={<DiyProductDetail />} />
         {/* <Route path="/product/skateparks/:id" element={<SkateparksProductDetail />} />
          <Route path="/product/diy/:id" element={<DiyProductDetail />} /> */}
   <Route path="/news" element={<NewsPage />} />
+  <Route path="/FAQ" element={<FAQPage />} />
 
         <Route  path="/photopage" element={<PhotoPage />} />
         

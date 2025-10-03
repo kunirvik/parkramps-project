@@ -6,7 +6,7 @@
 // import SocialButtons from "../SocialButtons/SocialButtons";
 // import { Pagination, Mousewheel, Thumbs } from "swiper/modules";
 // import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
-// import productCatalogDiyss from "../data/productCatalogDiyss";
+// import productCatalogSetss from "../data/productCatalogSetss";
 // import "swiper/css";
 // import "swiper/css/pagination"; 
 // import { ChevronDown, ChevronUp } from "lucide-react";
@@ -115,10 +115,10 @@
 // const [thumbsShown, setThumbsShown] = useState(false);
 //   // Основные состояния
 //   const [activeProductIndex, setActiveProductIndex] = useState(() => 
-//     Math.max(0, productCatalogDiyss.findIndex(p => p.id === Number(id)))
+//     Math.max(0, productCatalogSetss.findIndex(p => p.id === Number(id)))
 //   );
 //   const [selectedImageIndices, setSelectedImageIndices] = useState(() => 
-//     productCatalogDiyss.map(() => 0)
+//     productCatalogSetss.map(() => 0)
 //   );
 //   const [swiperInstances, setSwiperInstances] = useState({
 //     main: null,
@@ -151,7 +151,7 @@
 
 //   // Мемоизированные значения
 //   const currentProduct = useMemo(() => 
-//     productCatalogDiyss[activeProductIndex], [activeProductIndex]
+//     productCatalogSetss[activeProductIndex], [activeProductIndex]
 //   );
 
 //   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -166,7 +166,7 @@
 // );
 // // 1. Собираем общий альбом
 // const allImages = useMemo(() => {
-//   return productCatalogDiyss.flatMap((p) => p.sample || []);
+//   return productCatalogSetss.flatMap((p) => p.sample || []);
 // }, []); 
 
 
@@ -324,7 +324,7 @@
 
 // const openGallery = () => {
 //   // считаем сколько фото было ДО текущего продукта
-//   const productStartIndex = productCatalogDiyss
+//   const productStartIndex = productCatalogSetss
 //     .slice(0, activeProductIndex)
 //     .reduce((acc, p) => acc + (p.sample?.length || 0), 0);
 
@@ -453,7 +453,7 @@
 //   });
 
 //   // Обновляем URL и миниатюры
-//   updateUrl(productCatalogDiyss[newIndex].id, 0);
+//   updateUrl(productCatalogSetss[newIndex].id, 0);
 //   if (swiperInstances.thumbs) {
 //     swiperInstances.thumbs.slideTo(newIndex);
 //   }
@@ -473,7 +473,7 @@
 //     // Перезапускаем hover-анимацию, если курсор остался на слайде
 //     const pending = pendingHoverRef.current;
 //     if ((pending && pending.index === newIndex) || hoveredIndexRef.current === newIndex || isPointerOverSwiper()) {
-//       const product = productCatalogDiyss[newIndex];
+//       const product = productCatalogSetss[newIndex];
 //       startHoverInterval(newIndex, product);
 //       pendingHoverRef.current = null;
 //     }
@@ -608,7 +608,7 @@
 //     const newIndex = swiper.activeIndex;
 //     if (newIndex !== activeProductIndex) {
 //       setActiveProductIndex(newIndex);
-//       updateUrl(productCatalogDiyss[newIndex].id, selectedImageIndices[newIndex]);
+//       updateUrl(productCatalogSetss[newIndex].id, selectedImageIndices[newIndex]);
   
 //       if (swiperInstances.thumbs) {
 //         swiperInstances.thumbs.slideTo(newIndex);
@@ -723,7 +723,7 @@
 //         preventClicksPropagation={false}
 //         touchStartPreventDefault={false}
 //       >
-//         {productCatalogDiyss.map((product, index) => (
+//         {productCatalogSetss.map((product, index) => (
 //           <SwiperSlide key={product.id} style={{ height: "100%" }}>
 //             <div className="w-full h-full flex items-center justify-center">
 //         <img
@@ -840,7 +840,7 @@
 //         resistance={false}
 //         resistanceRatio={0}
 //       >
-//         {productCatalogDiyss.map((product, index) => (
+//         {productCatalogSetss.map((product, index) => (
 //           <SwiperSlide key={product.id}>
 //             <img
 //               src={product.image}
@@ -888,7 +888,7 @@ import LoadingScreen from "../LoadingScreen/LodingScreen";
 import SocialButtons from "../SocialButtons/SocialButtons";
 import { Pagination, Mousewheel, Thumbs } from "swiper/modules";
 import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
-import productCatalogDiys from "../data/productCatalogDiys";
+import productCatalogSets from "../data/productCatalogSets";
 import "swiper/css";
 import "swiper/css/pagination"; 
 // import { ChevronDown, ChevronUp } from "lucide-react";
@@ -916,7 +916,7 @@ const SWIPER_CONFIG = {
 
 const LOADING_SCREEN_DURATION = 1500;
 
-export default function DiyProductDetail() {
+export default function SetsProductDetail() {
   const location = useLocation();
   const navigate = useNavigate();
   const { id, category } = useParams();
@@ -931,8 +931,8 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
 
   // Основные состояния - объединены в один объект для лучшей производительности
   const [state, setState] = useState(() => ({
-    activeProductIndex: Math.max(0, productCatalogDiys.findIndex(p => p.id === Number(id))),
-    selectedImageIndices: productCatalogDiys.map(() => 0),
+    activeProductIndex: Math.max(0, productCatalogSets.findIndex(p => p.id === Number(id))),
+    selectedImageIndices: productCatalogSets.map(() => 0),
     hoveredIndex: null,
     isGalleryOpen: false,
     galleryStartIndex: 0,
@@ -975,7 +975,7 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
 
   // Мемоизированные значения
   const currentProduct = useMemo(() => 
-    productCatalogDiys[state.activeProductIndex], 
+    productCatalogSets[state.activeProductIndex], 
     [state.activeProductIndex]
   );
 
@@ -985,7 +985,7 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
   );
 
   const allImages = useMemo(() => 
-    productCatalogDiys.flatMap((p) => p.sample || []), 
+    productCatalogSets.flatMap((p) => p.sample || []), 
     []
   );
 
@@ -994,7 +994,7 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     if (refs.current.urlUpdateBlocked) return;
     
     refs.current.urlUpdateBlocked = true;
-    const newUrl = `/product/diy/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/sets/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     setTimeout(() => {
@@ -1119,7 +1119,7 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
   }, []);
 
   const openGallery = useCallback(() => {
-    const productStartIndex = productCatalogDiys
+    const productStartIndex = productCatalogSets
       .slice(0, state.activeProductIndex)
       .reduce((acc, p) => acc + (p.sample?.length || 0), 0);
 
@@ -1263,7 +1263,7 @@ onComplete: async () => {
       };
     });
 
-    updateUrl(productCatalogDiys[newIndex].id, 0);
+    updateUrl(productCatalogSets[newIndex].id, 0);
     if (swiperInstances.thumbs) {
       swiperInstances.thumbs.slideTo(newIndex);
     }
@@ -1285,7 +1285,7 @@ onComplete: async () => {
       if ((pending && pending.index === newIndex) || 
           refs.current.hoveredIndex === newIndex || 
           isPointerOverSwiper()) {
-        const product = productCatalogDiys[newIndex];
+        const product = productCatalogSets[newIndex];
         startHoverInterval(newIndex, product);
         refs.current.pendingHover = null;
       }
@@ -1449,7 +1449,7 @@ useEffect(() => {
     const newIndex = swiper.activeIndex;
     if (newIndex !== state.activeProductIndex) {
       updateState({ activeProductIndex: newIndex });
-      updateUrl(productCatalogDiys[newIndex].id, state.selectedImageIndices[newIndex]);
+      updateUrl(productCatalogSets[newIndex].id, state.selectedImageIndices[newIndex]);
 
       if (swiperInstances.thumbs) {
         swiperInstances.thumbs.slideTo(newIndex);
@@ -1552,7 +1552,7 @@ useEffect(() => {
     refs.current.hoverInterval = null;
   }}
                   >
-                    {productCatalogDiys.map((product, index) => (
+                    {productCatalogSets.map((product, index) => (
                       <SwiperSlide key={product.id} style={{ height: "100%" }}>
                         <div className="w-full h-full flex items-center justify-center">
                           <img
@@ -1636,7 +1636,7 @@ useEffect(() => {
 
         <div
           ref={el => refs.current.thumbs = el}
-          className="block w-[100%] p-10 sm:px-1"
+          className="block w-[100%] p-1 sm:px-1"
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1667,7 +1667,7 @@ useEffect(() => {
             resistance={false}
             resistanceRatio={0}
           >
-            {productCatalogDiys.map((product, index) => (
+            {productCatalogSets.map((product, index) => (
               <SwiperSlide key={product.id}>
                 <img
                   src={product.image}

@@ -26,7 +26,7 @@ const products = [
     id: 3,
     name: "фигуры и комплекты фигур которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы",
     category: "sets",
-    image: "/images/sets/box.png",
+    image: "/images/sets/kicker2.png",
     hoverImage: ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "A bold design statement."
   },
@@ -34,8 +34,8 @@ const products = [
   {
     id: 4,
      category: "diy",
-    name: "хочешь самостоятельно собрать фигуру: специально для тебя мы подготовим предварительно собранную фигуру. проверим все элементы и подготовим для тебя комплект для сборки, тебе приедут все части фигуры и подробная инструкция к сборке, останется только взять шуруповерт. позвать друга и собрать фигуру для катания",
-   image: "/images/sets/kicker2.png",
+    // name: "хочешь самостоятельно собрать фигуру: специально для тебя мы подготовим предварительно собранную фигуру. проверим все элементы и подготовим для тебя комплект для сборки, тебе приедут все части фигуры и подробная инструкция к сборке, останется только взять шуруповерт. позвать друга и собрать фигуру для катания",
+   image: "/images/bowl.png",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }
@@ -164,7 +164,7 @@ const handleClick = async (product, e) => {
         navigate(`/product/skateparks/1?view=0`, { state: { imageData } });
         break;
       case "diy":
-        navigate(`/product/diy/1?view=0`, { state: { imageData } });
+        navigate(`/projectpage`, { state: { imageData } });
         break;
       default:
         console.warn("Неизвестная категория:", product.category);
