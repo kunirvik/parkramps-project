@@ -18,15 +18,16 @@ const products = [
     id: 2,
       category: "ramps",  
       image: "/images/ramps/minir180h60w200d40alt.png",
-    name: "рампы",
+    name: "рампи",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }, 
   {
     id: 3,
-    name: "фигуры и комплекты фигур которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы",
+    // name: "фигуры и комплекты фигур которые вы сможете собрать своими руками, материал полностью размечен и подготовлен, так что вы сможете собрать фигуру без проблем по заранее подготовленному чертежу и обкатать её уже в считаные часы",
     category: "sets",
-    image: "/images/sets/kicker2.png",
+       name: "фiгури",
+    image: "/images/sets/box360//160yolobox1.webp",
     hoverImage: ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "A bold design statement."
   },
@@ -34,8 +35,9 @@ const products = [
   {
     id: 4,
      category: "diy",
+       name: "iвенти",
     // name: "хочешь самостоятельно собрать фигуру: специально для тебя мы подготовим предварительно собранную фигуру. проверим все элементы и подготовим для тебя комплект для сборки, тебе приедут все части фигуры и подробная инструкция к сборке, останется только взять шуруповерт. позвать друга и собрать фигуру для катания",
-   image: "/images/bowl.png",
+   image: "/images/parkdominium.webp",
     hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
     description: "An iconic pop-art sofa."
   }
@@ -252,7 +254,12 @@ return (
             ? selectedProduct === product.id
               ? "scale-100"
               : "scale-0 pointer-events-none"
-            : "scale-100"}`}
+            : "scale-100"}
+            `}     style={{
+   
+    height:"clamp(150px, 40vh, 1000px)"
+
+  }}
       >
         <div onClick={(e) => handleClick(product, e)} 
         className="flex flex-col items-center w-full h-full relative">
@@ -281,7 +288,7 @@ return (
       {/* Текст снизу */}
       <div className="flex-shrink-0 flex justify-center items-center bg-black">
         <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
-          2015-2025
+          2015-2025 © всі права захищені
         </span>
       </div>
     </div>
@@ -296,12 +303,13 @@ return (
                    text-sm sm:text-base rounded-xl max-w-[300px] sm:max-w-[400px] 
                    whitespace-normal break-words"
       >
-        <h2 className="font-futura font-medium" style={{ fontSize: "clamp(25px, 5vw, 25px)" }}>
+        {/* <h2 className="font-futura font-medium" style={{ fontSize: "clamp(25px, 5vw, 25px)" }}>
           {products.find(p => p.id === tooltip.productId)?.category}
-        </h2>
-        {products.find(p => p.id === tooltip.productId)?.name}
+        </h2> */}
+         <h2 className="font-futura font-medium" style={{ fontSize: "clamp(25px, 5vw, 25px)" }}>
+        {products.find(p => p.id === tooltip.productId)?.name}</h2>
       </div>
     )}
   </>
 );
-}
+} 

@@ -1,4 +1,4 @@
-const productCatalogSets = [ {id: 1,
+const productCatalogSets = [ {id: 2,
     name: "box1",
     image: "/images/sets/kicker2.png",
     altImages: ["/images/160yolobox1.jpg", "/images/160yolobox1.jpg", "/images/160yolobox1.jpg", "/images/160yolobox1.jpg", "/images/160yolobox1.jpg","/images/160yolobox1.jpg","/images/160yolobox1.jpg","/images/160yolobox1.jpg","/images/160yolobox1.jpg","/images/160yolobox1..jpg", "/images/160yolobox1..jpg", "/images/160yolobox1..jpg",  ],
@@ -14,7 +14,7 @@ const productCatalogSets = [ {id: 1,
     relatedProducts: [2, 3, 4, 5] // IDs of related products
   },
   {
-    id: 2,
+    id: 1,
     name: "jumpbox",
            image: "/images/sets/box360/160yolobox1.webp",
         altImages: [ "/images/sets/box360/160yolobox2.webp", "/images/sets/box360/160yolobox3.webp", "/images/sets/box360/160yolobox4.webp", 

@@ -1310,7 +1310,7 @@ useEffect(() => {
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
-        className="text-gray-200 hover:text-pink-800 transition-colors"
+        className=" cursor-pointer text-gray-200 hover:text-pink-800 transition-colors"
       >
         ← Back
       </button>

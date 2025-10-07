@@ -245,7 +245,10 @@ export default function ProjectPage() {
           </footer>
         </section>
       </main>
+
+      <div className=" h-1000"><h1 className="text-[500px] font-futura font-bold tracking-[-0.06em] height-1000">arena</h1></div>
     </div>
+
   );
 }
 

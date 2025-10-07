@@ -5,7 +5,7 @@ import LoadingScreen from "../LoadingScreen/LodingScreen";
 // import { PiEyesFill } from "react-icons/pi";
 
 
-const words = ["Skateparks",  "Ramps", "Parkramps"];
+const words = ["Skateparks",  "Ramps", "Events", "Parkramps"];
 
 export default function MenuPage() {
   const [index, setIndex] = useState(0);
