@@ -1570,6 +1570,27 @@ useEffect(() => {
                             onTouchEnd={() => handleTouchEnd(index)}
                           />
                         </div>
+
+                         {/* 👉 Добавь ползунок прямо здесь, внутри SwiperSlide и внутри map */}
+    {isTouchDevice && product.altImages?.length > 0 && (
+      <div className="fixed  w-full mt-2 flex justify-center">
+        <input
+          type="range"
+          min="0"
+          max={product.altImages.length}
+          value={state.selectedImageIndices[index]}
+          onChange={(e) => {
+            const newIndex = Number(e.target.value);
+            setState(prev => {
+              const newIndices = [...prev.selectedImageIndices];
+              newIndices[index] = newIndex;
+              return { ...prev, selectedImageIndices: newIndices };
+            });
+          }}
+          className="w-3/4 accent-pink-600"
+        />
+      </div>
+    )}
                       </SwiperSlide>
                     ))}
                   </Swiper>
@@ -1680,7 +1701,11 @@ useEffect(() => {
                   alt={product.name}
                   draggable="false"
                 />
+
+                
               </SwiperSlide>
+
+              
             ))}
           </Swiper>
         </div>
@@ -1697,7 +1722,7 @@ useEffect(() => {
         {/* Дата по центру внизу */}
         <div className="flex justify-center items-center bg-black">
           <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
-            2015-2025
+           2015-2025 © всі права захищені
           </span>
         </div>
       </div>

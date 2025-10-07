@@ -1457,7 +1457,7 @@ useEffect(() => {
 
         <div
           ref={el => refs.current.thumbs = el}
-          className="block w-[100%] p-10 sm:px-1"
+          className="block w-[100%] p-1 sm:px-1"
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1518,7 +1518,7 @@ useEffect(() => {
         {/* Дата по центру внизу */}
         <div className="flex justify-center items-center bg-black">
           <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
-            2015-2025
+            2015-2025 © всі права захищені
           </span>
         </div>
       </div>

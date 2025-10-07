@@ -1627,6 +1627,7 @@ const isTouchDevice = typeof window !== "undefined" && ("ontouchstart" in window
 const isDesktop = () => window.innerWidth >= 1024; // или другой порог
   // Определяем, нужен ли loading screen
   const shouldShowLoading = useMemo(() => !imageData, [imageData]);
+const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
 
   // Основные состояния - объединены в один объект для лучшей производительности
   const [state, setState] = useState(() => ({
@@ -1678,10 +1679,10 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     [state.activeProductIndex]
   );
 
-  const currentImagesFullscreen = useMemo(() => 
-    currentProduct ? currentProduct.sample : [], 
-    [currentProduct]
-  );
+  // const currentImagesFullscreen = useMemo(() => 
+  //   currentProduct ? currentProduct.sample : [], 
+  //   [currentProduct]
+  // );
 
   const allImages = useMemo(() => 
     productCatalogRamps.flatMap((p) => p.sample || []), 
@@ -1950,6 +1951,13 @@ onComplete: async () => {
 }, [imageData, startTransitionAnimation, state.thumbsShown, showInfoAndThumbs]);
 
   const handleSlideChange = useCallback(async (swiper) => {
+    if (isTouchDevice) {
+  // 🚫 на телефоне не запускаем hover-анимацию
+  updateAnimationState({ slideChanging: false, inProgress: false });
+  await animateInfo('in');
+  return;
+}
+
     const newIndex = swiper.activeIndex;
     if (newIndex === state.activeProductIndex || animationState.inProgress) return;
 
@@ -2028,7 +2036,8 @@ resetAccordion();
   //   updateState({ hoveredIndex: null });
   //   clearInterval(refs.current.hoverInterval);
   // }, []);
-const handleMouseEnter = useCallback((index, product) => {
+const handleMouseEnter = useCallback((index, product) => { 
+  if (isTouchDevice) return;
   if (!animationState.complete || animationState.inProgress) return;
 
   updateState({ hoveredIndex: index });
@@ -2047,16 +2056,18 @@ const handleMouseEnter = useCallback((index, product) => {
       return { ...prev, selectedImageIndices: newIndices };
     });
   }, intervalDuration);
-}, [animationState.complete, animationState.inProgress, getIntervalDuration]);
+}, [animationState.complete, animationState.inProgress, getIntervalDuration, isTouchDevice]);
 
 const handleMouseLeave = useCallback(() => {
+   if (isTouchDevice) return; // 🚫 На телефоне не анимируем
   updateState({ hoveredIndex: null });
   clearInterval(refs.current.hoverInterval);
   refs.current.hoverInterval = null;
-}, []);
+},  [isTouchDevice]);
 
   
   const handleTouchStart = useCallback(() => {
+    
   if (!isDesktop()) return; // на телефоне просто ничего не делаем
 }, []);
 
@@ -2276,6 +2287,7 @@ useEffect(() => {
                             onTouchEnd={() => handleTouchEnd(index)}
                           />
                         </div>
+                        
                       </SwiperSlide>
                     ))}
                   </Swiper>
@@ -2361,7 +2373,7 @@ useEffect(() => {
 
         <div
           ref={el => refs.current.thumbs = el}
-          className="block w-[100%] p-10 sm:px-1"
+          className="block w-[100%] p-1 sm:px-1"
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -2422,7 +2434,7 @@ useEffect(() => {
         {/* Дата по центру внизу */}
         <div className="flex justify-center items-center bg-black">
           <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
-            2015-2025
+            2015-2025 © всі права захищені
           </span>
         </div>
       </div>
