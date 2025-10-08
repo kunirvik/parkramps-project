@@ -1579,6 +1579,8 @@
 // }
 
 
+
+
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useLocation, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import gsap from "gsap";
@@ -1627,7 +1629,6 @@ const isTouchDevice = typeof window !== "undefined" && ("ontouchstart" in window
 const isDesktop = () => window.innerWidth >= 1024; // или другой порог
   // Определяем, нужен ли loading screen
   const shouldShowLoading = useMemo(() => !imageData, [imageData]);
-const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
 
   // Основные состояния - объединены в один объект для лучшей производительности
   const [state, setState] = useState(() => ({
@@ -1679,22 +1680,16 @@ const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
     [state.activeProductIndex]
   );
 
-  // const currentImagesFullscreen = useMemo(() => 
-  //   currentProduct ? currentProduct.sample : [], 
-  //   [currentProduct]
-  // );
+  const currentImagesFullscreen = useMemo(() => 
+    currentProduct ? currentProduct.sample : [], 
+    [currentProduct]
+  );
+const [animationsEnabled, setAnimationsEnabled] = useState(true);
 
   const allImages = useMemo(() => 
     productCatalogRamps.flatMap((p) => p.sample || []), 
     []
   );
-
-  const [accordionKey, setAccordionKey] = useState(0);
-
-const resetAccordion = () => {
-  // изменение ключа форсит сброс Accordion в закрытое состояние
-  setAccordionKey(prev => prev + 1);
-};
 
   // Утилиты - мемоизированы с useCallback
   const updateUrl = useCallback((productId, viewIndex = 0) => {
@@ -1951,13 +1946,6 @@ onComplete: async () => {
 }, [imageData, startTransitionAnimation, state.thumbsShown, showInfoAndThumbs]);
 
   const handleSlideChange = useCallback(async (swiper) => {
-    if (isTouchDevice) {
-  // 🚫 на телефоне не запускаем hover-анимацию
-  updateAnimationState({ slideChanging: false, inProgress: false });
-  await animateInfo('in');
-  return;
-}
-
     const newIndex = swiper.activeIndex;
     if (newIndex === state.activeProductIndex || animationState.inProgress) return;
 
@@ -1965,7 +1953,7 @@ onComplete: async () => {
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     await animateInfo('out');
-resetAccordion();
+
     // Обновляем состояние одним вызовом
     setState(prev => {
       const newIndices = [...prev.selectedImageIndices];
@@ -1982,9 +1970,9 @@ resetAccordion();
       swiperInstances.thumbs.slideTo(newIndex);
     }
 
-
+    
     updateAnimationState({ slideChanging: false, inProgress: false });
-        await animateInfo('in');
+    await animateInfo('in');
     clearInterval(refs.current.hoverInterval);
     refs.current.hoverInterval = null;
 
@@ -2036,17 +2024,53 @@ resetAccordion();
   //   updateState({ hoveredIndex: null });
   //   clearInterval(refs.current.hoverInterval);
   // }, []);
-const handleMouseEnter = useCallback((index, product) => { 
-  if (isTouchDevice) return;
-  if (!animationState.complete || animationState.inProgress) return;
+// const handleMouseEnter = useCallback((index, product) => {
+//   if (!animationState.complete || animationState.inProgress) return;
 
-  updateState({ hoveredIndex: index });
-  clearInterval(refs.current.hoverInterval);
+//   updateState({ hoveredIndex: index });
+//   clearInterval(refs.current.hoverInterval);
+
+//   const totalImages = 1 + (product?.altImages?.length || 0);
+//   if (totalImages <= 1) return;
+
+//   const intervalDuration = getIntervalDuration(totalImages); // динамический расчёт
+
+//   refs.current.hoverInterval = setInterval(() => {
+//     setState(prev => {
+//       const newIndices = [...prev.selectedImageIndices];
+//       const cur = newIndices[index] ?? 0;
+//       newIndices[index] = (cur + 1) % totalImages;
+//       return { ...prev, selectedImageIndices: newIndices };
+//     });
+//   }, intervalDuration);
+// }, [animationState.complete, animationState.inProgress, getIntervalDuration]);
+
+// const handleMouseLeave = useCallback(() => {
+//   updateState({ hoveredIndex: null });
+//   clearInterval(refs.current.hoverInterval);
+//   refs.current.hoverInterval = null;
+// }, []);
+
+  
+//   const handleTouchStart = useCallback(() => {
+//   if (!isDesktop()) return; // на телефоне просто ничего не делаем
+// }, []);
+
+// const handleTouchEnd = useCallback(() => {
+//   if (!isDesktop()) return;
+//   clearInterval(refs.current.hoverInterval);
+// }, []);
+// Универсальный запуск анимации (hover / touch)
+const startImageCycle = useCallback((index, product) => {
+  if (!animationsEnabled || !animationState.complete || animationState.inProgress)
+    return;
 
   const totalImages = 1 + (product?.altImages?.length || 0);
   if (totalImages <= 1) return;
 
-  const intervalDuration = getIntervalDuration(totalImages); // динамический расчёт
+  clearInterval(refs.current.hoverInterval);
+
+  const intervalDuration = getIntervalDuration(totalImages);
 
   refs.current.hoverInterval = setInterval(() => {
     setState(prev => {
@@ -2056,24 +2080,12 @@ const handleMouseEnter = useCallback((index, product) => {
       return { ...prev, selectedImageIndices: newIndices };
     });
   }, intervalDuration);
-}, [animationState.complete, animationState.inProgress, getIntervalDuration, isTouchDevice]);
+}, [animationsEnabled, animationState.complete, animationState.inProgress]);
 
-const handleMouseLeave = useCallback(() => {
-   if (isTouchDevice) return; // 🚫 На телефоне не анимируем
-  updateState({ hoveredIndex: null });
+// Универсальная остановка анимации
+const stopImageCycle = useCallback(() => {
   clearInterval(refs.current.hoverInterval);
   refs.current.hoverInterval = null;
-},  [isTouchDevice]);
-
-  
-  const handleTouchStart = useCallback(() => {
-    
-  if (!isDesktop()) return; // на телефоне просто ничего не делаем
-}, []);
-
-const handleTouchEnd = useCallback(() => {
-  if (!isDesktop()) return;
-  clearInterval(refs.current.hoverInterval);
 }, []);
 
  
@@ -2118,7 +2130,7 @@ useEffect(() => {
     const applyStyles = (isDesktop) => {
       styleElement.innerHTML = `
         html, body { 
-      
+          overflow: ${isDesktop ? "hidden" : "auto"} !important; 
           height: 100% !important;
           width: 100% !important;
         }
@@ -2213,7 +2225,7 @@ useEffect(() => {
 
 
     </div> 
-    
+
           <div className="w-full lg:h-[50%] flex flex-col lg:flex-row lg:content-center relative">
             {/* Переходное изображение */}
             {!animationState.complete && imageData && (
@@ -2272,7 +2284,7 @@ useEffect(() => {
                     {productCatalogRamps.map((product, index) => (
                       <SwiperSlide key={product.id} style={{ height: "100%" }}>
                         <div className="w-full h-full flex items-center justify-center">
-                          <img
+                          {/* <img
                             src={
                               state.selectedImageIndices[index] === 0
                                 ? product.image
@@ -2285,9 +2297,29 @@ useEffect(() => {
                             onMouseLeave={() => handleMouseLeave(index)}
                             onTouchStart={() => handleTouchStart(index, product)}
                             onTouchEnd={() => handleTouchEnd(index)}
-                          />
+                          /> */}
+                          <img
+  src={
+    state.selectedImageIndices[index] === 0
+      ? product.image
+      : product.altImages[state.selectedImageIndices[index] - 1]
+  }
+  alt={product.name}
+  className="max-h-full w-auto object-contain"
+  draggable="false"
+
+  // ПК — hover
+  onMouseEnter={() => !isTouchDevice && startImageCycle(index, product)}
+  onMouseLeave={() => !isTouchDevice && stopImageCycle()}
+
+  // Мобильные — касание
+  onTouchStart={() => isTouchDevice && startImageCycle(index, product)}
+  onTouchEnd={() => isTouchDevice && stopImageCycle()}
+/>
+
                         </div>
-                        
+
+                    
                       </SwiperSlide>
                     ))}
                   </Swiper>
@@ -2316,22 +2348,18 @@ useEffect(() => {
                   {currentProduct.name}
                 </h1>
               </div>
-               <p className="text-1xl font-futura text-[#717171] font-medium mb-3">
-        {currentProduct.description2}
-      </p>
+
               <Accordion
-                key={accordionKey} 
                 items={[
                   //  {title: "описание", content: currentProduct.description2 },
                   { title: "приобрести рампу", content: (<>{currentProduct.description} <ContactButton/></>) },
                  
-                ]}   forceCloseTrigger={state.activeProductIndex} 
+                ]}
                 defaultOpenIndex={1}
+                 forceCloseTrigger={state.activeProductIndex}
               />
 
-             
-
-              {/* {currentProduct.details?.map((detail, index) => {
+              {currentProduct.details?.map((detail, index) => {
                 const isCatalog = detail.title.toLowerCase().includes("каталог");
                 return (
                   <button
@@ -2343,7 +2371,7 @@ useEffect(() => {
                         window.location.href = detail.link;
                       }
                     }}
-                    className="w-full text-left  flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+                    className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
                   >
                     <span className="font-futura text-[#717171] font-medium">
                       {detail.title}
@@ -2351,22 +2379,7 @@ useEffect(() => {
                     <span className="font-futura text-[#717171] text-lg">→</span>
                   </button>
                 );
-              })} */}  <button
-                 
-                    onClick={() => {
-                      if (isCatalog) {
-                        openGallery();
-                      } else {
-                        window.location.href = detail.link;
-                      }
-                    }}
-                    className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
-                  >
-                    <span className="font-futura text-[#717171] font-medium">
-               каталог
-                    </span>
-                    <span className="font-futura text-[#717171] text-lg">→</span>
-                  </button>
+              })}
             </div>
           </div>
         </div>
@@ -2417,7 +2430,11 @@ useEffect(() => {
                   alt={product.name}
                   draggable="false"
                 />
+
+                
               </SwiperSlide>
+
+              
             ))}
           </Swiper>
         </div>
@@ -2434,7 +2451,7 @@ useEffect(() => {
         {/* Дата по центру внизу */}
         <div className="flex justify-center items-center bg-black">
           <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
-            2015-2025 © всі права захищені
+           2015-2025 © всі права захищені
           </span>
         </div>
       </div>

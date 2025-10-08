@@ -800,10 +800,10 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     [state.activeProductIndex]
   );
 
-  const currentImagesFullscreen = useMemo(() => 
-    currentProduct ? currentProduct.sample : [], 
-    [currentProduct]
-  );
+  // const currentImagesFullscreen = useMemo(() => 
+  //   currentProduct ? currentProduct.sample : [], 
+  //   [currentProduct]
+  // );
 
   const allImages = useMemo(() => 
     productCatalogSkateparks.flatMap((p) => p.sample || []), 
