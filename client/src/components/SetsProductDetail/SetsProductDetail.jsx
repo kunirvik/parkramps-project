@@ -1420,6 +1420,10 @@ useEffect(() => {
           border: 2px solid black !important;
           border-radius: 0.5rem !important;
         }
+          .swiper-initializing .swiper-slide {
+  visibility: hidden;
+}
+
         .transition-image-container {
           position: fixed !important;
           top: 0 !important;
