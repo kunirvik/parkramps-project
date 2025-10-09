@@ -1232,6 +1232,9 @@ onComplete: async () => {
   const handleSwiperInit = useCallback((swiper) => {
     setSwiperInstances(prev => ({ ...prev, main: swiper }));
      if (!imageData) {
+         if (refs.current.swiperContainer) {
+      gsap.set(refs.current.swiperContainer, { opacity: 1, visibility: 'visible' });
+    }
     // Если зашли напрямую, делаем анимацию здесь
     if (!state.thumbsShown) {
       gsap.set(refs.current.info, { opacity: 0, y: 20 });
