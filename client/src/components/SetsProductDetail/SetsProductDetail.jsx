@@ -880,6 +880,7 @@
 // }
 
 
+
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useLocation, useParams, useNavigate, useSearchParams } from "react-router-dom";
 import gsap from "gsap";
@@ -979,10 +980,10 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     [state.activeProductIndex]
   );
 
-  const currentImagesFullscreen = useMemo(() => 
-    currentProduct ? currentProduct.sample : [], 
-    [currentProduct]
-  );
+  // const currentImagesFullscreen = useMemo(() => 
+  //   currentProduct ? currentProduct.sample : [], 
+  //   [currentProduct]
+  // );
 
   const allImages = useMemo(() => 
     productCatalogSets.flatMap((p) => p.sample || []), 
@@ -1518,24 +1519,15 @@ useEffect(() => {
             )}
 
             {/* Swiper галерея */}
-            {/* <div
+            <div
               ref={el => refs.current.swiperContainer = el}
               className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
               style={{
                 visibility: !imageData || animationState.complete ? "visible" : "hidden",
                 opacity: !imageData || animationState.complete ? 1 : 0,
               }}
-            > */}
-            
-             <div
-  ref={el => refs.current.swiperContainer = el}
-  className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
-  style={{
-    visibility: imageData && !animationState.complete ? "hidden" : "visible",
-    opacity: imageData && !animationState.complete ? 0 : 1,
-  }}
->
- <div className="w-full flex flex-row items-start justify-between gap-2">
+            >
+              <div className="w-full flex flex-row items-start justify-between gap-2">
                 <div className="w-[100%]">
                   <Swiper
                     className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
@@ -1579,27 +1571,6 @@ useEffect(() => {
                             onTouchEnd={() => handleTouchEnd(index)}
                           />
                         </div>
-
-                         {/* 👉 Добавь ползунок прямо здесь, внутри SwiperSlide и внутри map */}
-    {isTouchDevice && product.altImages?.length > 0 && (
-      <div className="fixed  w-full mt-2 flex justify-center">
-        <input
-          type="range"
-          min="0"
-          max={product.altImages.length}
-          value={state.selectedImageIndices[index]}
-          onChange={(e) => {
-            const newIndex = Number(e.target.value);
-            setState(prev => {
-              const newIndices = [...prev.selectedImageIndices];
-              newIndices[index] = newIndex;
-              return { ...prev, selectedImageIndices: newIndices };
-            });
-          }}
-          className="w-3/4 accent-pink-600"
-        />
-      </div>
-    )}
                       </SwiperSlide>
                     ))}
                   </Swiper>
@@ -1710,11 +1681,7 @@ useEffect(() => {
                   alt={product.name}
                   draggable="false"
                 />
-
-                
               </SwiperSlide>
-
-              
             ))}
           </Swiper>
         </div>
@@ -1731,7 +1698,7 @@ useEffect(() => {
         {/* Дата по центру внизу */}
         <div className="flex justify-center items-center bg-black">
           <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
-           2015-2025 © всі права захищені
+            2015-2025 © всі права захищені
           </span>
         </div>
       </div>
