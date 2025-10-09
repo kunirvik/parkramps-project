@@ -1680,11 +1680,11 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     [state.activeProductIndex]
   );
 
-  const currentImagesFullscreen = useMemo(() => 
-    currentProduct ? currentProduct.sample : [], 
-    [currentProduct]
-  );
-const [animationsEnabled, setAnimationsEnabled] = useState(true);
+  // const currentImagesFullscreen = useMemo(() => 
+  //   currentProduct ? currentProduct.sample : [], 
+  //   [currentProduct]
+  // );
+
 
   const allImages = useMemo(() => 
     productCatalogRamps.flatMap((p) => p.sample || []), 
@@ -2024,53 +2024,18 @@ onComplete: async () => {
   //   updateState({ hoveredIndex: null });
   //   clearInterval(refs.current.hoverInterval);
   // }, []);
-// const handleMouseEnter = useCallback((index, product) => {
-//   if (!animationState.complete || animationState.inProgress) return;
 
-//   updateState({ hoveredIndex: index });
-//   clearInterval(refs.current.hoverInterval);
+const handleMouseEnter = useCallback((index, product) => {
+   if (!isDesktop()) return;
+  if (!animationState.complete || animationState.inProgress) return;
 
-//   const totalImages = 1 + (product?.altImages?.length || 0);
-//   if (totalImages <= 1) return;
-
-//   const intervalDuration = getIntervalDuration(totalImages); // динамический расчёт
-
-//   refs.current.hoverInterval = setInterval(() => {
-//     setState(prev => {
-//       const newIndices = [...prev.selectedImageIndices];
-//       const cur = newIndices[index] ?? 0;
-//       newIndices[index] = (cur + 1) % totalImages;
-//       return { ...prev, selectedImageIndices: newIndices };
-//     });
-//   }, intervalDuration);
-// }, [animationState.complete, animationState.inProgress, getIntervalDuration]);
-
-// const handleMouseLeave = useCallback(() => {
-//   updateState({ hoveredIndex: null });
-//   clearInterval(refs.current.hoverInterval);
-//   refs.current.hoverInterval = null;
-// }, []);
-
-  
-//   const handleTouchStart = useCallback(() => {
-//   if (!isDesktop()) return; // на телефоне просто ничего не делаем
-// }, []);
-
-// const handleTouchEnd = useCallback(() => {
-//   if (!isDesktop()) return;
-//   clearInterval(refs.current.hoverInterval);
-// }, []);
-// Универсальный запуск анимации (hover / touch)
-const startImageCycle = useCallback((index, product) => {
-  if (!animationsEnabled || !animationState.complete || animationState.inProgress)
-    return;
+  updateState({ hoveredIndex: index });
+  clearInterval(refs.current.hoverInterval);
 
   const totalImages = 1 + (product?.altImages?.length || 0);
   if (totalImages <= 1) return;
 
-  clearInterval(refs.current.hoverInterval);
-
-  const intervalDuration = getIntervalDuration(totalImages);
+  const intervalDuration = getIntervalDuration(totalImages); // динамический расчёт
 
   refs.current.hoverInterval = setInterval(() => {
     setState(prev => {
@@ -2080,15 +2045,26 @@ const startImageCycle = useCallback((index, product) => {
       return { ...prev, selectedImageIndices: newIndices };
     });
   }, intervalDuration);
-}, [animationsEnabled, animationState.complete, animationState.inProgress]);
+}, [animationState.complete, animationState.inProgress, getIntervalDuration]);
 
-// Универсальная остановка анимации
-const stopImageCycle = useCallback(() => {
+const handleMouseLeave = useCallback(() => {
+   if (!isDesktop()) return;
+  updateState({ hoveredIndex: null });
   clearInterval(refs.current.hoverInterval);
   refs.current.hoverInterval = null;
 }, []);
 
- 
+  
+  const handleTouchStart = useCallback(() => {
+  if (!isDesktop()) return; // на телефоне просто ничего не делаем
+}, []);
+
+const handleTouchEnd = useCallback(() => {
+  if (!isDesktop()) return;
+  clearInterval(refs.current.hoverInterval);
+}, []);
+
+
 
   // Effects - оптимизированы
   useEffect(() => {
@@ -2284,7 +2260,7 @@ useEffect(() => {
                     {productCatalogRamps.map((product, index) => (
                       <SwiperSlide key={product.id} style={{ height: "100%" }}>
                         <div className="w-full h-full flex items-center justify-center">
-                          {/* <img
+                          <img
                             src={
                               state.selectedImageIndices[index] === 0
                                 ? product.image
@@ -2297,25 +2273,8 @@ useEffect(() => {
                             onMouseLeave={() => handleMouseLeave(index)}
                             onTouchStart={() => handleTouchStart(index, product)}
                             onTouchEnd={() => handleTouchEnd(index)}
-                          /> */}
-                          <img
-  src={
-    state.selectedImageIndices[index] === 0
-      ? product.image
-      : product.altImages[state.selectedImageIndices[index] - 1]
-  }
-  alt={product.name}
-  className="max-h-full w-auto object-contain"
-  draggable="false"
-
-  // ПК — hover
-  onMouseEnter={() => !isTouchDevice && startImageCycle(index, product)}
-  onMouseLeave={() => !isTouchDevice && stopImageCycle()}
-
-  // Мобильные — касание
-  onTouchStart={() => isTouchDevice && startImageCycle(index, product)}
-  onTouchEnd={() => isTouchDevice && stopImageCycle()}
-/>
+                          />
+      
 
                         </div>
 

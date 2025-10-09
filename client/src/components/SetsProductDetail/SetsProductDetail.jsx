@@ -1518,15 +1518,24 @@ useEffect(() => {
             )}
 
             {/* Swiper галерея */}
-            <div
+            {/* <div
               ref={el => refs.current.swiperContainer = el}
               className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
               style={{
                 visibility: !imageData || animationState.complete ? "visible" : "hidden",
                 opacity: !imageData || animationState.complete ? 1 : 0,
               }}
-            >
-              <div className="w-full flex flex-row items-start justify-between gap-2">
+            > */}
+            
+             <div
+  ref={el => refs.current.swiperContainer = el}
+  className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
+  style={{
+    visibility: imageData && !animationState.complete ? "hidden" : "visible",
+    opacity: imageData && !animationState.complete ? 0 : 1,
+  }}
+>
+ <div className="w-full flex flex-row items-start justify-between gap-2">
                 <div className="w-[100%]">
                   <Swiper
                     className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
