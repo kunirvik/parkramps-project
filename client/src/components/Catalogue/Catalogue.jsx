@@ -239,21 +239,24 @@ return (
 
     
 
-  <div className="flex-grow overflow-hidden flex items-center justify-center ">
-  <div className="grid grid-cols-1  sm:grid-cols-2 w-full h-full "
+  <div className="flex-grow overflow-hidden flex items-center justify-center  "   style={{
+  marginTop: "clamp(60px, 3vw, 60px)"}}> 
+  <div className="grid grid-cols-1  sm:grid-cols-2 w-full h-full  "
         style={{
     maxHeight: "100%",
     overflow: "auto",
-    gap: "clamp(10px, 5vw, 20px)", // min 10px, растет до 40px с экраном
-    padding: "clamp(50px, 3vw, 20px)", // тоже динамически для отступов
+    // paddingTop: "clamp(50px, 3vw, 50px)", // отступ сверху
+   
+    // gap: "clamp(10px, 3vw, 20px)", // min 10px, растет до 40px с экраном
+    // padding: "clamp(20px, 1vw, 20px)", // тоже динамически для отступов
   }}>
     {products.map((product) => (
       <div
         key={product.id}
         ref={(el) => el && productsRef.current.set(product.id, el)}
-        className={`cursor-pointer flex justify-center items-center p-2 sm:p-4
-          relative overflow-hidden transition-all duration-400 ease-in-out
-          h-40 sm:h-60 md:h-80 lg:h-90
+        className={` cursor-pointer flex justify-center items-center p-2 sm:p-4
+                   relative overflow-hidden transition-all duration-400 ease-in-out
+       
           ${selectedProduct !== null
             ? selectedProduct === product.id
               ? "scale-100"
@@ -261,8 +264,9 @@ return (
             : "scale-100"}
             `}     style={{
    
-    height:"clamp(150px, 40vh, 1000px)"
-
+  height: isMobile ? "clamp(10px, 25vh, 2000px)" : "clamp(200px, 40vh, 6000px)"
+    
+    //  paddingTop: "clamp(70px, 3vw, 70px)", // отступ сверху
   }}
       >
         <div onClick={(e) => handleClick(product, e)} 

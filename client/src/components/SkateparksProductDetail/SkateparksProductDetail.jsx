@@ -1471,7 +1471,7 @@ useEffect(() => {
 
         <div
           ref={el => refs.current.thumbs = el}
-          className="block w-[100%] p-1 sm:px-1"
+          className="block w-[100%] pt-10 pb-10 sm:pt-10"
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}

@@ -210,9 +210,7 @@ export default function ModalRequestSkatepark({ isOpen, onClose }) {
 
           {success && <div className="mt-4 text-sm text-green-600">Почтовый клиент открыт. Если письмо не отправилось — скопируйте текст вручную или используйте серверную отправку.</div>}
 
-          <div className="mt-4 text-xs text-gray-500">
-            Примечание: кнопка открывает почтовый клиент с заполненным письмом. Файлы не прикрепляются через mailto. Для прикрепления файлов используйте серверный endpoint (fetch/axios) или загрузите файлы в облако и вставьте ссылку в сообщение.
-          </div>
+          
         </form>
       </div>
     </div>
