@@ -1596,12 +1596,6 @@ import "swiper/css/pagination";
 import Accordion from "../Accordion/Accordion";
 import ContactButton from "../ContactButtons/ContactButton";
 
-
-
-
-
-
-
 // Константы
 const ANIMATION_CONFIG = {
   DURATION: 0.6,
@@ -1684,8 +1678,13 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
   //   currentProduct ? currentProduct.sample : [], 
   //   [currentProduct]
   // );
+const [accordionKey, setAccordionKey] = useState(0);
 
-
+const resetAccordion = () => {
+  // изменение ключа форсит сброс Accordion в закрытое состояние
+  setAccordionKey(prev => prev + 1);
+};
+ 
   const allImages = useMemo(() => 
     productCatalogRamps.flatMap((p) => p.sample || []), 
     []
@@ -1712,6 +1711,7 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     setState(prev => ({ ...prev, ...updates }));
   }, []);
 
+
   // Обработка завершения loading screen
   const handleLoadingComplete = useCallback(() => {
     setLoadingState(prev => ({ ...prev, isCompleted: true }));
@@ -1731,6 +1731,8 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
           }
         );
         
+      
+
         gsap.fromTo(refs.current.info,
           { opacity: 0, y: 50 },
           { 
@@ -1953,6 +1955,8 @@ onComplete: async () => {
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     await animateInfo('out');
+
+    resetAccordion(); // сбрасываем аккордеон при смене слайда
 
     // Обновляем состояние одним вызовом
     setState(prev => {
@@ -2307,10 +2311,13 @@ useEffect(() => {
                   {currentProduct.name}
                 </h1>
               </div>
-
+               <p className="text-1xl font-futura text-[#717171] font-medium mb-3">
+        {currentProduct.description3}
+      </p>
               <Accordion
+                key={accordionKey}
                 items={[
-                  //  {title: "описание", content: currentProduct.description2 },
+                   {title: "описание", content: currentProduct.description2 },
                   { title: "приобрести рампу", content: (<>{currentProduct.description} <ContactButton/></>) },
                  
                 ]}
@@ -2318,7 +2325,7 @@ useEffect(() => {
                  forceCloseTrigger={state.activeProductIndex}
               />
 
-              {currentProduct.details?.map((detail, index) => {
+              {/* {currentProduct.details?.map((detail, index) => {
                 const isCatalog = detail.title.toLowerCase().includes("каталог");
                 return (
                   <button
@@ -2338,14 +2345,14 @@ useEffect(() => {
                     <span className="font-futura text-[#717171] text-lg">→</span>
                   </button>
                 );
-              })}
+              })} */}
             </div>
           </div>
         </div>
 
         <div
           ref={el => refs.current.thumbs = el}
-          className="block w-[100%] p-1 sm:px-1"
+          className="block w-[100%]  pt-10 pb-10 sm:pt-10"
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}

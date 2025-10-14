@@ -957,6 +957,15 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     isCompleted: false
   });
 
+
+  const [accordionKey, setAccordionKey] = useState(0);
+
+const resetAccordion = () => {
+  // изменение ключа форсит сброс Accordion в закрытое состояние
+  setAccordionKey(prev => prev + 1);
+}; 
+
+
   // Refs - объединены в один объект
   const refs = useRef({
     container: null,
@@ -1001,6 +1010,8 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
       refs.current.urlUpdateBlocked = false;
     }, 50);
   }, []);
+
+  
 
   const updateAnimationState = useCallback((updates) => {
     setAnimationState(prev => ({ ...prev, ...updates }));
@@ -1251,6 +1262,8 @@ onComplete: async () => {
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     await animateInfo('out');
+
+    resetAccordion();
 
     // Обновляем состояние одним вызовом
     setState(prev => {
@@ -1605,8 +1618,12 @@ useEffect(() => {
                   {currentProduct.name}
                 </h1>
               </div>
+                 <p className="text-1xl font-futura text-[#717171] font-medium mb-3">
+        {currentProduct.description2}
+      </p>
 
               <Accordion
+              key={accordionKey} 
                 items={[
                   //  {title: "описание", content: currentProduct.description2 },
                   { title: "приобрести рампу", content: (<>{currentProduct.description} <ContactButton/></>) },
@@ -1643,7 +1660,7 @@ useEffect(() => {
 
         <div
           ref={el => refs.current.thumbs = el}
-          className="block w-[100%] p-1 sm:px-1"
+          className="block   w-[100%]  pt-10 sm:pt-10"
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}

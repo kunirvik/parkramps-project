@@ -33,16 +33,18 @@
 //   );
 // }
 
-
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Instagram, Mail, Phone } from "lucide-react"; // предполагаю, что иконки берутся отсюда
+import ModalRequestSkatepark from "../ModalRequestSkatepark/ModalRequestSkatepark";
 
 export default function SocialButtons() {
   const buttons = [
     { icon: <Instagram size={15} className="text-[#919191]" />, link: "https://instagram.com/parkramps/" },
-    { icon: <Mail size={15} className="text-[#919191]" />, link: "mailto:example@mail.com" },
-    { icon: <Phone size={15} className="text-[#919191]" />, link: "tel:+1234567890" },
+    { icon: <Mail size={15} className="text-[#919191]" />,  onClick: () => setIsModalOpen(true) }, // ✅ вместо ссылки открываем модалку,
+    { icon: <Phone size={15} className="text-[#919191]" />, link: "tel:+380681205553" },
   ];
+const [isModalOpen, setIsModalOpen] = useState(false);
 
   const text = "сайт собирается. мы строим и продаем скейтпарки. пишите нам в соцсети 10.2025";
 
@@ -71,6 +73,7 @@ export default function SocialButtons() {
           <img src="/logo.png" alt="Logo" className="h-8 opacity-50 drop-shadow-lg" />
         </div>
 
+
         <div className="flex items-center gap-2">
           {buttons.map((button, index) => (
             <motion.a
@@ -81,11 +84,15 @@ export default function SocialButtons() {
               className="backdrop-blur-xl shadow-lg flex items-center justify-center w-9 h-9 rounded transition-all hover:bg-white/30"
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.95 }}
+              onClick={button.onClick ? button.onClick : () => window.open( button.link, "_blank")}
             >
               {button.icon}
             </motion.a>
+            
           ))}
-        </div>
+          </div>
+          <ModalRequestSkatepark isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        
       </div>
     </>
   );

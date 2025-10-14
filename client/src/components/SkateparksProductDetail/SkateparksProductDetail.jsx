@@ -760,6 +760,14 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     thumbsShown: false
   }));
 
+  const [accordionKey, setAccordionKey] = useState(0);
+
+const resetAccordion = () => {
+  // изменение ключа форсит сброс Accordion в закрытое состояние
+  setAccordionKey(prev => prev + 1);
+};
+
+
   // Состояния Swiper
   const [swiperInstances, setSwiperInstances] = useState({
     main: null,
@@ -1072,6 +1080,9 @@ onComplete: async () => {
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     await animateInfo('out');
+
+
+    resetAccordion();
 
     // Обновляем состояние одним вызовом
     setState(prev => {
@@ -1419,10 +1430,13 @@ useEffect(() => {
                   {currentProduct.name}
                 </h1>
               </div>
-
+   <p className="text-1xl font-futura text-[#717171] font-medium mb-3">
+        {currentProduct.description3}
+      </p>
               <Accordion
+              key={accordionKey} 
                 items={[
-                  //  {title: "описание", content: currentProduct.description2 },
+                   {title: "описание", content: currentProduct.description2 },
                   { title: "приобрести рампу", content: (<>{currentProduct.description} <ContactButton/></>) },
                  
                 ]}
