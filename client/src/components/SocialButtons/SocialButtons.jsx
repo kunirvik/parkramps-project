@@ -35,14 +35,16 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Instagram, Mail, Phone } from "lucide-react"; // предполагаю, что иконки берутся отсюда
+import { Instagram, Mail, Phone, Plane } from "lucide-react"; // предполагаю, что иконки берутся отсюда
 import ModalRequestSkatepark from "../ModalRequestSkatepark/ModalRequestSkatepark";
 
 export default function SocialButtons() {
   const buttons = [
     { icon: <Instagram size={15} className="text-[#919191]" />, link: "https://instagram.com/parkramps/" },
+    // { icon: <Phone size={15} className="text-[#919191]" />, link: "tel:+3806812553" },
+    {icon:<Plane size={15} className="text-[#919191]" />, link: "https://t.me/parkramps"},
     { icon: <Mail size={15} className="text-[#919191]" />,  onClick: () => setIsModalOpen(true) }, // ✅ вместо ссылки открываем модалку,
-    { icon: <Phone size={15} className="text-[#919191]" />, link: "tel:+380681205553" },
+    
   ];
 const [isModalOpen, setIsModalOpen] = useState(false);
 

@@ -27,7 +27,7 @@ const productCatalogSets = [ {id: 2,
     year: 2024,
     description: "Профессиональные рампы различных размеров.",
     details: [
-      { title: "Материалы", link: "#materials" },
+      // { title: "Материалы", link: "#materials" },
        { title: "Каталог фигур", link: "#catalog" },
     ],
     relatedProducts: [1, 3, 4, 5] // IDs of related products

@@ -1,18 +1,25 @@
 import { useState, useEffect } from "react";
-
-
+import { Instagram, Phone, Plane } from "lucide-react"; // предполагаю, что иконки берутся отсюда
+import { motion } from "framer-motion";
 
 export default function ModalRequestSkatepark({ isOpen, onClose }) {
+
+       const buttons = [
+    { icon: <Instagram size={15} className="text-[#919191]" />, link: "https://instagram.com/parkramps/" },
+    {icon:<Plane size={15} className="text-[#919191]" />, link: "https://t.me/parkramps"},
+
+    // { icon: <Phone size={15} className="text-[#919191]" />, link: "tel:+380681205553" },
+  ];
   const [form, setForm] = useState({
     fullName: "",
-    email: "",
+    // email: "",
     phone: "",
-    requestType: "Продажа скейтпарка",
-    title: "",
-    quantity: 1,
-    location: "",
-    preferredContact: "email",
-    message: "",
+    // requestType: "Продажа скейтпарка",
+    // title: "",
+    // quantity: 1,
+    // location: "",
+    // preferredContact: "email",
+    // message: "",
   });
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
@@ -34,10 +41,10 @@ export default function ModalRequestSkatepark({ isOpen, onClose }) {
     setForm(prev => ({ ...prev, [name]: value }));
   }
 
-  function handleFiles(e) {
-    const chosen = Array.from(e.target.files).slice(0, 5); // лимит превью
-    setFiles(chosen);
-  }
+  // function handleFiles(e) {
+  //   const chosen = Array.from(e.target.files).slice(0, 5); // лимит превью
+  //   setFiles(chosen);
+  // }
 
   function validate() {
     const err = {};
@@ -52,15 +59,15 @@ export default function ModalRequestSkatepark({ isOpen, onClose }) {
     const subject = `[Заявка] ${form.requestType} — ${form.title}`;
     const bodyLines = [
       `Имя: ${form.fullName}`,
-      `E-mail: ${form.email}`,
+      // `E-mail: ${form.email}`,
       `Телефон: ${form.phone || "-"}`,
-      `Тип заявки: ${form.requestType}`,
-      `Заголовок: ${form.title}`,
-      `Кол-во: ${form.quantity}`,
-      `Локация: ${form.location}`,
-      `Предпочтительный контакт: ${form.preferredContact}`,
+      // `Тип заявки: ${form.requestType}`,
+      // `Заголовок: ${form.title}`,
+      // `Кол-во: ${form.quantity}`,
+      // `Локация: ${form.location}`,
+      // `Предпочтительный контакт: ${form.preferredContact}`,
       `Сообщение:\n${form.message || "-"}`,
-      "\n(Примечание: файлы не отправляются через mailto — прикрепите их отдельно при необходимости или загрузите на облако и вставьте ссылку)",
+      // "\n(Примечание: файлы не отправляются через mailto — прикрепите их отдельно при необходимости или загрузите на облако и вставьте ссылку)",
     ];
     const body = encodeURIComponent(bodyLines.join("\n"));
     // замените адрес ниже на ваш рабочий e-mail получателя
@@ -113,13 +120,32 @@ export default function ModalRequestSkatepark({ isOpen, onClose }) {
       <div className="relative w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl overflow-auto max-h-[90vh]">
         <form onSubmit={handleSubmit} className="p-6">
           <div className="flex items-start justify-between">
-            <h2 className="text-2xl font-semibold">Оставить заявку</h2>
+            <h2 className="text-2xl font-semibold">строим экстримальные площадки и проводим ивенты</h2>
             <button type="button" onClick={onClose} className="text-gray-500 hover:text-gray-800" aria-label="Закрыть">
               ✕
             </button>
           </div>
 
-          <p className="mt-2 text-sm text-gray-600">Заполните форму — мы свяжемся с вами по почте или телефону.</p>
+          <p className="mt-2 text-sm text-gray-600">Свяжитесь с нами в соц сетях.</p>
+        
+            
+        <div className="flex items-center gap-2">
+          {buttons.map((button, index) => (
+            <motion.a
+              key={index}
+              href={button.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="backdrop-blur-xl shadow-lg flex items-center justify-center w-9 h-9 rounded transition-all hover:bg-white/30"
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={button.onClick ? button.onClick : () => window.open( button.link, "_blank")}
+            >
+              {button.icon}
+            </motion.a>
+            
+          ))}
+          </div><p className="mt-2 text-sm text-gray-600"> или заполните форму — мы свяжемся удобным для Вас способом.</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <label className="flex flex-col">
@@ -128,77 +154,101 @@ export default function ModalRequestSkatepark({ isOpen, onClose }) {
               {errors.fullName && <span className="text-red-500 text-xs mt-1">{errors.fullName}</span>}
             </label>
 
-            <label className="flex flex-col">
-              <span className="text-sm font-medium">E-mail</span>
-              <input name="email" type="email" value={form.email} onChange={handleChange} className={`mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.email ? 'border-red-400' : 'border-gray-200'}`} />
-              {errors.email && <span className="text-red-500 text-xs mt-1">{errors.email}</span>}
-            </label>
 
             <label className="flex flex-col">
-              <span className="text-sm font-medium">Телефон (опционально)</span>
+              <span className="text-sm font-medium">Телефон </span>
               <input name="phone" value={form.phone} onChange={handleChange} className="mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-200" />
             </label>
 
-            <label className="flex flex-col">
-              <span className="text-sm font-medium">Тип заявки</span>
-              <select name="requestType" value={form.requestType} onChange={handleChange} className="mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-200">
-                <option>Продажа скейтпарка</option>
-                <option>Рампа</option>
-                <option>Фигура</option>
-                <option>Ивент / Организация</option>
-              </select>
-            </label>
+       
 
-            <label className="flex flex-col">
-              <span className="text-sm font-medium">Заголовок заявки</span>
-              <input name="title" value={form.title} onChange={handleChange} className={`mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.title ? 'border-red-400' : 'border-gray-200'}`} />
-              {errors.title && <span className="text-red-500 text-xs mt-1">{errors.title}</span>}
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium">Кол-во / Размер / Детали</span>
-              <input name="quantity" type="number" min={1} value={form.quantity} onChange={handleChange} className="mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-200" />
-            </label>
+           {/* <label className="flex flex-col">
+  <span className="text-sm font-medium">Размер (м²)</span>
+  <select
+    name="quantity"
+    value={form.quantity}
+    onChange={handleChange}
+    className="mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-200"
+  >
+    <option value="">Выберите размер</option>
+    <option value="50">до 50 м²</option>
+    <option value="100">до 100 м²</option>
+    <option value="200">до 200 м²</option>
+    <option value="300">до 300 м²</option>
+    <option value="500">500+ м²</option>
+  </select>
+</label> */}
+ 
 
             <label className="flex flex-col md:col-span-2">
-              <span className="text-sm font-medium">Локация (город, адрес)</span>
+              <span className="text-sm font-medium">Локация (область, город)</span>
               <input name="location" value={form.location} onChange={handleChange} className={`mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 ${errors.location ? 'border-red-400' : 'border-gray-200'}`} />
               {errors.location && <span className="text-red-500 text-xs mt-1">{errors.location}</span>}
             </label>
 
+      <label className="flex flex-col">
+              <span className="text-sm font-medium">Цель использования</span>
+              <select name="requestType" value={form.requestType} onChange={handleChange} className="mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-200">
+                <option>общественный парк</option>
+                <option>частный парк</option>
+                <option>ивент / мероприятие</option>
+                <option>другое / укажите в пожелании</option>
+              </select>
+            </label>
+
             <label className="flex flex-col md:col-span-2">
-              <span className="text-sm font-medium">Дополнительное сообщение</span>
+              <span className="text-sm font-medium">Укажите свои пожелания</span>
               <textarea name="message" value={form.message} onChange={handleChange} rows={4} className="mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 border-gray-200" />
             </label>
 
-            <label className="flex flex-col md:col-span-2">
-              <span className="text-sm font-medium">Прикрепить фото (макс. 5) — будет доступно только для предпросмотра</span>
-              <input type="file" accept="image/*" multiple onChange={handleFiles} className="mt-2" />
-              {files.length > 0 && (
-                <div className="mt-3 grid grid-cols-3 gap-2">
-                  {files.map((f, i) => (
-                    <div key={i} className="text-xs text-center border rounded-md p-1 overflow-hidden">
-                      <div className="truncate" title={f.name}>{f.name}</div>
-                      <div className="text-gray-500">{Math.round(f.size / 1024)} KB</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </label>
+     
+  <fieldset className="md:col-span-2 mt-2">
+  <legend className="text-sm font-medium">Как с вами связаться?</legend>
+  <div className="flex gap-4 mt-2">
+    <label className="inline-flex items-center gap-2">
+      <input
+        type="radio"
+        name="preferredContact"
+        value="email"
+        checked={form.preferredContact === "email"}
+        onChange={handleChange}
+      />
+      <span className="text-sm">E-mail</span>
+    </label>
+    <label className="inline-flex items-center gap-2">
+      <input
+        type="radio"
+        name="preferredContact"
+        value="phone"
+        checked={form.preferredContact === "phone"}
+        onChange={handleChange}
+      />
+      <span className="text-sm">Телефон</span>
+    </label>
+  </div>
 
-            <fieldset className="md:col-span-2 mt-2">
-              <legend className="text-sm font-medium">Как с вами связаться?</legend>
-              <div className="flex gap-4 mt-2">
-                <label className="inline-flex items-center gap-2">
-                  <input type="radio" name="preferredContact" value="email" checked={form.preferredContact === 'email'} onChange={handleChange} />
-                  <span className="text-sm">E-mail</span>
-                </label>
-                <label className="inline-flex items-center gap-2">
-                  <input type="radio" name="preferredContact" value="phone" checked={form.preferredContact === 'phone'} onChange={handleChange} />
-                  <span className="text-sm">Телефон</span>
-                </label>
-              </div>
-            </fieldset>
+  {/* 👇 Условно показываем email поле */}
+  {form.preferredContact === "email" && (
+    <div className="mt-3">
+      <label className="flex flex-col">
+        <span className="text-sm font-medium">Ваш E-mail</span>
+        <input
+          name="email"
+          type="email"
+          value={form.email}
+          onChange={handleChange}
+          className={`mt-1 rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+            errors.email ? "border-red-400" : "border-gray-200"
+          }`}
+        />
+        {errors.email && (
+          <span className="text-red-500 text-xs mt-1">{errors.email}</span>
+        )}
+      </label>
+    </div>
+  )}
+</fieldset>
+ 
           </div>
 
           <div className="mt-6 flex items-center justify-end gap-3">
