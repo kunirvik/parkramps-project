@@ -2295,6 +2295,7 @@ useEffect(() => {
               ref={el => refs.current.info = el}
               className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
               style={{
+                 
                 opacity:
                   animationState.slideChanging || (!animationState.complete && imageData)
                     ? 0
@@ -2315,6 +2316,9 @@ useEffect(() => {
         {currentProduct.description3}
       </p>
               <Accordion
+              //  style={{
+              //    maxHeight :"300px",
+              //    overflowY: "auto",}}
                 key={accordionKey}
                 items={[
                    {title: "описание", content: currentProduct.description2 },
