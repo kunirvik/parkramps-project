@@ -1162,157 +1162,83 @@ const showInfoAndThumbs = useCallback(() => {
 }, []);
  
 
-//   // Анимация перехода - оптимизирована
-//   const startTransitionAnimation = useCallback(() => {
-//     if (!refs.current.transitionImage || !refs.current.swiperContainer || 
-//         !imageData || animationState.inProgress) {
-//       updateAnimationState({ complete: true });
-//       return;
-//     }
+  // Анимация перехода - оптимизирована
+  const startTransitionAnimation = useCallback(() => {
+    if (!refs.current.transitionImage || !refs.current.swiperContainer || 
+        !imageData || animationState.inProgress) {
+      updateAnimationState({ complete: true });
+      return;
+    }
 
-//     updateAnimationState({ inProgress: true });
+    updateAnimationState({ inProgress: true });
 
-//     const { top, left, width, height } = imageData.rect;
-//     const transitionEl = refs.current.transitionImage;
-//     const swiperEl = refs.current.swiperContainer;
-//     const firstSlideImage = swiperEl.querySelector('.swiper-slide-active img');
+    const { top, left, width, height } = imageData.rect;
+    const transitionEl = refs.current.transitionImage;
+    const swiperEl = refs.current.swiperContainer;
+    const firstSlideImage = swiperEl.querySelector('.swiper-slide-active img');
 
-//     if (!firstSlideImage) {
-//       console.warn("Активное изображение слайда не найдено");
-//       updateAnimationState({ complete: true, inProgress: false });
-//       return;
-//     }
-
-//     const finalRect = firstSlideImage.getBoundingClientRect();
-    
-//     if (finalRect.width === 0 || finalRect.height === 0) {
-//       setTimeout(() => {
-//         updateAnimationState({ inProgress: false });
-//         startTransitionAnimation();
-//       }, 100);
-//       return;
-//     }
-
-//     // Скрываем swiper
-//     gsap.set(swiperEl, { visibility: 'hidden', opacity: 0 });
-
-//     // Устанавливаем начальное состояние
-//     gsap.set(transitionEl, {
-//       position: "absolute",
-//       top: top - window.scrollY,
-//       left: left - window.scrollX,
-//       width, height,
-//       zIndex: 1000,
-//       opacity: 1,
-//       visibility: 'visible',
-//       objectFit: "contain",
-//       borderRadius: imageData.borderRadius || '0px',
-//       pointerEvents: 'none'
-//     });
-
-//     // Анимируем переход
-//     gsap.to(transitionEl, {
-//       top: finalRect.top - window.scrollY,
-//       left: finalRect.left - window.scrollX,
-//       width: finalRect.width,
-//       height: finalRect.height,
-//       borderRadius: '12px',
-//       duration: ANIMATION_CONFIG.DURATION,
-//       ease: ANIMATION_CONFIG.EASE,
-//   // В startTransitionAnimation:
-// onComplete: async () => {
-//   gsap.set(swiperEl, { visibility: 'visible', opacity: 1 });
-//   gsap.set(transitionEl, { visibility: 'hidden', opacity: 0 });
-
-//   updateAnimationState({ complete: true });
-
-//   // Показываем инфо и миниатюры вместе только один раз
-//   if (!state.thumbsShown) {
-//     await showInfoAndThumbs();
-//     updateState({ thumbsShown: true });
-//   }
-
-//   updateAnimationState({ inProgress: false });
-// }
-
-//     });
-//   }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
-
-
-
-const startTransitionAnimation = ({
-  imageData,
-  swiperEl,
-  transitionEl,
-  firstSlideImage,
-  ANIMATION_CONFIG,
-  updateAnimationState,
-}) => {
-  if (!imageData || !transitionEl || !firstSlideImage) return;
-
-  // --- 📌 Фиксируем скролл страницы ---
-  const scrollY = window.scrollY;
-  document.body.style.position = "fixed";
-  document.body.style.top = `-${scrollY}px`;
-  document.body.style.width = "100%";
-
-  // --- 📐 Получаем координаты один раз ---
-  const rectStart = imageData.rect;
-  const rectEnd = firstSlideImage.getBoundingClientRect();
-
-  const round = (v) => Math.round(v);
-
-  const startX = round(rectStart.left - window.scrollX);
-  const startY = round(rectStart.top - window.scrollY);
-  const finalX = round(rectEnd.left - window.scrollX);
-  const finalY = round(rectEnd.top - window.scrollY);
-
-  const startW = round(rectStart.width);
-  const startH = round(rectStart.height);
-  const finalW = round(rectEnd.width);
-  const finalH = round(rectEnd.height);
-
-  // --- 🧭 Устанавливаем начальное состояние ---
-  gsap.set(transitionEl, {
-    x: startX,
-    y: startY,
-    width: startW,
-    height: startH,
-    visibility: "visible",
-    opacity: 1,
-    willChange: "transform, width, height",
-    transform: "translateZ(0)", // 💪 форсируем GPU
-  });
-
-  gsap.set(swiperEl, {
-    visibility: "hidden",
-    opacity: 0,
-  });
-
-  // --- 🪄 Запускаем анимацию ---
-  gsap.to(transitionEl, {
-    x: finalX,
-    y: finalY,
-    width: finalW,
-    height: finalH,
-    duration: ANIMATION_CONFIG.DURATION,
-    ease: ANIMATION_CONFIG.EASE,
-    onComplete: () => {
-      // --- ✨ Возвращаем скролл ---
-      document.body.style.position = "";
-      document.body.style.top = "";
-      window.scrollTo(0, scrollY);
-
-      // --- 📸 Показываем Swiper ---
-      gsap.set(swiperEl, { visibility: "visible", opacity: 1 });
-
-      // --- 🫥 Прячем transition элемент ---
-      gsap.set(transitionEl, { visibility: "hidden", opacity: 0 });
-
+    if (!firstSlideImage) {
+      console.warn("Активное изображение слайда не найдено");
       updateAnimationState({ complete: true, inProgress: false });
-    },
-  });
-};
+      return;
+    }
+
+    const finalRect = firstSlideImage.getBoundingClientRect();
+    
+    if (finalRect.width === 0 || finalRect.height === 0) {
+      setTimeout(() => {
+        updateAnimationState({ inProgress: false });
+        startTransitionAnimation();
+      }, 100);
+      return;
+    }
+
+    // Скрываем swiper
+    gsap.set(swiperEl, { visibility: 'hidden', opacity: 0 });
+
+    // Устанавливаем начальное состояние
+    gsap.set(transitionEl, {
+      position: "absolute",
+      top: top - window.scrollY,
+      left: left - window.scrollX,
+      width, height,
+      zIndex: 1000,
+      opacity: 1,
+      visibility: 'visible',
+      objectFit: "contain",
+      borderRadius: imageData.borderRadius || '0px',
+      pointerEvents: 'none'
+    });
+
+    // Анимируем переход
+    gsap.to(transitionEl, {
+      top: finalRect.top - window.scrollY,
+      left: finalRect.left - window.scrollX,
+      width: finalRect.width,
+      height: finalRect.height,
+      borderRadius: '12px',
+      duration: ANIMATION_CONFIG.DURATION,
+      ease: ANIMATION_CONFIG.EASE,
+  // В startTransitionAnimation:
+onComplete: async () => {
+  gsap.set(swiperEl, { visibility: 'visible', opacity: 1 });
+  gsap.set(transitionEl, { visibility: 'hidden', opacity: 0 });
+
+  updateAnimationState({ complete: true });
+
+  // Показываем инфо и миниатюры вместе только один раз
+  if (!state.thumbsShown) {
+    await showInfoAndThumbs();
+    updateState({ thumbsShown: true });
+  }
+
+  updateAnimationState({ inProgress: false });
+}
+
+    });
+  }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
+
+
 
 
   // Обработчики Swiper - оптимизированы
@@ -1333,11 +1259,36 @@ const startTransitionAnimation = ({
 
 
   const handleSlideChange = useCallback(async (swiper) => {
-     if (!isDesktop()) return;
+    
     const newIndex = swiper.activeIndex;
     if (newIndex === state.activeProductIndex || animationState.inProgress) return;
 
     const oldIndex = state.activeProductIndex;
+    if (!isDesktop())
+       {
+    // На мобилках просто меняем состояние без анимаций
+    setState(prev => {
+      const newIndices = [...prev.selectedImageIndices];
+      newIndices[newIndex] = 0;
+      return {
+        ...prev,
+        activeProductIndex: newIndex,
+        selectedImageIndices: newIndices
+      };
+    });
+
+    updateUrl(productCatalogSets[newIndex].id, 0);
+    if (swiperInstances.thumbs) {
+      swiperInstances.thumbs.slideTo(newIndex);
+    }
+
+    // Сброс hover интервала
+    clearInterval(refs.current.hoverInterval);
+    refs.current.hoverInterval = null;
+    return;
+  }
+    
+    
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     await animateInfo('out');
@@ -1363,6 +1314,8 @@ const startTransitionAnimation = ({
     
     updateAnimationState({ slideChanging: false, inProgress: false });
     await animateInfo('in');
+
+    
     clearInterval(refs.current.hoverInterval);
     refs.current.hoverInterval = null;
 
