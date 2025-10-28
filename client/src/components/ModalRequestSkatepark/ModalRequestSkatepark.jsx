@@ -126,7 +126,9 @@ export default function ModalRequestSkatepark({ isOpen, onClose }) {
             </button>
           </div>
 
-          <p className="mt-2 text-sm text-gray-600">Свяжитесь с нами в соц сетях.</p>
+          <p className="mt-2 text-sm text-gray-600">Напишіть нам — підготуємо технічне завдання і попередню кошторисну пропозицію.
+
+Офіс</p>
         
             
         <div className="flex items-center gap-2">

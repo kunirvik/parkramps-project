@@ -12,6 +12,8 @@ import ProjectPage from "./components/ProjectPage/ProjectPage"
 import './App.css'
 import FAQPage from "./components/FAQPage/FAQPage"
 import SetsProductDetail from "./components/SetsProductDetail/SetsProductDetail";
+import About from "./components/About/About";
+
 
 function App() {
  const location = useLocation();
@@ -37,6 +39,7 @@ function App() {
         
         
          <Route path="projectpage" element={<ProjectPage/>}/>
+            <Route path="about" element={<About/>}/>
       </Routes>
      
     </>

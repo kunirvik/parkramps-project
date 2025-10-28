@@ -893,6 +893,7 @@ import "swiper/css/pagination";
 // import { ChevronDown, ChevronUp } from "lucide-react";
 import Accordion from "../Accordion/Accordion";
 import ContactButton from "../ContactButtons/ContactButton";
+import Footer from "../Footer/Footer";
 
 
 
@@ -1069,6 +1070,7 @@ const resetAccordion = () => {
         y: targetY,
         duration,
         ease: ANIMATION_CONFIG.EASE,
+        force3D: true,
         onComplete: resolve
       });
     });
@@ -1147,14 +1149,14 @@ const showInfoAndThumbs = useCallback(() => {
   if (refs.current.info) {
     animations.push(gsap.fromTo(refs.current.info,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: ANIMATION_CONFIG.DURATION, ease: ANIMATION_CONFIG.EASE }
+      { opacity: 1,  force3D: true, y: 0, duration: ANIMATION_CONFIG.DURATION, ease: ANIMATION_CONFIG.EASE }
     ));
   }
 
   if (refs.current.thumbs) {
     animations.push(gsap.fromTo(refs.current.thumbs,
       { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: ANIMATION_CONFIG.DURATION, ease: ANIMATION_CONFIG.EASE }
+      { opacity: 1,  force3D: true, y: 0, duration: ANIMATION_CONFIG.DURATION, ease: ANIMATION_CONFIG.EASE }
     ));
   }
 
@@ -1162,85 +1164,181 @@ const showInfoAndThumbs = useCallback(() => {
 }, []);
  
 
-  // Анимация перехода - оптимизирована
-  const startTransitionAnimation = useCallback(() => {
-    if (!refs.current.transitionImage || !refs.current.swiperContainer || 
-        !imageData || animationState.inProgress) {
-      updateAnimationState({ complete: true });
-      return;
-    }
+//   // Анимация перехода - оптимизирована
+//   const startTransitionAnimation = useCallback(() => {
+//     if (!refs.current.transitionImage || !refs.current.swiperContainer || 
+//         !imageData || animationState.inProgress) {
+//       updateAnimationState({ complete: true });
+//       return;
+//     }
 
-    updateAnimationState({ inProgress: true });
+//     updateAnimationState({ inProgress: true });
 
-    const { top, left, width, height } = imageData.rect;
-    const transitionEl = refs.current.transitionImage;
-    const swiperEl = refs.current.swiperContainer;
-    const firstSlideImage = swiperEl.querySelector('.swiper-slide-active img');
+//     const { top, left, width, height } = imageData.rect;
+//     const transitionEl = refs.current.transitionImage;
+//     const swiperEl = refs.current.swiperContainer;
+//     const firstSlideImage = swiperEl.querySelector('.swiper-slide-active img');
 
-    if (!firstSlideImage) {
-      console.warn("Активное изображение слайда не найдено");
-      updateAnimationState({ complete: true, inProgress: false });
-      return;
-    }
+//     if (!firstSlideImage) {
+//       console.warn("Активное изображение слайда не найдено");
+//       updateAnimationState({ complete: true, inProgress: false });
+//       return;
+//     }
 
-    const finalRect = firstSlideImage.getBoundingClientRect();
+//     const finalRect = firstSlideImage.getBoundingClientRect();
     
-    if (finalRect.width === 0 || finalRect.height === 0) {
-      setTimeout(() => {
-        updateAnimationState({ inProgress: false });
-        startTransitionAnimation();
-      }, 100);
-      return;
-    }
+//     if (finalRect.width === 0 || finalRect.height === 0) {
+//       setTimeout(() => {
+//         updateAnimationState({ inProgress: false });
+//         startTransitionAnimation();
+//       }, 100);
+//       return;
+//     }
 
-    // Скрываем swiper
-    gsap.set(swiperEl, { visibility: 'hidden', opacity: 0 });
+//     // Скрываем swiper
+//     gsap.set(swiperEl, { visibility: 'hidden', opacity: 0 });
 
-    // Устанавливаем начальное состояние
-    gsap.set(transitionEl, {
-      position: "absolute",
-      top: top - window.scrollY,
-      left: left - window.scrollX,
-      width, height,
-      zIndex: 1000,
-      opacity: 1,
-      visibility: 'visible',
-      objectFit: "contain",
-      borderRadius: imageData.borderRadius || '0px',
-      pointerEvents: 'none'
-    });
+//     // Устанавливаем начальное состояние
+//     gsap.set(transitionEl, {
+//       position: "fixed",
+//       top: top - window.scrollY,
+//       left: left - window.scrollX,
+//       width, height,
+//       zIndex: 1000,
+//       opacity: 1,
+//        force3D: true,
+//       visibility: 'visible',
+//       objectFit: "contain",
+//       borderRadius: imageData.borderRadius || '0px',
+//       pointerEvents: 'none'
+//     });
 
-    // Анимируем переход
-    gsap.to(transitionEl, {
-      top: finalRect.top - window.scrollY,
-      left: finalRect.left - window.scrollX,
-      width: finalRect.width,
-      height: finalRect.height,
-      borderRadius: '12px',
-      duration: ANIMATION_CONFIG.DURATION,
-      ease: ANIMATION_CONFIG.EASE,
-  // В startTransitionAnimation:
-onComplete: async () => {
-  gsap.set(swiperEl, { visibility: 'visible', opacity: 1 });
-  gsap.set(transitionEl, { visibility: 'hidden', opacity: 0 });
+//     // Анимируем переход
+//     gsap.to(transitionEl, {
+//       top: finalRect.top - window.scrollY,
+//       left: finalRect.left - window.scrollX,
+//       width: finalRect.width,
+//       height: finalRect.height,
+//       borderRadius: '12px',
+//        force3D: true,
+//       duration: ANIMATION_CONFIG.DURATION,
+//       ease: ANIMATION_CONFIG.EASE,
+//   // В startTransitionAnimation:
+// onComplete: async () => {
+//   gsap.set(swiperEl, { visibility: 'visible', opacity: 1 });
+//   gsap.set(transitionEl, { visibility: 'hidden', opacity: 0 });
 
-  updateAnimationState({ complete: true });
+//   updateAnimationState({ complete: true });
 
-  // Показываем инфо и миниатюры вместе только один раз
-  if (!state.thumbsShown) {
-    await showInfoAndThumbs();
-    updateState({ thumbsShown: true });
+//   // Показываем инфо и миниатюры вместе только один раз
+//   if (!state.thumbsShown) {
+//     await showInfoAndThumbs();
+//     updateState({ thumbsShown: true });
+//   }
+
+//   updateAnimationState({ inProgress: false });
+// }
+
+//     });
+//   }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
+
+
+
+const startTransitionAnimation = useCallback(() => {
+  if (!refs.current.transitionImage || !refs.current.swiperContainer || 
+      !imageData || animationState.inProgress) {
+    updateAnimationState({ complete: true });
+    return;
   }
 
-  updateAnimationState({ inProgress: false });
-}
+  updateAnimationState({ inProgress: true });
 
-    });
-  }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
+  const { top, left, width, height } = imageData.rect;
+  const transitionEl = refs.current.transitionImage;
+  const swiperEl = refs.current.swiperContainer;
+  const firstSlideImage = swiperEl.querySelector('.swiper-slide-active img');
 
+  if (!firstSlideImage) {
+    console.warn("Активное изображение слайда не найдено");
+    updateAnimationState({ complete: true, inProgress: false });
+    return;
+  }
 
+  const finalRect = firstSlideImage.getBoundingClientRect();
+  
+  if (finalRect.width === 0 || finalRect.height === 0) {
+    setTimeout(() => {
+      updateAnimationState({ inProgress: false });
+      startTransitionAnimation();
+    }, 100);
+    return;
+  }
 
+  // Скрываем swiper
+  gsap.set(swiperEl, { 
+    visibility: 'hidden', 
+    opacity: 0,
+    force3D: true 
+  });
 
+  // Вычисляем начальные и конечные позиции
+  const startX = left - window.scrollX;
+  const startY = top - window.scrollY;
+  const endX = finalRect.left - window.scrollX;
+  const endY = finalRect.top - window.scrollY;
+
+  // Устанавливаем начальное состояние с transform
+  gsap.set(transitionEl, {
+    position: "fixed",  // Изменено с absolute на fixed
+    top: 0,
+    left: 0,
+    x: startX,
+    y: startY,
+    width,
+    height,
+    zIndex: 1000,
+    opacity: 1,
+    visibility: 'visible',
+    objectFit: "contain",
+    borderRadius: imageData.borderRadius || '0px',
+    pointerEvents: 'none',
+    force3D: true,
+    willChange: 'transform, opacity'
+  });
+
+  // Анимируем через transform
+  gsap.to(transitionEl, {
+    x: endX,
+    y: endY,
+    width: finalRect.width,
+    height: finalRect.height,
+    borderRadius: '12px',
+    duration: ANIMATION_CONFIG.DURATION,
+    ease: ANIMATION_CONFIG.EASE,
+    force3D: true,
+    onComplete: async () => {
+      gsap.set(swiperEl, { 
+        visibility: 'visible', 
+        opacity: 1,
+        force3D: true 
+      });
+      gsap.set(transitionEl, { 
+        visibility: 'hidden', 
+        opacity: 0,
+        clearProps: 'all'  // Очищаем все свойства
+      });
+
+      updateAnimationState({ complete: true });
+
+      if (!state.thumbsShown) {
+        await showInfoAndThumbs();
+        updateState({ thumbsShown: true });
+      }
+
+      updateAnimationState({ inProgress: false });
+    }
+  });
+}, [imageData, animationState.inProgress, updateAnimationState, state.thumbsShown, showInfoAndThumbs]);
   // Обработчики Swiper - оптимизированы
   const handleSwiperInit = useCallback((swiper) => {
     setSwiperInstances(prev => ({ ...prev, main: swiper }));
@@ -1459,13 +1557,15 @@ useEffect(() => {
         .swiper-slide { 
           transition: transform ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
                       opacity ${ANIMATION_CONFIG.DURATION}s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important; 
-        }
+        will-change: transform, opacity;
+        transform: translateZ(0); }
         .swiper-no-transition .swiper-wrapper { transition: none !important; }
         .swiper-slide-thumb-active {
           opacity: 1 !important;
           transform: scale(1.05) !important;
           border: 2px solid black !important;
           border-radius: 0.5rem !important;
+          
         }
         .transition-image-container {
           position: fixed !important;
@@ -1475,7 +1575,15 @@ useEffect(() => {
           height: 100vh !important;
           overflow: hidden !important;
           pointer-events: none !important;
+            will-change: transform, opacity;
+        transform: translateZ(0);
         }
+          img {
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
       `;
     };
 
@@ -1533,11 +1641,11 @@ useEffect(() => {
           }}
         >
 
-                      <div className="w-full flex items-start  mb-4">
+                      <div className="w-full block sm: hidden flex items-start  mb-4">
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
-        className=" cursor-pointer text-gray-200 hover:text-pink-800 transition-colors"
+        className="  cursor-pointer text-gray-200 hover:text-pink-800 transition-colors"
       >
         ← Back
       </button>
@@ -1564,7 +1672,56 @@ useEffect(() => {
                 />
               </div>
             )}
-
+ <div
+          ref={el => refs.current.thumbs = el}
+          className="block sm:hidden  w-[100%] "
+          style={{
+            opacity: state.thumbsShown ? 1 : 0,
+          }}
+        >
+          <Swiper
+            modules={[Thumbs]}
+            direction="horizontal"
+            onSwiper={(swiper) =>  { 
+              setSwiperInstances((prev) => ({ ...prev, thumbs: swiper })); }}
+            breakpoints={{
+              320: { slidesPerView: 4, spaceBetween: 8 },
+              480: { slidesPerView: 8 },
+              640: { slidesPerView: 8 },
+              768: { slidesPerView: 8 },
+              1024: { slidesPerView: 8 },
+              1280: { slidesPerView: 8 },
+            }}
+            slidesPerView="auto"
+            spaceBetween={10}
+            watchSlidesProgress={true}
+            slideToClickedSlide={true}
+            initialSlide={state.activeProductIndex}
+            speed={SWIPER_CONFIG.SPEED}
+            preventClicks={false}
+            preventClicksPropagation={false}
+            observer={true}
+            observeParents={true}
+            resistance={false}
+            resistanceRatio={0}
+          >
+            {productCatalogSets.map((product, index) => (
+              <SwiperSlide key={product.id}>
+                <img
+                  src={product.image}
+                  onClick={() => handleThumbnailClick(index)}
+                  className={`cursor-pointer transition-all duration-300 rounded-lg border-2 px-3 ${
+                    index === state.activeProductIndex
+                      ? "opacity-100 scale-105 border-black"
+                      : "grayscale border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                  alt={product.name}
+                  draggable="false"
+                />
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
             {/* Swiper галерея */}
             <div
               ref={el => refs.current.swiperContainer = el}
@@ -1629,7 +1786,7 @@ useEffect(() => {
                 </div>
               </div>
             </div>
-
+<></>
             <div
               ref={el => refs.current.info = el}
               className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
@@ -1659,8 +1816,9 @@ useEffect(() => {
               <Accordion
               key={accordionKey} 
                 items={[
-                  //  {title: "описание", content: currentProduct.description2 },
-                  { title: "приобрести рампу", content: (<>{currentProduct.description} <ContactButton/></>) },
+                   {title: "опис", content: currentProduct.description2 },
+                  { title: "замовити фiгуру", content: (<>{currentProduct.description} <ContactButton/></>) },
+                  
                  
                 ]}
                 defaultOpenIndex={1}
@@ -1694,7 +1852,7 @@ useEffect(() => {
 
         <div
           ref={el => refs.current.thumbs = el}
-          className="block   w-[100%]  pt-10 sm:pt-10"
+          className="hidden  sm:block  w-[100%]  pt-10 sm:pt-10"
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1756,12 +1914,13 @@ useEffect(() => {
           onClose={() => updateState({ isGalleryOpen: false })}
         />
 
-        {/* Дата по центру внизу */}
+<Footer />
+        {/* Дата по центру внизу
         <div className="flex justify-center items-center bg-black">
           <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
            2015-2025 © всі права захищені
           </span>
-        </div>
+        </div> */}
       </div>
     </>
   );

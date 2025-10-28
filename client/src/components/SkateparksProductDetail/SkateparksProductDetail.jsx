@@ -715,6 +715,7 @@ import "swiper/css/pagination";
 // import { ChevronDown, ChevronUp } from "lucide-react";
 import Accordion from "../Accordion/Accordion";
 import ContactButton from "../ContactButtons/ContactButton";
+import Footer from "../Footer/Footer";
 
 
 
@@ -1578,13 +1579,14 @@ useEffect(() => {
           isOpen={state.isGalleryOpen}
           onClose={() => updateState({ isGalleryOpen: false })}
         />
-
+<Footer></Footer>
         {/* Дата по центру внизу */}
-        <div className="flex justify-center items-center bg-black">
+        {/* <div className="flex justify-center items-center bg-black">
           <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
             2015-2025 © всі права захищені
           </span>
-        </div>
+        </div> */}
+
       </div>
     </>
   );

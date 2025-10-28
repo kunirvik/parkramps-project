@@ -14,6 +14,14 @@ const products = [
     description: "An iconic pop-art sofa."
   },
 
+  {
+    id: 2,
+      category: "ramps",  
+      image: "/images/ramps/minir180h60w200d40alt.png",
+    name: "рампи",
+    hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
+    description: "An iconic pop-art sofa."
+  }, 
   
      {
     id: 3,
@@ -26,14 +34,6 @@ const products = [
   },
 
 
-  {
-    id: 2,
-      category: "ramps",  
-      image: "/images/ramps/minir180h60w200d40alt.png",
-    name: "рампи",
-    hoverImage:  ["/images/skateparks/park3.png", "/images/skateparks/park2.png"],
-    description: "An iconic pop-art sofa."
-  }, 
 
 
   {
@@ -241,13 +241,13 @@ return (
 
   <div className="flex-grow overflow-hidden flex items-center justify-center  "   style={{
   marginTop: "clamp(60px, 3vw, 60px)"}}> 
-  <div className="grid grid-cols-1  sm:grid-cols-2 w-full h-full  "
+  <div className="grid grid-cols-1 md:grid-cols-2  w-full h-full  "
         style={{
     maxHeight: "100%",
     overflow: "auto",
     // paddingTop: "clamp(50px, 3vw, 50px)", // отступ сверху
    
-    // gap: "clamp(10px, 3vw, 20px)", // min 10px, растет до 40px с экраном
+    gap: "clamp(10px, 3vw, 20px)", // min 10px, растет до 40px с экраном
     // padding: "clamp(20px, 1vw, 20px)", // тоже динамически для отступов
   }}>
     {products.map((product) => (

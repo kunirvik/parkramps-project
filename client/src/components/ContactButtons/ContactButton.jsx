@@ -1,12 +1,18 @@
 import { motion } from "framer-motion";
-import { Instagram, Mail, Phone } from "lucide-react"; // предполагаю, что иконки берутся отсю
+import { Instagram, Plane, Mail } from "lucide-react"; // предполагаю, что иконки берутся отсю
+import { useState } from "react";
+import ModalRequestSkatepark from "../ModalRequestSkatepark/ModalRequestSkatepark";
 export default function ContactButton({ }) {
 const buttons = [
     { icon: <Instagram size={15} className="text-[#919191]" />, link: "https://instagram.com/parkramps/" },
-    { icon: <Mail size={15} className="text-[#919191]" />, link: "mailto:example@mail.com" },
-    { icon: <Phone size={15} className="text-[#919191]" />, link: "tel:+1234567890" },
+   { icon: <Mail size={15} className="text-[#919191]" />,  onClick: () => setIsModalOpen(true) }, 
+    { icon: <Plane size={15} className="text-[#919191]" />, link: "https://t.me/parkrampsi" },
+   
   ];
-    return (<><div className="flex space-x-4">
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+    
+    return (<><div className="flex mt-5 space-x-4">
           {buttons.map((button, index) => (
             <motion.a
               key={index}
@@ -19,7 +25,8 @@ const buttons = [
             >
               {button.icon}
             </motion.a>
-          ))}</div></>
+          ))}</div>
+          <ModalRequestSkatepark isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} /></>
         )}
 
     

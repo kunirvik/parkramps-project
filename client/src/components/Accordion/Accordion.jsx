@@ -186,7 +186,7 @@ const Accordion = ({ items, defaultOpenIndexDesktop = 0, forceCloseTrigger }) =>
                 <ChevronDown className="w-5 h-5" />
               )}
               <span
-                className={`absolute left-0 w-full h-[1px] bg-gray-500 transition-transform duration-300`}
+                className={`absolute left-0 w-full h-[1px] bg-gray-500  transition-transform duration-300`}
                 style={{
                   bottom: isOpen ? "-8px" : "0px",
                   transform: isOpen ? "translateY(100%)" : "translateY(0)",
@@ -200,14 +200,17 @@ const Accordion = ({ items, defaultOpenIndexDesktop = 0, forceCloseTrigger }) =>
                 isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
               }`}
             >
-              <div className="pb-5 text-[#717171] font-futura relative">
+              <div className="pb-5 text-[#717171] font-futura font-medium relative">
                 {item.content}
               </div>
               {isOpen && (
                 <span className="absolute left-0 bottom-0 w-full h-[1px] bg-gray-500" />
               )}
             </div>
+
+<button ></button>
           </div>
+
         );
       })}
     </div>
