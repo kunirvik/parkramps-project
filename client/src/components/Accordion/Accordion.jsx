@@ -174,7 +174,7 @@ const Accordion = ({ items, defaultOpenIndexDesktop = 0, forceCloseTrigger }) =>
         return (
           <div key={index} className="w-full">
             <button
-              className="cursor-pointer relative w-full flex justify-between items-center py-3 text-left text-gray-900 hover:text-gray-300 transition-colors group"
+              className="cursor-pointer relative w-full flex justify-between items-center py-1 text-left text-gray-900 hover:text-gray-300 transition-colors group"
               onClick={() => toggleAccordion(index)}
             >
               <span className="font-futura font-medium text-[#717171]">
@@ -200,7 +200,7 @@ const Accordion = ({ items, defaultOpenIndexDesktop = 0, forceCloseTrigger }) =>
                 isOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
               }`}
             >
-              <div className="pb-5 text-[#717171] font-futura font-medium relative">
+              <div className=" text-[#717171] font-futura font-medium relative">
                 {item.content}
               </div>
               {isOpen && (

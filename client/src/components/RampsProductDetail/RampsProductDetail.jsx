@@ -2379,7 +2379,7 @@ useEffect(() => {
                  forceCloseTrigger={state.activeProductIndex}
               />
 
-              {/* {currentProduct.details?.map((detail, index) => {
+              {currentProduct.details?.map((detail, index) => {
                 const isCatalog = detail.title.toLowerCase().includes("каталог");
                 return (
                   <button
@@ -2399,7 +2399,7 @@ useEffect(() => {
                     <span className="font-futura text-[#717171] text-lg">→</span>
                   </button>
                 );
-              })} */}
+              })}
             </div>
           </div>
         </div>

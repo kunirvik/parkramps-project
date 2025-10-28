@@ -1318,7 +1318,7 @@ useEffect(() => {
           }}
         >
 
-                      <div className="w-full flex items-start  mb-4">
+                      <div className="w-full  hidden sm:block  flex items-start  mb-4">
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
@@ -1351,7 +1351,7 @@ useEffect(() => {
             )}
   <div
           ref={el => refs.current.thumbs = el}
-          className="block sm:hidden w-[100%] "
+          className="block py-5 sm:hidden w-[100%] "
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1486,14 +1486,22 @@ useEffect(() => {
               <Accordion
               key={accordionKey} 
                 items={[
-                   {title: "описание", content: currentProduct.description2 },
-                  { title: "приобрести рампу", content: (<>{currentProduct.description} <ContactButton/></>) },
-                 
+                   {title: "опис", content: currentProduct.description2 },
+                  { title: "замовити скейтпарк", content: (<>{currentProduct.description} <ContactButton/></>) },
+                
                 ]}
                 defaultOpenIndex={1}
                  forceCloseTrigger={state.activeProductIndex}
               />
-
+ {/* <button
+          onClick={(e) => {
+            e.stopPropagation();
+            openGallery();
+          }}
+          className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+        >
+          Відкрити каталог →
+        </button> */}
               {currentProduct.details?.map((detail, index) => {
                 const isCatalog = detail.title.toLowerCase().includes("каталог");
                 return (
