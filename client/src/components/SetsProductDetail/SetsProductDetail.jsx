@@ -958,15 +958,6 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     isCompleted: false
   });
 
-
-  const [accordionKey, setAccordionKey] = useState(0);
-
-const resetAccordion = () => {
-  // изменение ключа форсит сброс Accordion в закрытое состояние
-  setAccordionKey(prev => prev + 1);
-}; 
-
-
   // Refs - объединены в один объект
   const refs = useRef({
     container: null,
@@ -992,8 +983,13 @@ const resetAccordion = () => {
   //   currentProduct ? currentProduct.sample : [], 
   //   [currentProduct]
   // );
+const [accordionKey, setAccordionKey] = useState(0);
 
-
+const resetAccordion = () => {
+  // изменение ключа форсит сброс Accordion в закрытое состояние
+  setAccordionKey(prev => prev + 1);
+};
+ 
   const allImages = useMemo(() => 
     productCatalogSets.flatMap((p) => p.sample || []), 
     []
@@ -1004,15 +1000,13 @@ const resetAccordion = () => {
     if (refs.current.urlUpdateBlocked) return;
     
     refs.current.urlUpdateBlocked = true;
-    const newUrl = `/product/sets/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/ramps/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     setTimeout(() => {
       refs.current.urlUpdateBlocked = false;
     }, 50);
   }, []);
-
-  
 
   const updateAnimationState = useCallback((updates) => {
     setAnimationState(prev => ({ ...prev, ...updates }));
@@ -1021,6 +1015,7 @@ const resetAccordion = () => {
   const updateState = useCallback((updates) => {
     setState(prev => ({ ...prev, ...updates }));
   }, []);
+
 
   // Обработка завершения loading screen
   const handleLoadingComplete = useCallback(() => {
@@ -1041,6 +1036,8 @@ const resetAccordion = () => {
           }
         );
         
+      
+
         gsap.fromTo(refs.current.info,
           { opacity: 0, y: 50 },
           { 
@@ -1106,6 +1103,7 @@ const resetAccordion = () => {
  
   // Hover логика - оптимизирована
   const startHoverInterval = useCallback((index, product) => {
+      if (isTouchDevice) return; // 🚫 отключаем на телефонах
     clearInterval(refs.current.hoverInterval);
 
     const totalImages = 1 + (product?.altImages?.length || 0);
@@ -1239,9 +1237,6 @@ onComplete: async () => {
     });
   }, [imageData, animationState.inProgress, updateAnimationState, animateInfo]);
 
-
-
-
   // Обработчики Swiper - оптимизированы
   const handleSwiperInit = useCallback((swiper) => {
     setSwiperInstances(prev => ({ ...prev, main: swiper }));
@@ -1258,43 +1253,16 @@ onComplete: async () => {
   requestAnimationFrame(startTransitionAnimation);
 }, [imageData, startTransitionAnimation, state.thumbsShown, showInfoAndThumbs]);
 
-
   const handleSlideChange = useCallback(async (swiper) => {
-    
     const newIndex = swiper.activeIndex;
     if (newIndex === state.activeProductIndex || animationState.inProgress) return;
 
     const oldIndex = state.activeProductIndex;
-    if (!isDesktop())
-       {
-    // На мобилках просто меняем состояние без анимаций
-    setState(prev => {
-      const newIndices = [...prev.selectedImageIndices];
-      newIndices[newIndex] = 0;
-      return {
-        ...prev,
-        activeProductIndex: newIndex,
-        selectedImageIndices: newIndices
-      };
-    });
-
-    updateUrl(productCatalogSets[newIndex].id, 0);
-    if (swiperInstances.thumbs) {
-      swiperInstances.thumbs.slideTo(newIndex);
-    }
-
-    // Сброс hover интервала
-    clearInterval(refs.current.hoverInterval);
-    refs.current.hoverInterval = null;
-    return;
-  }
-    
-    
     updateAnimationState({ slideChanging: true, inProgress: true });
 
     await animateInfo('out');
 
-    resetAccordion();
+    resetAccordion(); // сбрасываем аккордеон при смене слайда
 
     // Обновляем состояние одним вызовом
     setState(prev => {
@@ -1315,8 +1283,6 @@ onComplete: async () => {
     
     updateAnimationState({ slideChanging: false, inProgress: false });
     await animateInfo('in');
-
-    
     clearInterval(refs.current.hoverInterval);
     refs.current.hoverInterval = null;
 
@@ -1327,6 +1293,11 @@ onComplete: async () => {
         return { ...prev, selectedImageIndices: newIndices };
       });
 
+
+        // 🚫 на мобильных ничего не делаем
+  if (isTouchDevice) return;
+
+  
       const pending = refs.current.pendingHover;
       if ((pending && pending.index === newIndex) || 
           refs.current.hoveredIndex === newIndex || 
@@ -1370,6 +1341,7 @@ onComplete: async () => {
   // }, []);
 
 const handleMouseEnter = useCallback((index, product) => {
+   if (isTouchDevice) return; // 🚫 на телефоне не запускаем
    if (!isDesktop()) return;
   if (!animationState.complete || animationState.inProgress) return;
 
@@ -1534,11 +1506,11 @@ useEffect(() => {
           }}
         >
 
-                      <div className="w-full block sm: hidden flex items-start  mb-4">
+                      <div className="hidden sm:block w-full flex items-start  mb-4">
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
-        className="  cursor-pointer text-gray-200 hover:text-pink-800 transition-colors"
+        className=" cursor-pointer text-gray-200 hover:text-pink-800 transition-colors"
       >
         ← Back
       </button>
@@ -1565,9 +1537,9 @@ useEffect(() => {
                 />
               </div>
             )}
- <div
+<div
           ref={el => refs.current.thumbs = el}
-          className="block sm:hidden  w-[100%] "
+          className="block sm:hidden pt-5 w-[100%] "
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1679,13 +1651,12 @@ useEffect(() => {
                 </div>
               </div>
             </div>
-<></>
+
             <div
               ref={el => refs.current.info = el}
               className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
               style={{
-                maxHeight :"400px",
-               
+                 
                 opacity:
                   animationState.slideChanging || (!animationState.complete && imageData)
                     ? 0
@@ -1702,16 +1673,17 @@ useEffect(() => {
                   {currentProduct.name}
                 </h1>
               </div>
-                 <p className="text-1xl font-futura text-[#717171] font-medium mb-3">
-        {currentProduct.description2}
+               <p className="text-1xl font-futura text-[#717171] font-medium mb-3">
+        {currentProduct.description3}
       </p>
-
               <Accordion
-              key={accordionKey} 
+              //  style={{
+              //    maxHeight :"300px",
+              //    overflowY: "auto",}}
+                key={accordionKey}
                 items={[
                    {title: "опис", content: currentProduct.description2 },
-                  { title: "замовити фiгуру", content: (<>{currentProduct.description} <ContactButton/></>) },
-                  
+                  { title: "замовити рампу", content: (<>{currentProduct.description} <ContactButton/></>) },
                  
                 ]}
                 defaultOpenIndex={1}
@@ -1745,7 +1717,7 @@ useEffect(() => {
 
         <div
           ref={el => refs.current.thumbs = el}
-          className="hidden  sm:block  w-[100%]  pt-10 sm:pt-10"
+          className="hidden sm:block w-[100%]  pt-10 pb-10 sm:pt-10"
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1807,14 +1779,14 @@ useEffect(() => {
           onClose={() => updateState({ isGalleryOpen: false })}
         />
 
-<Footer />
-        {/* Дата по центру внизу
-        <div className="flex justify-center items-center bg-black">
+<Footer></Footer>
+        {/* Дата по центру внизу */}
+        {/* <div className="flex justify-center items-center bg-black">
           <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
-           2015-2025 © всі права захищені
+         © 2025 Parkramps — Скейтпарки і екстрим-майданчики в Україні
           </span>
-        </div> */}
-      </div>
+        </div>*/}
+      </div> 
     </>
   );
 }

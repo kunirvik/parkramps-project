@@ -924,6 +924,9 @@ const resetAccordion = () => {
  
   // Hover логика - оптимизирована
   const startHoverInterval = useCallback((index, product) => {
+    if (isTouchDevice) return; // 🚫 отключаем на телефонах 
+    
+
     clearInterval(refs.current.hoverInterval);
 
     const totalImages = 1 + (product?.altImages?.length || 0);
@@ -1113,6 +1116,8 @@ onComplete: async () => {
         newIndices[oldIndex] = 0;
         return { ...prev, selectedImageIndices: newIndices };
       });
+  // 🚫 на мобильных ничего не делаем
+  if (isTouchDevice) return;
 
       const pending = refs.current.pendingHover;
       if ((pending && pending.index === newIndex) || 
@@ -1156,6 +1161,7 @@ onComplete: async () => {
   //   clearInterval(refs.current.hoverInterval);
   // }, []);
 const handleMouseEnter = useCallback((index, product) => {
+  if (isTouchDevice) return; // 🚫 на телефоне не запускаем
   if (!animationState.complete || animationState.inProgress) return;
 
   updateState({ hoveredIndex: index });
