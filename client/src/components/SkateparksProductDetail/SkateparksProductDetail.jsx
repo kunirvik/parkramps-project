@@ -1332,7 +1332,13 @@ useEffect(() => {
       >
         ← Back
       </button>
-
+<div className="hidden lg:block w-[50%] absolute right-[1%] top-15 z-20">
+  <p className="text-[#717171] text-right text-[20px] font-futura font-medium tracking-wide">
+   Не чекай ідеального парку — створи його сам. Фігура за фігурою. Трюк за трюком.
+    Не чекай ідеального парку — створи його сам. Фігура за фігурою. Трюк за трюком.
+     Не чекай ідеального парку — створи його сам. Фігура за фігурою. Трюк за трюком.
+  </p>
+</div>
 
     </div> 
 

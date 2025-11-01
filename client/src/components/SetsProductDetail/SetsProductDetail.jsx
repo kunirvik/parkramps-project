@@ -901,6 +901,7 @@ import Footer from "../Footer/Footer";
 
 
 
+
 // Константы
 const ANIMATION_CONFIG = {
   DURATION: 0.6,
@@ -938,6 +939,14 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
     galleryStartIndex: 0,
     thumbsShown: false
   }));
+
+  const [accordionKey, setAccordionKey] = useState(0);
+
+const resetAccordion = () => {
+  // изменение ключа форсит сброс Accordion в закрытое состояние
+  setAccordionKey(prev => prev + 1);
+};
+
 
   // Состояния Swiper
   const [swiperInstances, setSwiperInstances] = useState({
@@ -983,13 +992,7 @@ const isDesktop = () => window.innerWidth >= 1024; // или другой пор
   //   currentProduct ? currentProduct.sample : [], 
   //   [currentProduct]
   // );
-const [accordionKey, setAccordionKey] = useState(0);
 
-const resetAccordion = () => {
-  // изменение ключа форсит сброс Accordion в закрытое состояние
-  setAccordionKey(prev => prev + 1);
-};
- 
   const allImages = useMemo(() => 
     productCatalogSets.flatMap((p) => p.sample || []), 
     []
@@ -1000,7 +1003,7 @@ const resetAccordion = () => {
     if (refs.current.urlUpdateBlocked) return;
     
     refs.current.urlUpdateBlocked = true;
-    const newUrl = `/product/ramps/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/sets/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     setTimeout(() => {
@@ -1015,7 +1018,6 @@ const resetAccordion = () => {
   const updateState = useCallback((updates) => {
     setState(prev => ({ ...prev, ...updates }));
   }, []);
-
 
   // Обработка завершения loading screen
   const handleLoadingComplete = useCallback(() => {
@@ -1036,8 +1038,6 @@ const resetAccordion = () => {
           }
         );
         
-      
-
         gsap.fromTo(refs.current.info,
           { opacity: 0, y: 50 },
           { 
@@ -1103,7 +1103,9 @@ const resetAccordion = () => {
  
   // Hover логика - оптимизирована
   const startHoverInterval = useCallback((index, product) => {
-      if (isTouchDevice) return; // 🚫 отключаем на телефонах
+    if (isTouchDevice) return; // 🚫 отключаем на телефонах 
+    
+
     clearInterval(refs.current.hoverInterval);
 
     const totalImages = 1 + (product?.altImages?.length || 0);
@@ -1262,7 +1264,8 @@ onComplete: async () => {
 
     await animateInfo('out');
 
-    resetAccordion(); // сбрасываем аккордеон при смене слайда
+
+    resetAccordion();
 
     // Обновляем состояние одним вызовом
     setState(prev => {
@@ -1292,12 +1295,9 @@ onComplete: async () => {
         newIndices[oldIndex] = 0;
         return { ...prev, selectedImageIndices: newIndices };
       });
-
-
-        // 🚫 на мобильных ничего не делаем
+  // 🚫 на мобильных ничего не делаем
   if (isTouchDevice) return;
 
-  
       const pending = refs.current.pendingHover;
       if ((pending && pending.index === newIndex) || 
           refs.current.hoveredIndex === newIndex || 
@@ -1339,10 +1339,8 @@ onComplete: async () => {
   //   updateState({ hoveredIndex: null });
   //   clearInterval(refs.current.hoverInterval);
   // }, []);
-
 const handleMouseEnter = useCallback((index, product) => {
-   if (isTouchDevice) return; // 🚫 на телефоне не запускаем
-   if (!isDesktop()) return;
+  if (isTouchDevice) return; // 🚫 на телефоне не запускаем
   if (!animationState.complete || animationState.inProgress) return;
 
   updateState({ hoveredIndex: index });
@@ -1364,7 +1362,6 @@ const handleMouseEnter = useCallback((index, product) => {
 }, [animationState.complete, animationState.inProgress, getIntervalDuration]);
 
 const handleMouseLeave = useCallback(() => {
-   if (!isDesktop()) return;
   updateState({ hoveredIndex: null });
   clearInterval(refs.current.hoverInterval);
   refs.current.hoverInterval = null;
@@ -1380,7 +1377,7 @@ const handleTouchEnd = useCallback(() => {
   clearInterval(refs.current.hoverInterval);
 }, []);
 
-
+ 
 
   // Effects - оптимизированы
   useEffect(() => {
@@ -1506,7 +1503,7 @@ useEffect(() => {
           }}
         >
 
-                      <div className="hidden sm:block w-full flex items-start  mb-4">
+                      <div className="w-full  hidden sm:block  flex items-start  mb-4">
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
@@ -1537,9 +1534,9 @@ useEffect(() => {
                 />
               </div>
             )}
-<div
+  <div
           ref={el => refs.current.thumbs = el}
-          className="block sm:hidden pt-5 w-[100%] "
+          className="block py-5 sm:hidden w-[100%] "
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1639,11 +1636,7 @@ useEffect(() => {
                             onTouchStart={() => handleTouchStart(index, product)}
                             onTouchEnd={() => handleTouchEnd(index)}
                           />
-      
-
                         </div>
-
-                    
                       </SwiperSlide>
                     ))}
                   </Swiper>
@@ -1656,7 +1649,6 @@ useEffect(() => {
               ref={el => refs.current.info = el}
               className="w-full lg:w-[%] lg:h-[55%] flex flex-col justify mt-8 lg:mt-20"
               style={{
-                 
                 opacity:
                   animationState.slideChanging || (!animationState.complete && imageData)
                     ? 0
@@ -1673,23 +1665,28 @@ useEffect(() => {
                   {currentProduct.name}
                 </h1>
               </div>
-               <p className="text-1xl font-futura text-[#717171] font-medium mb-3">
+   <p className="text-1xl font-futura text-[#717171] font-medium mb-3">
         {currentProduct.description3}
       </p>
               <Accordion
-              //  style={{
-              //    maxHeight :"300px",
-              //    overflowY: "auto",}}
-                key={accordionKey}
+              key={accordionKey} 
                 items={[
                    {title: "опис", content: currentProduct.description2 },
-                  { title: "замовити рампу", content: (<>{currentProduct.description} <ContactButton/></>) },
-                 
+                  { title: "замовити скейтпарк", content: (<>{currentProduct.description} <ContactButton/></>) },
+                
                 ]}
                 defaultOpenIndex={1}
                  forceCloseTrigger={state.activeProductIndex}
               />
-
+ {/* <button
+          onClick={(e) => {
+            e.stopPropagation();
+            openGallery();
+          }}
+          className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
+        >
+          Відкрити каталог →
+        </button> */}
               {currentProduct.details?.map((detail, index) => {
                 const isCatalog = detail.title.toLowerCase().includes("каталог");
                 return (
@@ -1715,9 +1712,10 @@ useEffect(() => {
           </div>
         </div>
 
+      
         <div
           ref={el => refs.current.thumbs = el}
-          className="hidden sm:block w-[100%]  pt-10 pb-10 sm:pt-10"
+          className="hidden sm:block w-[100%] pt-10 pb-10 sm:pt-10"
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1761,11 +1759,7 @@ useEffect(() => {
                   alt={product.name}
                   draggable="false"
                 />
-
-                
               </SwiperSlide>
-
-              
             ))}
           </Swiper>
         </div>
@@ -1778,15 +1772,15 @@ useEffect(() => {
           isOpen={state.isGalleryOpen}
           onClose={() => updateState({ isGalleryOpen: false })}
         />
-
 <Footer></Footer>
         {/* Дата по центру внизу */}
         {/* <div className="flex justify-center items-center bg-black">
           <span className="text-[#919190] font-futura font-light text-sm sm:text-[17px]">
-         © 2025 Parkramps — Скейтпарки і екстрим-майданчики в Україні
+            2015-2025 © всі права захищені
           </span>
-        </div>*/}
-      </div> 
+        </div> */}
+
+      </div>
     </>
   );
 }

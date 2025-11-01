@@ -60,7 +60,7 @@ export default function FullscreenGallery({
     }
   }, [isOpen, startIndex, isMobile]);
 
-  if (!isOpen) return null;
+
 
  // ✅ Мемоизируем SwiperSlides (всегда, не внутри условия)
 const swiperSlides = useMemo(
