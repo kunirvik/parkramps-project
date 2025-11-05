@@ -1507,7 +1507,7 @@ useEffect(() => {
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
-        className=" cursor-pointer text-gray-200 hover:text-pink-800 transition-colors"
+        className=" cursor-pointer font-futura text-[#717171] font-medium text-[17px]   hover:text-pink-800 transition-colors"
       >
         ← Back
       </button>
@@ -1536,7 +1536,7 @@ useEffect(() => {
             )}
   <div
           ref={el => refs.current.thumbs = el}
-          className="block py-5 sm:hidden w-[100%] "
+          className="block sm:hidden w-[100%] "
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1587,7 +1587,7 @@ useEffect(() => {
             {/* Swiper галерея */}
             <div
               ref={el => refs.current.swiperContainer = el}
-              className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
+              className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-0 lg:content-center"
               style={{
                 visibility: !imageData || animationState.complete ? "visible" : "hidden",
                 opacity: !imageData || animationState.complete ? 1 : 0,
@@ -1695,9 +1695,10 @@ useEffect(() => {
                     onClick={() => {
                       if (isCatalog) {
                         openGallery();
-                      } else {
-                        window.location.href = detail.link;
                       }
+                      //  else {
+                      //   // window.location.href = detail.link;
+                      // }
                     }}
                     className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
                   >

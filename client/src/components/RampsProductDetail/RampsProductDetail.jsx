@@ -2206,7 +2206,7 @@ useEffect(() => {
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
-        className=" cursor-pointer text-gray-200 hover:text-pink-800 transition-colors"
+        className=" cursor-pointer font-futura text-[#717171] font-medium text-[17px] hover:text-pink-800 transition-colors"
       >
         ← Back
       </button>
@@ -2214,7 +2214,7 @@ useEffect(() => {
 
     </div> 
 
-          <div className="w-full lg:h-[50%] flex flex-col lg:flex-row lg:content-center relative">
+          <div className="w-full lg:h-[50%] flex flex-col mt-5 lg:flex-row lg:content-center relative">
             {/* Переходное изображение */}
             {!animationState.complete && imageData && (
               <div className="transition-image-container">
@@ -2235,7 +2235,7 @@ useEffect(() => {
             )}
 <div
           ref={el => refs.current.thumbs = el}
-          className="block sm:hidden pt-5 w-[100%] "
+          className="block sm:hidden w-[100%] "
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -2286,7 +2286,7 @@ useEffect(() => {
             {/* Swiper галерея */}
             <div
               ref={el => refs.current.swiperContainer = el}
-              className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
+              className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-0 lg:content-center"
               style={{
                 visibility: !imageData || animationState.complete ? "visible" : "hidden",
                 opacity: !imageData || animationState.complete ? 1 : 0,
@@ -2295,7 +2295,7 @@ useEffect(() => {
               <div className="w-full flex flex-row items-start justify-between gap-2">
                 <div className="w-[100%]">
                   <Swiper
-                    className="custom-swiper h-[250px] sm:h-[300px] md:h-[350px]"
+                    className="custom-swiper h-[250px] sm:h-[350px] md:h-[350px]"
                     modules={[Pagination, Mousewheel, Thumbs]}
                     pagination={{ clickable: true, el: ".custom-swiper-pagination" }}
                     mousewheel={true}

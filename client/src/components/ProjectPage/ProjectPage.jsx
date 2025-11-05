@@ -18,6 +18,15 @@ const images = [
     }
   },
   {
+    public_id: "skatepark-2",
+    secure_url: "/images/project2026/2017.jpg",
+    resource_type: "image",
+    context: {
+      caption: "Скейтпарк №2",
+      alt: "Вид на другой скейтпарк"
+    }
+  },
+  {
     public_id: "ramp-1",
     secure_url: "/images/project2026/halloween2.jpg",
     resource_type: "image",
@@ -26,6 +35,7 @@ const images = [
       alt: "Небольшая мини-рампa для скейтборда"
     }
   },
+
   {
     public_id: "skatepark-2",
     secure_url: "/images/project2026/bmxsesh.jpg",
@@ -34,7 +44,17 @@ const images = [
       caption: "Скейтпарк №2",
       alt: "Вид на другой скейтпарк"
     }
+  },  
+  {
+    public_id: "skatepark-2",
+    secure_url: "/images/project2026/2021.jpg",
+    resource_type: "image",
+    context: {
+      caption: "Скейтпарк №2",
+      alt: "Вид на другой скейтпарк"
+    }
   },
+  
     {
     public_id: "skatepark-2",
     secure_url: "/images/project2026/skatesesh.jpg",
@@ -42,8 +62,32 @@ const images = [
     context: {
       caption: "Скейтпарк №2",
       alt: "Вид на другой скейтпарк"
+    }, },
+     {
+    public_id: "skatepark-2",
+    secure_url: "/images/project2026/2015.jpg",
+    resource_type: "image",
+    context: {
+      caption: "Скейтпарк №2",
+      alt: "Вид на другой скейтпарк"
+    }},{
+    public_id: "skatepark-2",
+    secure_url: "/images/project2026/2020.jpg",
+    resource_type: "image",
+    context: {
+      caption: "Скейтпарк №2",
+      alt: "Вид на другой скейтпарк"
     }
   },
+      {
+    public_id: "skatepark-2",
+    secure_url: "/images/project2026/bmx2016.jpg",
+    resource_type: "image",
+    context: {
+      caption: "Скейтпарк №2",
+      alt: "Вид на другой скейтпарк"
+    }}
+ 
 ]; 
 const ProjectPage = () => {
   // const [images, setImages] = useState([]);
