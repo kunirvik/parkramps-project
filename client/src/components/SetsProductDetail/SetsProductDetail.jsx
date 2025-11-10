@@ -1419,7 +1419,7 @@ useEffect(() => {
     const applyStyles = (isDesktop) => {
       styleElement.innerHTML = `
         html, body { 
-          overflow: ${isDesktop ? "hidden" : "auto"} !important; 
+          overflow: ${isDesktop ? "auto" : "auto"} !important; 
           height: 100% !important;
           width: 100% !important;
         }
@@ -1502,16 +1502,29 @@ useEffect(() => {
             opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
           }}
         >
-
+                 <div className=" block lg:hidden w-[100%]   top-15 z-20">
+  <p className="text-[#bdbdbd]  text-[17px] font-futura font-medium tracking-wide">
+   Не чекай ідеального парку — створи його сам. Фігура за фігурою. Трюк за трюком.
+ 
+  </p>
+</div>
                       <div className="w-full  hidden sm:block  flex items-start  mb-4">
+       
       {/* Левая часть — Back */}
       <button
         onClick={() => navigate(-1)}
-        className=" cursor-pointer font-futura text-[#717171] font-medium text-[17px]   hover:text-pink-800 transition-colors"
+        className=" cursor-pointer font-futura text-[#717171] font-medium text-[17px] hover:text-pink-800 transition-colors"
       >
         ← Back
       </button>
-
+<div className="hidden lg:block w-[50%] absolute right-[1%] top-15 z-20">
+  <p className="text-[#bdbdbd] text-right text-[20px] font-futura font-medium tracking-wide">
+   Не чекай ідеального парку — створи його сам. Фігура за фігурою. Трюк за трюком.
+    Грайнди, бокси, рейли, фанбокси — усе, щоб твій спот жив. 
+    Легко комбінуються, зручно перевозити. 
+    
+  </p>
+</div>
 
     </div> 
 
@@ -1536,7 +1549,7 @@ useEffect(() => {
             )}
   <div
           ref={el => refs.current.thumbs = el}
-          className="block sm:hidden w-[100%] "
+          className="block py-5 sm:hidden w-[100%] "
           style={{
             opacity: state.thumbsShown ? 1 : 0,
           }}
@@ -1587,7 +1600,7 @@ useEffect(() => {
             {/* Swiper галерея */}
             <div
               ref={el => refs.current.swiperContainer = el}
-              className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-0 lg:content-center"
+              className="w-full lg:w-[75%] lg:h-[100%] mt-0 lg:mt-20 lg:content-center"
               style={{
                 visibility: !imageData || animationState.complete ? "visible" : "hidden",
                 opacity: !imageData || animationState.complete ? 1 : 0,
@@ -1695,10 +1708,9 @@ useEffect(() => {
                     onClick={() => {
                       if (isCatalog) {
                         openGallery();
+                      } else {
+                        window.location.href = detail.link;
                       }
-                      //  else {
-                      //   // window.location.href = detail.link;
-                      // }
                     }}
                     className="w-full text-left flex cursor-pointer justify-between items-center py-3 border-b border-gray-200 text-gray-900 hover:text-blue-600 transition-colors"
                   >

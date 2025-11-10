@@ -13,10 +13,23 @@ const app = express();
 
 app.use(cors());
 
+app.use(express.json());
 
 
+
+// подключаемся к MongoDB
+mongoose.connect(process.env.MONGO_URL)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.log('❌ Mongo error', err));
+
+app.get('/', (req, res) => res.send('API работает'));
+
+app.listen(5000, () => console.log('🚀 Server started on port 5000'));
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
+
+
+
 
 app.get("/api/youtube", async (req, res) => {
   const query = "новости"; // можно делать динамическим
@@ -30,6 +43,9 @@ app.get("/api/youtube", async (req, res) => {
     res.status(500).json({ error: "Ошибка при загрузке данных" });
   }
 });
+
+
+
 
 
 
