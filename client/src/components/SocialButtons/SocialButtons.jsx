@@ -70,9 +70,9 @@ const [isModalOpen, setIsModalOpen] = useState(false);
       </div>
 
       {/* --- Хедер --- */}
-      <div className="fixed top-6 left-0 w-full h-10 bg-black flex items-center justify-between shadow-md z-50 px-4">
+      <div className="fixed top-6 left-0 w-full h-12.6 bg-black flex items-center justify-between shadow-md z-50 px-4">
         <div className="flex items-center space-x-2">
-          <img src="/logo.png" alt="Logo" className="h-8 opacity-50 drop-shadow-lg" />
+          <img src="/logo.png" alt="Logo" style={{ maxHeight: "clamp(50px, 3vw, 300px)",}} className="opacity-50 drop-shadow-lg" />
         </div>
 
 

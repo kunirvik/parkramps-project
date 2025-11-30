@@ -1,5 +1,5 @@
-import { Swiper, SwiperSlide } from "swiper-react";
-import { Thumbs } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Thumbs } from "swiper/modules";
 
 export function ProductThumbnails({
   products,

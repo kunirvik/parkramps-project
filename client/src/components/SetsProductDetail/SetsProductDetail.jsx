@@ -1141,6 +1141,10 @@ const resetAccordion = () => {
     });
   }, [state.activeProductIndex, currentProduct]);
 
+    const closeGallery = useCallback(() => {
+  updateState({ isGalleryOpen: false });
+}, []);
+
   // Отдельная функция для показа инфо и миниатюр
 const showInfoAndThumbs = useCallback(() => {
   const animations = [];
@@ -1502,7 +1506,7 @@ useEffect(() => {
             opacity: shouldShowLoading && !loadingState.isCompleted ? 0 : 1,
           }}
         >
-                 <div className=" block lg:hidden w-[100%]   top-15 z-20">
+                 <div className=" block lg:hidden w-[100%] top-10 z-20">
   <p className="text-[#bdbdbd]  text-[17px] font-futura font-medium tracking-wide">
    Не чекай ідеального парку — створи його сам. Фігура за фігурою. Трюк за трюком.
  
@@ -1517,12 +1521,11 @@ useEffect(() => {
       >
         ← Back
       </button>
-<div className="hidden lg:block w-[50%] absolute right-[1%] top-15 z-20">
+<div className="hidden lg:block w-[50%] absolute right-[1%] z-20">
   <p className="text-[#bdbdbd] text-right text-[20px] font-futura font-medium tracking-wide">
    Не чекай ідеального парку — створи його сам. Фігура за фігурою. Трюк за трюком.
     Грайнди, бокси, рейли, фанбокси — усе, щоб твій спот жив. 
     Легко комбінуються, зручно перевозити. 
-    
   </p>
 </div>
 
@@ -1685,7 +1688,7 @@ useEffect(() => {
               key={accordionKey} 
                 items={[
                    {title: "опис", content: currentProduct.description2 },
-                  { title: "замовити скейтпарк", content: (<>{currentProduct.description} <ContactButton/></>) },
+                  { title: "замовити", content: (<>{currentProduct.description} <ContactButton/></>) },
                 
                 ]}
                 defaultOpenIndex={1}
@@ -1783,7 +1786,7 @@ useEffect(() => {
           images={allImages}
           startIndex={state.galleryStartIndex}
           isOpen={state.isGalleryOpen}
-          onClose={() => updateState({ isGalleryOpen: false })}
+          onClose={closeGallery}
         />
 <Footer></Footer>
         {/* Дата по центру внизу */}

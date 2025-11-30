@@ -1,5 +1,5 @@
-import { Swiper, SwiperSlide } from "swiper-react";
-import { Pagination, Mousewheel, Thumbs } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Mousewheel, Thumbs } from "swiper/modules";
 
 const SWIPER_CONFIG = {
   SPEED: 600,

@@ -12,14 +12,14 @@ export default function ModalRequestSkatepark({ isOpen, onClose }) {
   ];
   const [form, setForm] = useState({
     fullName: "",
-    // email: "",
+    email: "",
     phone: "",
     // requestType: "Продажа скейтпарка",
-    // title: "",
+    title: "",
     // quantity: 1,
-    // location: "",
-    // preferredContact: "email",
-    // message: "",
+    location: "",
+    preferredContact: "phone",
+    message: "",
   });
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
@@ -59,19 +59,19 @@ export default function ModalRequestSkatepark({ isOpen, onClose }) {
     const subject = `[Заявка] ${form.requestType} — ${form.title}`;
     const bodyLines = [
       `Имя: ${form.fullName}`,
-      // `E-mail: ${form.email}`,
+      `E-mail: ${form.email|| "-"}`,
       `Телефон: ${form.phone || "-"}`,
       // `Тип заявки: ${form.requestType}`,
       // `Заголовок: ${form.title}`,
       // `Кол-во: ${form.quantity}`,
-      // `Локация: ${form.location}`,
-      // `Предпочтительный контакт: ${form.preferredContact}`,
+      `Локация: ${form.location || "-"}`,
+      `Предпочтительный контакт: ${form.preferredContact}`,
       `Сообщение:\n${form.message || "-"}`,
       // "\n(Примечание: файлы не отправляются через mailto — прикрепите их отдельно при необходимости или загрузите на облако и вставьте ссылку)",
     ];
     const body = encodeURIComponent(bodyLines.join("\n"));
     // замените адрес ниже на ваш рабочий e-mail получателя
-    const to = "sales@example.com";
+    const to = "parkramps1@gmail.com";
     return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
   }
 
@@ -97,11 +97,11 @@ export default function ModalRequestSkatepark({ isOpen, onClose }) {
         fullName: "",
         email: "",
         phone: "",
-        requestType: "Продажа скейтпарка",
-        title: "",
-        quantity: 1,
+        // requestType: "Продажа скейтпарка",
+        // title: "",
+        // quantity: 1,
         location: "",
-        preferredContact: "email",
+        preferredContact: "phone",
         message: "",
       });
       setFiles([]);
