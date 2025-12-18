@@ -48,7 +48,7 @@ export default function SocialButtons() {
   ];
 const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const text = "сайт собирается. мы строим и продаем скейтпарки. пишите нам в соцсети 11.2025";
+  const text = "сайт собирается. мы строим и продаем скейтпарки. пишите нам в соцсети 12.2025";
 
   return (
     <>

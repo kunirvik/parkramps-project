@@ -140,7 +140,7 @@ export default function MenuPage() {
          onClick={() =>{
  
         
-           navigate("/catalogue")
+           navigate("https://t.me/prkrmps", { replace: true });
         }
           
           }
