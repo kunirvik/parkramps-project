@@ -131,21 +131,17 @@ export default function MenuPage() {
 
 
 
-        {/* Кнопка перехода */}
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+       <motion.a
+  href="https://t.me/prkrmps"
+  target="_blank"
+  rel="noopener noreferrer"
+  whileHover={{ scale: 1.1 }}
+  whileTap={{ scale: 0.9 }}
+  className="px-6 py-3 bg-white/20 backdrop-blur-md rounded-lg text-lg font-futura font-light shadow-lg hover:bg-pink-300 cursor-pointer inline-block"
+>
+  explore
+</motion.a>
 
-          className="px-6 py-3 bg-white/20 backdrop-blur-md rounded-lg text-lg font-futura font-light shadow-lg hover:bg-pink-300 cursor-pointer"
-         onClick={() =>{
- 
-        
-           navigate("https://t.me/prkrmps", { replace: true });
-        }
-          
-          }
-        >explore
-        </motion.button>
       </div>
     </div></>
   );
