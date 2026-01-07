@@ -163,6 +163,8 @@ export default function FAQPage() {
           <a href="#contact" className="inline-flex items-center px-4 py-2 rounded-md bg-indigo-600 text-white font-medium shadow hover:opacity-95">Связаться</a>
           <a href="#catalog" className="inline-flex items-center px-4 py-2 rounded-md border border-gray-200 text-gray-700">Посмотреть каталог</a>
         </div>
+<div className=''>057</div>
+        
       </footer>
     </div>
   )
