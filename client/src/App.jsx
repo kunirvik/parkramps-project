@@ -11,8 +11,9 @@ import NewsPage from "./components/NewsPage/NewsPage";
 import ProjectPage from "./components/ProjectPage/ProjectPage"
 import './App.css'
 import FAQPage from "./components/FAQPage/FAQPage"
-import SetsProductDetail from "./components/SetsProductDetail/SetsProductDetail";
+// import SetProductDetail from "./components/SetsProductDetail/SetsProductDetail";
 import About from "./components/About/About";
+import BlogPage from "./components/blog/components/BlogPage";
 
 
 function App() {
@@ -23,10 +24,10 @@ function App() {
       
     <Routes location={location} key={location.pathname}>
         <Route path="/" element={<MenuPage />} />
-        
+          <Route path="/blog" element={<BlogPage />} />
         <Route  path="/catalogue" element={<Catalogue />} />
       {/* <Route path="/product/:category/:id" element={<ProductDetail />} /> */}
-       <Route path="/product/sets/:id" element={<SetsProductDetail />} />
+       <Route path="/product/sets/:id" element={<ProductDetail />} />
  <Route path="/product/ramps/:id" element={<RampsProductDetail />} /> 
  <Route path="/product/skateparks/:id" element={<SkateparksProductDetail />} />
  <Route path="/product/diy/:id" element={<DiyProductDetail />} />

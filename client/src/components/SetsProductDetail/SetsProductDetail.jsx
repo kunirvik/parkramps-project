@@ -6,7 +6,7 @@
 // import SocialButtons from "../SocialButtons/SocialButtons";
 // import { Pagination, Mousewheel, Thumbs } from "swiper/modules";
 // import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
-// import productCatalogSetsSetss from "../data/productCatalogSetsSetss";
+// import productCatalogSets from "../data/productCatalogSets";
 // import "swiper/css";
 // import "swiper/css/pagination"; 
 // import { ChevronDown, ChevronUp } from "lucide-react";
@@ -115,10 +115,10 @@
 // const [thumbsShown, setThumbsShown] = useState(false);
 //   // Основные состояния
 //   const [activeProductIndex, setActiveProductIndex] = useState(() => 
-//     Math.max(0, productCatalogSetsSetss.findIndex(p => p.id === Number(id)))
+//     Math.max(0, productCatalogSets.findIndex(p => p.id === Number(id)))
 //   );
 //   const [selectedImageIndices, setSelectedImageIndices] = useState(() => 
-//     productCatalogSetsSetss.map(() => 0)
+//     productCatalogSets.map(() => 0)
 //   );
 //   const [swiperInstances, setSwiperInstances] = useState({
 //     main: null,
@@ -151,7 +151,7 @@
 
 //   // Мемоизированные значения
 //   const currentProduct = useMemo(() => 
-//     productCatalogSetsSetss[activeProductIndex], [activeProductIndex]
+//     productCatalogSets[activeProductIndex], [activeProductIndex]
 //   );
 
 //   const [hoveredIndex, setHoveredIndex] = useState(null);
@@ -166,7 +166,7 @@
 // );
 // // 1. Собираем общий альбом
 // const allImages = useMemo(() => {
-//   return productCatalogSetsSetss.flatMap((p) => p.sample || []);
+//   return productCatalogSets.flatMap((p) => p.sample || []);
 // }, []); 
 
 
@@ -324,7 +324,7 @@
 
 // const openGallery = () => {
 //   // считаем сколько фото было ДО текущего продукта
-//   const productStartIndex = productCatalogSetsSetss
+//   const productStartIndex = productCatalogSets
 //     .slice(0, activeProductIndex)
 //     .reduce((acc, p) => acc + (p.sample?.length || 0), 0);
 
@@ -453,7 +453,7 @@
 //   });
 
 //   // Обновляем URL и миниатюры
-//   updateUrl(productCatalogSetsSetss[newIndex].id, 0);
+//   updateUrl(productCatalogSets[newIndex].id, 0);
 //   if (swiperInstances.thumbs) {
 //     swiperInstances.thumbs.slideTo(newIndex);
 //   }
@@ -473,7 +473,7 @@
 //     // Перезапускаем hover-анимацию, если курсор остался на слайде
 //     const pending = pendingHoverRef.current;
 //     if ((pending && pending.index === newIndex) || hoveredIndexRef.current === newIndex || isPointerOverSwiper()) {
-//       const product = productCatalogSetsSetss[newIndex];
+//       const product = productCatalogSets[newIndex];
 //       startHoverInterval(newIndex, product);
 //       pendingHoverRef.current = null;
 //     }
@@ -608,7 +608,7 @@
 //     const newIndex = swiper.activeIndex;
 //     if (newIndex !== activeProductIndex) {
 //       setActiveProductIndex(newIndex);
-//       updateUrl(productCatalogSetsSetss[newIndex].id, selectedImageIndices[newIndex]);
+//       updateUrl(productCatalogSets[newIndex].id, selectedImageIndices[newIndex]);
   
 //       if (swiperInstances.thumbs) {
 //         swiperInstances.thumbs.slideTo(newIndex);
@@ -723,7 +723,7 @@
 //         preventClicksPropagation={false}
 //         touchStartPreventDefault={false}
 //       >
-//         {productCatalogSetsSetss.map((product, index) => (
+//         {productCatalogSets.map((product, index) => (
 //           <SwiperSlide key={product.id} style={{ height: "100%" }}>
 //             <div className="w-full h-full flex items-center justify-center">
 //         <img
@@ -840,7 +840,7 @@
 //         resistance={false}
 //         resistanceRatio={0}
 //       >
-//         {productCatalogSetsSetss.map((product, index) => (
+//         {productCatalogSets.map((product, index) => (
 //           <SwiperSlide key={product.id}>
 //             <img
 //               src={product.image}
@@ -2566,17 +2566,7 @@ useEffect(() => {
   onToggle={handleAccordionToggle('virobi')}
 />
 
-<Accordion
-  items={[
-    { 
-      title: "контакти", 
- 
-    },
-  ]}
-  controlled={true}
-  openIndex={accordionState.virobi}
-  onToggle={handleAccordionToggle('virobi')}
-/>
+
 
 
 

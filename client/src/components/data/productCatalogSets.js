@@ -26,6 +26,7 @@ const productCatalogSets = [ {id: 2,
     sample: ["/images/sample/jumpbox.webp",  "/images/sample/jumpbox1.webp", ],
     designer: "РампСтрой",
     year: 2024,
+         description2: "Професійний флайбокс для відпрацювання стрибкiв.",
     description: "Пиши нам у месенджер або кидай заявку — ми зателефонуємо й усе обговоримо. Замов фігуру для скейтпарку під себе — міцну, надійну й готову до катки. Власне виробництво, ручна збірка, доставка по Україні.",
     details: [
       // { title: "Материалы", link: "#materials" },

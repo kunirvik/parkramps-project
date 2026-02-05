@@ -6,7 +6,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import LoadingScreen from "../LoadingScreen/LodingScreen";
 import SocialButtons from "../SocialButtons/SocialButtons";
 import { Pagination, Mousewheel, Thumbs } from "swiper/modules";
-import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
+// import FullscreenGallery from "../FullscreenGallery/FullscreenGallery";
 import productCatalog from "../data/productCatalog";
 import "swiper/css";
 import "swiper/css/pagination"; 
@@ -143,7 +143,7 @@ export default function ProductDetail() {
     if (refs.urlUpdateBlocked.current) return;
     
     refs.urlUpdateBlocked.current = true;
-    const newUrl = `/product/set/${productId}?view=${viewIndex}`;
+    const newUrl = `/product/sets/${productId}?view=${viewIndex}`;
     window.history.replaceState(null, '', newUrl);
     
     setTimeout(() => {
@@ -741,11 +741,11 @@ export default function ProductDetail() {
    </div>
 
     {/* Fullscreen gallery */}
-    <FullscreenGallery
+    {/* <FullscreenGallery
       images={currentImagesFullscreen}
       isOpen={isGalleryOpen}
       onClose={() => setIsGalleryOpen(false)}
-    />
+    /> */}
   </div>
 </>
 

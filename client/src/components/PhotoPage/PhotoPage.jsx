@@ -18,8 +18,8 @@ const PhotoPage = () => {
   const navigate = useNavigate();
 
 
-const API = import.meta.env.VITE_API_URL;
-// const API = "https://parkramps-project.onrender.com";
+// const API = import.meta.env.VITE_API_URL;
+const API = "https://parkramps-project.onrender.com/";
 
 console.log(import.meta.env);
 console.log("API URL:", API);

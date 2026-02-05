@@ -1,8 +1,13 @@
-
-const express = require('express');
-const cloudinary = require('cloudinary').v2;
-const cors = require('cors');
 require('dotenv').config();
+const express = require('express');
+
+// const cloudinary = require('cloudinary').v2;
+const cors = require('cors');
+const cloudinary = require('./cloudinary.config');
+
+const { loadCompanyPosts } = require("./blog/loadCompanyPosts")
+// const mongoose = require("mongoose")
+
 
 const app = express();
 
@@ -17,14 +22,14 @@ app.use(express.json());
 
 
 
-// подключаемся к MongoDB
-mongoose.connect(process.env.MONGO_URL)
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.log('❌ Mongo error', err));
+// // подключаемся к MongoDB
+// mongoose.connect(process.env.MONGO_URL)
+//   .then(() => console.log('✅ MongoDB connected'))
+//   .catch(err => console.log('❌ Mongo error', err));
 
 app.get('/', (req, res) => res.send('API работает'));
 
-app.listen(5000, () => console.log('🚀 Server started on port 5000'));
+// app.listen(5000, () => console.log('🚀 Server started on port 5000'));
 
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
@@ -39,6 +44,18 @@ app.get("/api/youtube", async (req, res) => {
     const response = await fetch(url);
     const data = await response.json();
     res.json(data.items);
+
+    
+    // const videos = data.items.map(item => ({
+    //   id: item.id.videoId,
+    //   type: "video",
+    //   title: item.snippet.title,
+    //   date: item.snippet.publishedAt,
+    //   source: "YouTube",
+    //   url: `https://www.youtube.com/watch?v=${item.id.videoId}`
+    // }))
+
+    // res.json(videos)
   } catch (err) {
     res.status(500).json({ error: "Ошибка при загрузке данных" });
   }
@@ -55,7 +72,12 @@ app.get("/api/youtube", async (req, res) => {
 
 // GET /api/gallery
 app.get('/api/gallery', async (req, res) => {
-  try {
+  try {console.log(
+  'Cloudinary env:',
+  !!process.env.CLOUDINARY_CLOUD_NAME,
+  !!process.env.CLOUDINARY_API_KEY,
+  !!process.env.CLOUDINARY_API_SECRET
+);
     const tags = req.query.tags ? req.query.tags.split(',') : []; // Получаем массив тегов из запроса
     const folderName = 'Parkramps';
 
@@ -66,7 +88,9 @@ app.get('/api/gallery', async (req, res) => {
       expression += ` AND ${tagFilters}`;
     }
 
+
     const result = await cloudinary.search
+
       .expression(expression)
       .with_field('context') 
       .sort_by('public_id', 'desc')
@@ -80,6 +104,23 @@ app.get('/api/gallery', async (req, res) => {
   }
 });
 
+
+
+
+app.get("/api/blog", (req, res) => {
+  try {
+    const posts = loadCompanyPosts()
+
+    const sorted = posts.sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    )
+
+    res.json(sorted)
+  } catch (err) {
+    console.error("Blog error:", err)
+    res.status(500).json({ error: "Ошибка загрузки блога" })
+  }
+})
 
 
 
